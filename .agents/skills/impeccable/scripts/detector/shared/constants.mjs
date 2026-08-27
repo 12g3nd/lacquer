@@ -17,7 +17,7 @@ const SAFE_TAGS = new Set([
 // already filter out plain inline form labels so this does not introduce
 // false positives. See modern-color-borders.html for the test matrix.
 const BORDER_SAFE_TAGS = new Set(
-  [...SAFE_TAGS].filter(t => t !== 'label')
+  [...SAFE_TAGS].filter((t) => t !== 'label'),
 );
 
 const OVERUSED_FONTS = new Set([
@@ -53,7 +53,7 @@ function isBrandFontOnOwnDomain(font) {
   const allowed = BRAND_FONT_DOMAINS[font];
   if (!allowed) return false;
   const host = location.hostname.toLowerCase();
-  return allowed.some(suffix => host === suffix || host.endsWith('.' + suffix));
+  return allowed.some((suffix) => host === suffix || host.endsWith('.' + suffix));
 }
 
 const GENERIC_FONTS = new Set([

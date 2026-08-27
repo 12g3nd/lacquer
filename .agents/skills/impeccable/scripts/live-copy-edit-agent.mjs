@@ -9,9 +9,9 @@
 
 import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
-import { createRequire } from 'node:module';
 
 const DEFAULT_TIMEOUT_MS = 60_000;
 const BATCH_OP_TEXT_LIMIT = 240;

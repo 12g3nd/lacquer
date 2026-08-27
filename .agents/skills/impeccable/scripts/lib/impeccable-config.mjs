@@ -153,7 +153,7 @@ function normalizeDetectionConfigForWrite(config) {
     out.ignoreRules = uniqueStrings(config.ignoreRules.map((rule) => normalizeIgnoreRule(rule)).filter(Boolean));
   }
   if (Array.isArray(config?.ignoreFiles)) {
-    out.ignoreFiles = uniqueStrings(config.ignoreFiles.filter(v => typeof v === 'string' && v.trim()).map(v => v.trim()));
+    out.ignoreFiles = uniqueStrings(config.ignoreFiles.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim()));
   }
   out.ignoreValues = normalizeIgnoreValueEntries(config?.ignoreValues || []);
   if (config?.advisoryRules === 'include' || config?.advisoryRules === 'exclude') {
@@ -262,10 +262,10 @@ const COLOR_CHANNEL_FORMATS = {
   hue: {
     units: {
       '': identity,
-      deg: identity,
-      rad: (value) => value * (180 / Math.PI),
-      turn: (value) => value * 360,
-      grad: (value) => value * 0.9,
+      "deg": identity,
+      "rad": (value) => value * (180 / Math.PI),
+      "turn": (value) => value * 360,
+      "grad": (value) => value * 0.9,
     },
   },
   percent: { units: { '%': (value) => value / 100 }, min: 0, max: 1 },
@@ -333,7 +333,7 @@ export function normalizeIgnoreValueEntries(entries) {
     const normalized = { rule, value };
     const files = uniqueStrings([
       ...(typeof entry.file === 'string' && entry.file.trim() ? [entry.file.trim()] : []),
-      ...(Array.isArray(entry.files) ? entry.files.filter(v => typeof v === 'string' && v.trim()).map(v => v.trim()) : []),
+      ...(Array.isArray(entry.files) ? entry.files.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim()) : []),
     ]);
     if (files.length > 0) normalized.files = files;
     // Key order is rule, value, files, createdAt, reason and must stay that way:

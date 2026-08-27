@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 /**
  * Live root resolution: the single place that decides which directories a live
  * session operates on. Every live entry script resolves this once at startup
@@ -27,7 +28,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+
 import { resolveProjectRoot } from '../context.mjs';
 
 const ROOTS_MANIFEST_VERSION = 1;

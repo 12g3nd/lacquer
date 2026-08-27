@@ -20,7 +20,7 @@ import zlib from 'node:zlib';
 
 const KEYWORD = 'impeccable:prompt';
 const args = process.argv.slice(2);
-const file = args.find(a => !a.startsWith('--'));
+const file = args.find((a) => !a.startsWith('--'));
 const readMode = args.includes('--read');
 const scanMode = args.includes('--scan');
 const argOf = (name) => { const i = args.indexOf(name); return i !== -1 ? args[i + 1] : null; };
@@ -37,7 +37,7 @@ function promptOf(imagePath) {
 }
 
 if (scanMode) {
-  const targets = args.filter(a => !a.startsWith('--'));
+  const targets = args.filter((a) => !a.startsWith('--'));
   if (targets.length === 0) { console.error('embed-prompt: --scan needs at least one directory'); process.exit(1); }
   const RASTER = /\.(png|jpe?g|webp)$/i;
   const rasters = [];

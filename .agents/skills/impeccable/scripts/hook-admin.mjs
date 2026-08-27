@@ -23,7 +23,6 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { IMPECCABLE_COMMAND } from './lib/provider.mjs';
 
 import {
   getConfigPath,
@@ -36,6 +35,7 @@ import {
   normalizeIgnoreValue,
   normalizeIgnoreValueEntries,
 } from './hook-lib.mjs';
+import { IMPECCABLE_COMMAND } from './lib/provider.mjs';
 
 const ACTIONS = new Set(['status', 'on', 'off', 'ignore-rule', 'ignore-file', 'ignore-value', 'reset']);
 const IMPECCABLE_HOOK_COMMAND_MARKERS = [
@@ -348,7 +348,7 @@ function statusReport(cwd) {
   });
 
   const lines = [
-    `Impeccable design hook`,
+    'Impeccable design hook',
     `  state:        ${cfg.enabled ? 'enabled' : 'disabled'}`,
     `  shared file:  ${fileState(shared, cfgPath, 'using defaults; file not present')}`,
     `  local file:   ${fileState(local, localPath, 'not present')}`,
@@ -784,12 +784,12 @@ function main() {
     let out = '';
     switch (action) {
       case 'status': out = statusReport(cwd); break;
-      case 'on':     out = setEnabled(cwd, true); break;
-      case 'off':    out = setEnabled(cwd, false); break;
+      case 'on': out = setEnabled(cwd, true); break;
+      case 'off': out = setEnabled(cwd, false); break;
       case 'ignore-rule': out = addIgnoreRule(cwd, rest); break;
       case 'ignore-file': out = addIgnoreFile(cwd, rest); break;
       case 'ignore-value': out = addIgnoreValue(cwd, rest); break;
-      case 'reset':  out = reset(cwd); break;
+      case 'reset': out = reset(cwd); break;
     }
     process.stdout.write(out + '\n');
   } catch (err) {

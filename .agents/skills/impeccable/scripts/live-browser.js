@@ -817,7 +817,7 @@
     const wrapEl = annotPinsEl.querySelector('[data-annot-pin="' + idx + '"]');
     if (!wrapEl) return;
     // Strip any existing bubble (but keep the dot)
-    wrapEl.querySelectorAll('div:not(:first-child)').forEach(n => n.remove());
+    wrapEl.querySelectorAll('div:not(:first-child)').forEach((n) => n.remove());
     const input = document.createElement('input');
     input.type = 'text';
     input.placeholder = 'Note…';
@@ -840,8 +840,8 @@
       if (annotEditing && annotEditing.input === input) finalizeEditingPin();
     });
     // Stop clicks/pointerdowns inside the input from bubbling to the overlay
-    ['pointerdown', 'click'].forEach(ev => {
-      input.addEventListener(ev, e => e.stopPropagation());
+    ['pointerdown', 'click'].forEach((ev) => {
+      input.addEventListener(ev, (e) => e.stopPropagation());
     });
     setTimeout(() => input.focus(), 0);
   }
@@ -2884,7 +2884,7 @@
   }
 
   function actionLabel() {
-    const a = ACTIONS.find(a => a.value === selectedAction);
+    const a = ACTIONS.find((a) => a.value === selectedAction);
     return a ? a.label : 'Freeform';
   }
 
@@ -2922,7 +2922,7 @@
       display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '3px',
     });
 
-    ACTIONS.forEach(action => {
+    ACTIONS.forEach((action) => {
       const chip = el('button', {
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         gap: '4px',
@@ -2978,7 +2978,7 @@
     if (pickerEl.style.display !== 'none') { hideActionPicker(); return; }
     // Rebuild chips to reflect current selection
     const P = pickerEl.__iceq_palette || barPaletteForTheme(detectPageTheme());
-    pickerEl.querySelectorAll('button').forEach(chip => {
+    pickerEl.querySelectorAll('button').forEach((chip) => {
       const isActive = chip.dataset.action === selectedAction;
       chip.style.background = isActive ? P.accentSoft : 'transparent';
       chip.style.color = isActive ? P.accent : P.text;
@@ -3278,10 +3278,10 @@
         });
         row.appendChild(track);
       } else if (p.kind === 'steps') {
-        const opts = (p.options || []).map(o =>
-          typeof o === 'string' ? { value: o, label: o } : o
+        const opts = (p.options || []).map((o) =>
+          typeof o === 'string' ? { value: o, label: o } : o,
         );
-        const activeOpt = opts.find(o => o.value === p.default) || opts[0];
+        const activeOpt = opts.find((o) => o.value === p.default) || opts[0];
         readout.textContent = activeOpt ? activeOpt.label : String(p.default);
         const segRow = el('div', {
           display: 'grid',
@@ -3290,7 +3290,7 @@
           background: P.hairline, borderRadius: '5px',
         });
         const segBtns = [];
-        opts.forEach(o => {
+        opts.forEach((o) => {
           const active = o.value === p.default;
           const b = el('button', {
             padding: '5px 4px', border: 'none', borderRadius: '3px',
@@ -6212,8 +6212,8 @@
     rememberSessionFileMeta({ file: filePath });
     const url = 'http://localhost:' + PORT + '/source?token=' + TOKEN + '&path=' + encodeURIComponent(filePath);
     fetch(url)
-      .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
-      .then(html => {
+      .then((r) => { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then((html) => {
         const parser = new DOMParser();
         let srcWrapper = null;
 
@@ -6339,7 +6339,7 @@
         completeParameterGenerationIfReady();
         console.log('[impeccable] Injected ' + arrivedVariants + ' variants from source file.');
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('[impeccable] Failed to fetch source:', err);
         showToast('Could not load variants. Try refreshing the page.', 5000);
       });
@@ -7165,7 +7165,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(msg),
-    }).then(async res => {
+    }).then(async (res) => {
       if (res.ok) return res;
       const body = await res.json().catch(() => ({}));
       // The server refused to journal progress for a session it has never
@@ -7605,8 +7605,8 @@
     const captureRect = elForCapture.getBoundingClientRect();
     pickedAnchorViewportTop = captureRect.top;
     const snapshot = {
-      comments: annotState.comments.map(c => ({ x: c.x, y: c.y, text: c.text })),
-      strokes: annotState.strokes.map(s => ({ points: s.points.map(p => [p[0], p[1]]) })),
+      comments: annotState.comments.map((c) => ({ x: c.x, y: c.y, text: c.text })),
+      strokes: annotState.strokes.map((s) => ({ points: s.points.map((p) => [p[0], p[1]]) })),
     };
     const basePayload = {
       type: 'generate', id: currentSessionId,
@@ -7659,8 +7659,8 @@
     const prompt = input ? input.value.trim() : '';
     if (annotEditing) finalizeEditingPin();
     const snapshot = {
-      comments: annotState.comments.map(c => ({ x: c.x, y: c.y, text: c.text })),
-      strokes: annotState.strokes.map(s => ({ points: s.points.map(p => [p[0], p[1]]) })),
+      comments: annotState.comments.map((c) => ({ x: c.x, y: c.y, text: c.text })),
+      strokes: annotState.strokes.map((s) => ({ points: s.points.map((p) => [p[0], p[1]]) })),
     };
     if (!canCreateInsert({ prompt, comments: snapshot.comments, strokes: snapshot.strokes })) return;
 
@@ -8385,10 +8385,10 @@ void main() {
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
         -1, -1, 0, 1,
          1, -1, 1, 1,
-        -1,  1, 0, 0,
-        -1,  1, 0, 0,
+        -1, 1, 0, 0,
+        -1, 1, 0, 0,
          1, -1, 1, 1,
-         1,  1, 1, 0,
+         1, 1, 1, 0,
       ]), gl.STATIC_DRAW);
       const posLoc = gl.getAttribLocation(program, 'a_position');
       const uvLoc = gl.getAttribLocation(program, 'a_uv');
@@ -8779,7 +8779,7 @@ void main() {
     return activeSessions.find((session) =>
       session?.id === saved.id
       && pageMatchesCurrent(session.pageUrl || saved.pageUrl)
-      && !isTerminalSessionSummary(session)
+      && !isTerminalSessionSummary(session),
     ) || null;
   }
 
@@ -11130,7 +11130,7 @@ void main() {
     }
 
     // When pick/insert is active, make detect overlays click-through
-    document.querySelectorAll('.impeccable-overlay').forEach(o => {
+    document.querySelectorAll('.impeccable-overlay').forEach((o) => {
       o.style.pointerEvents = (pickActive || insertActive) ? 'none' : '';
     });
     syncPageInteractionCursor();

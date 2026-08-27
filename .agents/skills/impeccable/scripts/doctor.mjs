@@ -24,19 +24,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { loadContext, extractPlatform, resolveTargetSelection } from './context.mjs';
-import { parseTargetOptions } from './lib/target-args.mjs';
-import { IMPECCABLE_COMMAND, IMPECCABLE_PROVIDER_ID } from './lib/provider.mjs';
-import { parseDesignMd } from './lib/design-parser.mjs';
 import {
   PRODUCT_SCHEMA_VERSION,
   readProductSchemaVersion,
   stampProductSchema,
 } from './lib/artifact-schema.mjs';
-import {
-  collectBootFindingGroups,
-  checkNativePlatformEvidence,
-  designSidecarCandidatesFor,
-} from './lib/staleness.mjs';
+import { parseDesignMd } from './lib/design-parser.mjs';
+import { IMPECCABLE_COMMAND, IMPECCABLE_PROVIDER_ID } from './lib/provider.mjs';
 import {
   checkDesignCoverage,
   checkDesignDrift,
@@ -46,6 +40,12 @@ import {
   checkWorkspaces,
   loadKnownRuleIds,
 } from './lib/staleness-deep.mjs';
+import {
+  collectBootFindingGroups,
+  checkNativePlatformEvidence,
+  designSidecarCandidatesFor,
+} from './lib/staleness.mjs';
+import { parseTargetOptions } from './lib/target-args.mjs';
 
 const SCRIPTS_DIR = path.dirname(fileURLToPath(import.meta.url));
 
@@ -71,7 +71,7 @@ function parseArgs(argv) {
 
 function usage() {
   return [
-    `Usage: node doctor.mjs [--json] [--fix] [--target <path>]`,
+    'Usage: node doctor.mjs [--json] [--fix] [--target <path>]',
     '',
     "Report drift between this project's Impeccable artifacts and what the",
     'installed version reads: PRODUCT.md, DESIGN.md and its sidecar,',
@@ -267,7 +267,7 @@ function renderText(report, fixes) {
       for (const entry of held) lines.push(`  ${entry.id}: ${entry.reason}`);
     }
   } else if (findings.some((entry) => entry.severity === 'auto')) {
-    lines.push(`Run \`node doctor.mjs --fix\` to apply the automatic migrations, `
+    lines.push('Run `node doctor.mjs --fix` to apply the automatic migrations, '
       + `or \`${IMPECCABLE_COMMAND} doctor\` to work through all of them.`);
   }
 

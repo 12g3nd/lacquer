@@ -1,12 +1,12 @@
-import { GENERIC_FONTS, OVERUSED_FONTS, EM_DASH_FLOOR, EM_DASH_CHARS_PER_DASH } from '../../shared/constants.mjs';
-import { isNeutralColor } from '../../shared/color.mjs';
-import { extractGoogleFontFamilies } from '../../shared/fonts.mjs';
 import { checkSourceDesignSystem } from '../../design-system.mjs';
-import { scanCssTextForGlow, scanCssTextForGridBackground, scanCssTextForMarquee, scanCssTextForPseudoStripe, scanCssTextForRadialHalo } from '../../rules/checks.mjs';
-import { isFullPage } from '../../shared/page.mjs';
-import { applyInlineIgnores } from '../../shared/inline-ignores.mjs';
 import { finding } from '../../findings.mjs';
 import { profileFindings, profileStep } from '../../profile/profiler.mjs';
+import { scanCssTextForGlow, scanCssTextForGridBackground, scanCssTextForMarquee, scanCssTextForPseudoStripe, scanCssTextForRadialHalo } from '../../rules/checks.mjs';
+import { isNeutralColor } from '../../shared/color.mjs';
+import { GENERIC_FONTS, OVERUSED_FONTS, EM_DASH_FLOOR, EM_DASH_CHARS_PER_DASH } from '../../shared/constants.mjs';
+import { extractGoogleFontFamilies } from '../../shared/fonts.mjs';
+import { applyInlineIgnores } from '../../shared/inline-ignores.mjs';
+import { isFullPage } from '../../shared/page.mjs';
 
 // ---------------------------------------------------------------------------
 // Regex fallback (non-HTML files: CSS, JSX, TSX, etc.)
@@ -254,11 +254,11 @@ function stripJsComments(content, options = {}) {
 }
 
 function stripCssComments(content) {
-  return content.replace(/\/\*[\s\S]*?\*\//g, comment => comment.replace(/[^\n]/g, ' '));
+  return content.replace(/\/\*[\s\S]*?\*\//g, (comment) => comment.replace(/[^\n]/g, ' '));
 }
 
 function blankHtmlComments(text) {
-  return text.replace(/<!--[\s\S]*?-->/g, comment => comment.replace(/[^\n]/g, ' '));
+  return text.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\n]/g, ' '));
 }
 
 function blankCssLineCommentsInStyleBlocks(text) {
@@ -405,7 +405,7 @@ function blankCommentsForMatchers(text, ext) {
 }
 
 function firstOverusedGoogleFont(text) {
-  return extractGoogleFontFamilies(text).find(f => OVERUSED_FONTS.has(f)) || '';
+  return extractGoogleFontFamilies(text).find((f) => OVERUSED_FONTS.has(f)) || '';
 }
 
 // CSS named colors whose channels are equal (achromatic). Anything outside
@@ -631,7 +631,7 @@ const REGEX_ANALYZERS = [
     const lines = content.split('\n');
     let line = 1;
     for (let i = 0; i < lines.length; i++) { if (/font-size/i.test(lines[i]) || /\btext-(?:xs|sm|base|lg|xl|\d)/i.test(lines[i])) { line = i + 1; break; } }
-    return [finding('flat-type-hierarchy', filePath, `Sizes: ${sorted.map(s => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)`, line)];
+    return [finding('flat-type-hierarchy', filePath, `Sizes: ${sorted.map((s) => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)`, line)];
   },
   // Monotonous spacing (regex)
   (content, filePath) => {
@@ -645,13 +645,13 @@ const REGEX_ANALYZERS = [
     while ((m = gapRe.exec(content)) !== null) vals.push(+m[1]);
     const twRe = /\b(?:p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap)-(\d+)\b/g;
     while ((m = twRe.exec(content)) !== null) vals.push(+m[1] * 4);
-    const rounded = vals.map(v => Math.round(v / 4) * 4);
+    const rounded = vals.map((v) => Math.round(v / 4) * 4);
     if (rounded.length < 10) return [];
     const counts = {};
     for (const v of rounded) counts[v] = (counts[v] || 0) + 1;
     const maxCount = Math.max(...Object.values(counts));
     const pct = maxCount / rounded.length;
-    const unique = [...new Set(rounded)].filter(v => v > 0);
+    const unique = [...new Set(rounded)].filter((v) => v > 0);
     if (pct <= 0.6 || unique.length > 3) return [];
     const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
     return [finding('monotonous-spacing', filePath, `~${dominant}px used ${maxCount}/${rounded.length} times (${Math.round(pct * 100)}%)`)];
@@ -759,7 +759,7 @@ const REGEX_ANALYZERS = [
   },
   // Auto-scrolling marquees (<marquee> or infinite horizontal loop
   // animations).
-  (content, filePath) => scanCssTextForMarquee(content).map(hit => finding('marquee', filePath, hit.snippet)),
+  (content, filePath) => scanCssTextForMarquee(content).map((hit) => finding('marquee', filePath, hit.snippet)),
 ];
 
 // ---------------------------------------------------------------------------
@@ -1194,7 +1194,7 @@ function detectText(content, filePath, options = {}) {
   // rule's source offset, so the finding gets a real line and line-scoped
   // inline ignores keep working.
   const pseudoStripeFindings = (text, lineOffset) =>
-    scanCssTextForPseudoStripe(text).map(hit =>
+    scanCssTextForPseudoStripe(text).map((hit) =>
       finding(hit.id, filePath, hit.snippet, lineOffset + text.slice(0, hit.index).split('\n').length));
 
   if (STYLESHEET_EXTS.has(ext)) {
@@ -1210,7 +1210,7 @@ function detectText(content, filePath, options = {}) {
     phase: 'source',
     ruleId: 'codex-grid-background',
     target: filePath,
-  }, () => scanCssTextForGridBackground(source).map(hit => {
+  }, () => scanCssTextForGridBackground(source).map((hit) => {
     const line = source.substring(0, hit.index).split('\n').length;
     return finding('codex-grid-background', filePath, hit.snippet, line);
   })));
@@ -1273,10 +1273,10 @@ function detectText(content, filePath, options = {}) {
   // Deduplicate findings (same antipattern + similar snippet, within 2 lines)
   const deduped = [];
   for (const f of findings) {
-    const isDupe = deduped.some(d =>
+    const isDupe = deduped.some((d) =>
       d.antipattern === f.antipattern &&
       d.snippet === f.snippet &&
-      Math.abs(d.line - f.line) <= 2
+      Math.abs(d.line - f.line) <= 2,
     );
     if (!isDupe) deduped.push(f);
   }

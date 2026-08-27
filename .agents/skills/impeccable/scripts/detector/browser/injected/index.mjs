@@ -260,7 +260,7 @@ if (IS_BROWSER) {
 
   const highlight = function(el, findings) {
     if (el._impeccableOverlay) detachOverlay(el._impeccableOverlay);
-    const hasSlop = findings.some(f => RULE_CATEGORY[f.type || f.id] === 'slop');
+    const hasSlop = findings.some((f) => RULE_CATEGORY[f.type || f.id] === 'slop');
 
     const fixed = isInFixedContext(el);
     const rect = el.getBoundingClientRect();
@@ -277,12 +277,12 @@ if (IS_BROWSER) {
     });
 
     // Build per-finding label entries: ✦ prefix for slop
-    const entries = findings.map(f => {
+    const entries = findings.map((f) => {
       const name = TYPE_LABELS[f.type || f.id] || f.type || f.id;
       const prefix = RULE_CATEGORY[f.type || f.id] === 'slop' ? '\u2726 ' : '';
       return { name: prefix + name, detail: f.detail || f.snippet };
     });
-    const allText = entries.map(e => e.name).join(', ');
+    const allText = entries.map((e) => e.name).join(', ');
 
     const label = document.createElement('div');
     label.className = 'impeccable-label';
@@ -380,7 +380,7 @@ if (IS_BROWSER) {
       if (cycleMode) {
         updateCycleText();
       } else {
-        textSpan.textContent = entries.map(e => e.detail).join(' | ');
+        textSpan.textContent = entries.map((e) => e.detail).join(' | ');
       }
     };
     const onMouseLeave = () => {
@@ -502,10 +502,10 @@ if (IS_BROWSER) {
 
     if (el.classList && el.classList.length > 0) {
       const classes = [...el.classList]
-        .filter(c => !c.startsWith('impeccable-') && !isLikelyHashedClass(c))
+        .filter((c) => !c.startsWith('impeccable-') && !isLikelyHashedClass(c))
         .slice(0, 2);
       if (classes.length > 0) {
-        sel += '.' + classes.map(c => CSS.escape(c)).join('.');
+        sel += '.' + classes.map((c) => CSS.escape(c)).join('.');
       }
     }
 
@@ -515,7 +515,7 @@ if (IS_BROWSER) {
       try {
         const matching = parent.querySelectorAll(':scope > ' + sel);
         if (matching.length > 1) {
-          const sameType = [...parent.children].filter(c => c.tagName === el.tagName);
+          const sameType = [...parent.children].filter((c) => c.tagName === el.tagName);
           const idx = sameType.indexOf(el) + 1;
           sel += `:nth-of-type(${idx})`;
         }
@@ -568,8 +568,8 @@ if (IS_BROWSER) {
 
   function getDirectText(el) {
     return [...el.childNodes]
-      .filter(n => n.nodeType === 3)
-      .map(n => n.textContent || '')
+      .filter((n) => n.nodeType === 3)
+      .map((n) => n.textContent || '')
       .join('');
   }
 
@@ -585,10 +585,10 @@ if (IS_BROWSER) {
       range.detach?.();
     }
     if (rects.length === 0) return null;
-    const left = Math.min(...rects.map(r => r.left));
-    const top = Math.min(...rects.map(r => r.top));
-    const right = Math.max(...rects.map(r => r.right));
-    const bottom = Math.max(...rects.map(r => r.bottom));
+    const left = Math.min(...rects.map((r) => r.left));
+    const top = Math.min(...rects.map((r) => r.top));
+    const right = Math.max(...rects.map((r) => r.right));
+    const bottom = Math.max(...rects.map((r) => r.bottom));
     return {
       left,
       top,
@@ -641,7 +641,7 @@ if (IS_BROWSER) {
       for (const [x, y] of points) {
         if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) continue;
         const stack = document.elementsFromPoint(x, y);
-        const selfIndex = stack.findIndex(node => node === el || el.contains(node) || node.contains?.(el));
+        const selfIndex = stack.findIndex((node) => node === el || el.contains(node) || node.contains?.(el));
         if (selfIndex < 0) continue;
         for (const node of stack.slice(selfIndex + 1)) {
           const nodeTag = node.tagName?.toLowerCase();
@@ -708,12 +708,12 @@ if (IS_BROWSER) {
         reasons,
         clip,
         textColor,
-        preferRenderedForeground: !textColor || textColor.a < 0.99 || reasons.some(reason =>
+        preferRenderedForeground: !textColor || textColor.a < 0.99 || reasons.some((reason) =>
           reason === 'opacity stack' ||
           reason === 'blend mode' ||
           reason === 'filter' ||
           reason === 'backdrop filter' ||
-          reason === 'background-clip text'
+          reason === 'background-clip text',
         ),
         backgroundClipText: reasons.includes('background-clip text'),
       });
@@ -879,10 +879,10 @@ if (IS_BROWSER) {
   async function loadVisualContrastImage(src) {
     if (!src) return null;
     if (visualContrastImageCache.has(src)) return visualContrastImageCache.get(src);
-    const promise = new Promise(resolve => {
+    const promise = new Promise((resolve) => {
       const img = new Image();
       let settled = false;
-      const finish = value => {
+      const finish = (value) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
@@ -1038,7 +1038,7 @@ if (IS_BROWSER) {
     const stack = typeof document.elementsFromPoint === 'function'
       ? document.elementsFromPoint(point.x, point.y)
       : [];
-    const selfIndex = stack.findIndex(node => node === el || el.contains(node));
+    const selfIndex = stack.findIndex((node) => node === el || el.contains(node));
     const nodes = selfIndex >= 0 ? stack.slice(selfIndex) : [el, ...stack];
     const unresolved = [];
 
@@ -1102,13 +1102,13 @@ if (IS_BROWSER) {
     if (!el) return { ...candidate, status: 'unresolved', confidence: 'none', reason: 'missing element' };
     if (!isRenderedForBrowserRule(el)) return { ...candidate, status: 'unresolved', confidence: 'none', reason: 'hidden element' };
 
-    const blockingReason = (candidate.reasons || []).find(reason =>
+    const blockingReason = (candidate.reasons || []).find((reason) =>
       reason === 'background-clip text' ||
       reason === 'blend mode' ||
       reason === 'filter' ||
       reason === 'backdrop filter' ||
       reason === 'opacity stack' ||
-      reason === 'text shadow'
+      reason === 'text shadow',
     );
     if (blockingReason) {
       return { ...candidate, status: 'unresolved', confidence: 'none', reason: `${blockingReason} needs screenshot pixels` };
@@ -1153,7 +1153,7 @@ if (IS_BROWSER) {
     }
 
     ratios.sort((a, b) => a - b);
-    const pick = pct => ratios[Math.min(ratios.length - 1, Math.max(0, Math.floor((pct / 100) * ratios.length)))];
+    const pick = (pct) => ratios[Math.min(ratios.length - 1, Math.max(0, Math.floor((pct / 100) * ratios.length)))];
     const measuredRatio = pick(10);
     const medianRatio = pick(50);
     const status = measuredRatio < candidate.threshold ? 'fail' : 'pass';
@@ -1173,7 +1173,7 @@ if (IS_BROWSER) {
   }
 
   function waitForVisualPaint() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(resolve));
     });
   }
@@ -1226,8 +1226,8 @@ if (IS_BROWSER) {
         ? el.getBoundingClientRect().toJSON() : null,
       isPageLevel: el === document.body || el === document.documentElement,
       isHidden: isElementHidden(el),
-      findings: findings.map(f => {
-        const ap = ANTIPATTERNS.find(a => a.id === (f.type || f.id));
+      findings: findings.map((f) => {
+        const ap = ANTIPATTERNS.find((a) => a.id === (f.type || f.id));
         return {
           type: f.type || f.id,
           category: ap ? ap.category : 'quality',
@@ -1252,7 +1252,7 @@ if (IS_BROWSER) {
     }
     console.group(
       `%c[impeccable] ${allFindings.length} anti-pattern${allFindings.length === 1 ? '' : 's'} found`,
-      'color: oklch(84% 0.19 80.46); font-weight: bold'
+      'color: oklch(84% 0.19 80.46); font-weight: bold',
     );
     for (const { el, findings } of allFindings) {
       for (const f of findings) {
@@ -1270,7 +1270,7 @@ if (IS_BROWSER) {
     // every per-element attribution (checks, layout, occlusion, rhythm)
     // honors it; page-level findings attributed to <body> pass through
     // untouched, since body has no ignoring ancestor.
-    const kept = findings.filter(f => !scopedIgnoreActive(el, f.type));
+    const kept = findings.filter((f) => !scopedIgnoreActive(el, f.type));
     if (kept.length === 0) return;
     const existing = groupMap.get(el);
     if (existing) existing.push(...kept);
@@ -1299,7 +1299,7 @@ if (IS_BROWSER) {
     return String(stack || '')
       .split(',')
       .map(normalizeBrowserFontName)
-      .find(font => font && !GENERIC_FONTS.has(font)) || '';
+      .find((font) => font && !GENERIC_FONTS.has(font)) || '';
   }
 
   function browserDesignSystemConfig() {
@@ -1307,11 +1307,11 @@ if (IS_BROWSER) {
     if (!raw?.present) return null;
     const allowedFonts = new Set((raw.allowedFonts || []).map(normalizeBrowserFontName).filter(Boolean));
     const allowedColors = (raw.allowedColors || [])
-      .filter(color => color && Number.isFinite(color.r) && Number.isFinite(color.g) && Number.isFinite(color.b))
-      .map(color => ({ r: color.r, g: color.g, b: color.b }));
+      .filter((color) => color && Number.isFinite(color.r) && Number.isFinite(color.g) && Number.isFinite(color.b))
+      .map((color) => ({ r: color.r, g: color.g, b: color.b }));
     const allowedRadii = (raw.allowedRadii || [])
       .map(Number)
-      .filter(px => Number.isFinite(px));
+      .filter((px) => Number.isFinite(px));
     return {
       present: true,
       hasFonts: raw.hasFonts === true && allowedFonts.size > 0,
@@ -1341,7 +1341,7 @@ if (IS_BROWSER) {
     const parsed = parseAnyColor(text);
     if (!parsed) return true;
     if ((parsed.a ?? 1) <= 0.05) return true;
-    return designSystem.allowedColors.some(color => browserColorsClose(parsed, color));
+    return designSystem.allowedColors.some((color) => browserColorsClose(parsed, color));
   }
 
   function isBrowserTransparentCss(value) {
@@ -1359,19 +1359,19 @@ if (IS_BROWSER) {
     const px = resolveLengthPx(text, 16);
     if (px == null || !Number.isFinite(px) || px <= DESIGN_RADIUS_TOLERANCE_PX) return true;
     if (designSystem.hasPillRadius && px >= 99) return true;
-    return designSystem.allowedRadii.some(allowed => Math.abs(allowed - px) <= DESIGN_RADIUS_TOLERANCE_PX);
+    return designSystem.allowedRadii.some((allowed) => Math.abs(allowed - px) <= DESIGN_RADIUS_TOLERANCE_PX);
   }
 
   function browserRadiusTokens(value) {
     return String(value || '')
       .replace(/\s*\/\s*/g, ' ')
       .split(/\s+/)
-      .map(token => token.trim())
+      .map((token) => token.trim())
       .filter(Boolean);
   }
 
   function browserHasDirectText(el) {
-    return [...(el.childNodes || [])].some(node => node.nodeType === 3 && node.textContent.trim().length > 0);
+    return [...(el.childNodes || [])].some((node) => node.nodeType === 3 && node.textContent.trim().length > 0);
   }
 
   function browserSampleText(el) {
@@ -1496,31 +1496,31 @@ if (IS_BROWSER) {
       if (el === document.body || el === document.documentElement) continue;
 
       const findings = [
-        ...checkElementBordersDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementPseudoStripeDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementColorsDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementMotionDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementGlowDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementAIPaletteDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementRadialSpotlightDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementIconTileDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementItalicSerifDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementQualityDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementOversizedH1DOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementClippedOverflowDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementGptBorderShadowDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementTextOverflowDOM(el).map(f => ({ type: f.id, detail: f.snippet })),
-        ...checkElementBlinkingCursorDOM(el).map(f => ({ type: f.id, detail: f.snippet, ...(f.severity ? { severity: f.severity } : {}) })),
+        ...checkElementBordersDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementPseudoStripeDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementColorsDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementMotionDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementGlowDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementAIPaletteDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementRadialSpotlightDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementIconTileDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementItalicSerifDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementQualityDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementOversizedH1DOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementClippedOverflowDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementGptBorderShadowDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementTextOverflowDOM(el).map((f) => ({ type: f.id, detail: f.snippet })),
+        ...checkElementBlinkingCursorDOM(el).map((f) => ({ type: f.id, detail: f.snippet, ...(f.severity ? { severity: f.severity } : {}) })),
         ...checkElementDesignSystemDOM(el, designSystem, designSeen),
-      ].filter(f => _ruleOk(f.type));
+      ].filter((f) => _ruleOk(f.type));
 
       addBrowserFindings(groupMap, el, findings);
 
       // Hero eyebrow: the offending element is the eyebrow above the heading,
       // not the heading itself — highlight the previous sibling instead.
       const eyebrowFindings = checkElementHeroEyebrowDOM(el)
-        .map(f => ({ type: f.id, detail: f.snippet }))
-        .filter(f => _ruleOk(f.type));
+        .map((f) => ({ type: f.id, detail: f.snippet }))
+        .filter((f) => _ruleOk(f.type));
       if (eyebrowFindings.length > 0 && el.previousElementSibling) {
         addBrowserFindings(groupMap, el.previousElementSibling, eyebrowFindings);
       }
@@ -1529,37 +1529,37 @@ if (IS_BROWSER) {
     const pageLevelFindings = [];
 
     const designSourceFindings = checkBrowserDesignSystemSources(designSystem, designSeen)
-      .filter(f => _ruleOk(f.type));
+      .filter((f) => _ruleOk(f.type));
     if (designSourceFindings.length > 0) {
       pageLevelFindings.push(...designSourceFindings);
       addBrowserFindings(groupMap, document.body, designSourceFindings);
     }
 
-    const typoFindings = checkTypography().filter(f => _ruleOk(f.type));
+    const typoFindings = checkTypography().filter((f) => _ruleOk(f.type));
     if (typoFindings.length > 0) {
       pageLevelFindings.push(...typoFindings);
       addBrowserFindings(groupMap, document.body, typoFindings);
     }
 
     const sectionKickerFindings = checkKickerAboveHeadingDOM()
-      .map(f => ({ type: f.id, detail: f.snippet }))
-      .filter(f => _ruleOk(f.type));
+      .map((f) => ({ type: f.id, detail: f.snippet }))
+      .filter((f) => _ruleOk(f.type));
     if (sectionKickerFindings.length > 0) {
       pageLevelFindings.push(...sectionKickerFindings);
       addBrowserFindings(groupMap, document.body, sectionKickerFindings);
     }
 
     const numberedLabelFindings = checkNumberedSectionLabelsDOM()
-      .map(f => ({ type: f.id, detail: f.snippet }))
-      .filter(f => _ruleOk(f.type));
+      .map((f) => ({ type: f.id, detail: f.snippet }))
+      .filter((f) => _ruleOk(f.type));
     if (numberedLabelFindings.length > 0) {
       pageLevelFindings.push(...numberedLabelFindings);
       addBrowserFindings(groupMap, document.body, numberedLabelFindings);
     }
 
     const repeatedTextFindings = checkRepeatedContainerTextDOM()
-      .map(f => ({ type: f.id, detail: f.snippet }))
-      .filter(f => _ruleOk(f.type));
+      .map((f) => ({ type: f.id, detail: f.snippet }))
+      .filter((f) => _ruleOk(f.type));
     if (repeatedTextFindings.length > 0) {
       pageLevelFindings.push(...repeatedTextFindings);
       addBrowserFindings(groupMap, document.body, repeatedTextFindings);
@@ -1569,56 +1569,56 @@ if (IS_BROWSER) {
     // Reads rendered body text so it catches dashes written as HTML entities.
     // serializeFindings stamps the advisory flag from the registry.
     const emDashFindings = checkEmDashOveruseDOM()
-      .map(f => ({ type: f.id, detail: f.snippet }))
-      .filter(f => _ruleOk(f.type));
+      .map((f) => ({ type: f.id, detail: f.snippet }))
+      .filter((f) => _ruleOk(f.type));
     if (emDashFindings.length > 0) {
       pageLevelFindings.push(...emDashFindings);
       addBrowserFindings(groupMap, document.body, emDashFindings);
     }
 
-    const layoutFindings = checkLayout().filter(f => _ruleOk(f.type));
+    const layoutFindings = checkLayout().filter((f) => _ruleOk(f.type));
     for (const f of layoutFindings) {
       const el = f.el || document.body;
       addBrowserFindings(groupMap, el, [{ type: f.type, detail: f.detail || f.snippet }]);
     }
 
     // Heading rhythm (browser-only: needs real layout for the gap math)
-    const headingRhythmFindings = checkHeadingRhythmDOM().filter(f => _ruleOk(f.type));
+    const headingRhythmFindings = checkHeadingRhythmDOM().filter((f) => _ruleOk(f.type));
     for (const f of headingRhythmFindings) {
       addBrowserFindings(groupMap, f.el || document.body, [{ type: f.type, detail: f.detail }]);
     }
 
     // Edge-flush cards in horizontal scrollers (browser-only: needs real
     // layout for the scroller clip box vs card rect math)
-    const edgeFlushFindings = checkEdgeFlushCardsDOM().filter(f => _ruleOk(f.type));
+    const edgeFlushFindings = checkEdgeFlushCardsDOM().filter((f) => _ruleOk(f.type));
     for (const f of edgeFlushFindings) {
       addBrowserFindings(groupMap, f.el || document.body, [{ type: f.type, detail: f.detail }]);
     }
 
     // Text occlusion / element overlap (browser-only: needs real layout +
     // elementFromPoint to confirm what actually paints on top)
-    const occlusionFindings = checkTextOcclusionDOM().filter(f => _ruleOk(f.type));
+    const occlusionFindings = checkTextOcclusionDOM().filter((f) => _ruleOk(f.type));
     for (const f of occlusionFindings) {
       addBrowserFindings(groupMap, f.el || document.body, [{ type: f.type, detail: f.detail }]);
     }
 
     // First-viewport column overflow — the stretched-hero signature
     // (browser-only: needs real layout for the content-extent math)
-    const colOverflowFindings = checkFirstViewportColumnOverflowDOM().filter(f => _ruleOk(f.type));
+    const colOverflowFindings = checkFirstViewportColumnOverflowDOM().filter((f) => _ruleOk(f.type));
     for (const f of colOverflowFindings) {
       addBrowserFindings(groupMap, f.el || document.body, [{ type: f.type, detail: f.detail }]);
     }
 
     // Page-level quality checks (headings, etc.)
-    const qualityFindings = checkPageQualityDOM().filter(f => _ruleOk(f.type));
+    const qualityFindings = checkPageQualityDOM().filter((f) => _ruleOk(f.type));
     if (qualityFindings.length > 0) {
       pageLevelFindings.push(...qualityFindings);
       addBrowserFindings(groupMap, document.body, qualityFindings);
     }
 
     const creamFindings = checkCreamPalette(document)
-      .map(f => ({ type: f.id, detail: f.snippet }))
-      .filter(f => _ruleOk(f.type));
+      .map((f) => ({ type: f.id, detail: f.snippet }))
+      .filter((f) => _ruleOk(f.type));
     if (creamFindings.length > 0) {
       pageLevelFindings.push(...creamFindings);
       addBrowserFindings(groupMap, document.body, creamFindings);
@@ -1638,7 +1638,7 @@ if (IS_BROWSER) {
     // (the CSS ships here, but the pattern never renders — the live DOM is
     // ground truth in the browser), and a match under a data-impeccable-ignore
     // ancestor is waived. Selector-less findings stay page-level.
-    const scopedHtmlFindings = checkHtmlPatterns(docClone.outerHTML).filter(f => {
+    const scopedHtmlFindings = checkHtmlPatterns(docClone.outerHTML).filter((f) => {
       if (!f.selector) return true;
       const query = String(f.selector).replace(/::?[a-zA-Z-]+(\([^)]*\))?/g, '').trim().replace(/,\s*(?=,|$)/g, '');
       if (!query || /^[,\s]*$/.test(query)) return true;
@@ -1649,10 +1649,10 @@ if (IS_BROWSER) {
         return true;
       }
       if (matches.length === 0) return false;
-      return [...matches].some(el => !scopedIgnoreActive(el, f.id));
+      return [...matches].some((el) => !scopedIgnoreActive(el, f.id));
     });
     if (scopedHtmlFindings.length > 0) {
-      const mapped = scopedHtmlFindings.map(f => {
+      const mapped = scopedHtmlFindings.map((f) => {
         const item = { type: f.id, detail: f.snippet };
         if (f.severity) {
           item.severity = f.severity;
@@ -1670,7 +1670,7 @@ if (IS_BROWSER) {
           } catch { /* unresolvable selector: keep registry severity */ }
         }
         return item;
-      }).filter(f => _ruleOk(f.type));
+      }).filter((f) => _ruleOk(f.type));
       pageLevelFindings.push(...mapped);
       addBrowserFindings(groupMap, document.body, mapped);
     }
@@ -1738,7 +1738,7 @@ if (IS_BROWSER) {
       lastVisualContrastAnalyses.push(result);
       return;
     }
-    const idx = lastVisualContrastAnalyses.findIndex(item => item.selector === result.selector);
+    const idx = lastVisualContrastAnalyses.findIndex((item) => item.selector === result.selector);
     if (idx >= 0) lastVisualContrastAnalyses[idx] = result;
     else lastVisualContrastAnalyses.push(result);
   }
@@ -1762,7 +1762,7 @@ if (IS_BROWSER) {
     if (!el) return false;
     const findingType = result.finding.type || result.finding.id || 'low-contrast';
     const existing = groupMap.get(el) || [];
-    if (existing.some(f => (f.type || f.id) === findingType)) return false;
+    if (existing.some((f) => (f.type || f.id) === findingType)) return false;
     addBrowserFindings(groupMap, el, [{
       type: findingType,
       detail: result.finding.detail || result.finding.snippet,
@@ -1816,10 +1816,10 @@ if (IS_BROWSER) {
     disconnectLazyVisualContrastObserver();
     if (options.visualContrastLazy === false || options.scrollOffscreen !== false) return;
     if (typeof IntersectionObserver === 'undefined') return;
-    const unresolved = (analyses || []).filter(result =>
+    const unresolved = (analyses || []).filter((result) =>
       result?.status === 'unresolved' &&
       result.reason === 'text outside viewport' &&
-      result.selector
+      result.selector,
     );
     if (unresolved.length === 0) return;
     const generation = runtime.generation || scanGeneration;
@@ -1835,7 +1835,7 @@ if (IS_BROWSER) {
         lazyVisualContrastResolving.add(el);
         waitForVisualPaint()
           .then(() => analyzeVisualContrastCandidate(candidate))
-          .then(result => {
+          .then((result) => {
             if (generation !== scanGeneration) return;
             rememberVisualContrastAnalysis(result);
             const added = addVisualContrastResult(groupMap, result, { decorate: true });
@@ -1850,7 +1850,7 @@ if (IS_BROWSER) {
               }));
             }
           })
-          .catch(err => {
+          .catch((err) => {
             reportVisualContrastError(err, { selector: candidate.selector });
           })
           .finally(() => {
@@ -1950,7 +1950,7 @@ if (IS_BROWSER) {
         .then(() => {
           if (generation === scanGeneration) postSerializedFindings(collected.groupMap, options);
         })
-        .catch(err => {
+        .catch((err) => {
           reportVisualContrastError(err);
         });
     }

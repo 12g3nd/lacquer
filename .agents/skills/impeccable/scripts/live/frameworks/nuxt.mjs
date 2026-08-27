@@ -9,8 +9,9 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { buildLiveScriptSrc } from './script-src.mjs';
+
 import { findConfigFile } from './detect-utils.mjs';
+import { buildLiveScriptSrc } from './script-src.mjs';
 
 export const NUXT_PLUGIN_MARKER = 'impeccable-live-nuxt-plugin';
 export const NUXT_PLUGIN_NAME = 'impeccable-live.client.ts';

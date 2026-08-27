@@ -12,6 +12,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { getLiveDir } from '../lib/impeccable-paths.mjs';
 
 const BUFFER_VERSION = 1;
@@ -41,7 +42,7 @@ function readBufferInternal(cwd, { strict }) {
     return { version: BUFFER_VERSION, entries: parsed.entries };
   } catch (err) {
     if (strict && err?.code !== 'ENOENT') {
-      throw new Error('manual_edit_buffer_unreadable: ' + (err.message || String(err)));
+      throw new Error('manual_edit_buffer_unreadable: ' + (err.message || String(err)), { cause: err });
     }
     return { version: BUFFER_VERSION, entries: [] };
   }

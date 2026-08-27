@@ -26,6 +26,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { resolveLiveConfigPath } from './lib/impeccable-paths.mjs';
 import {
   describeInjectArtifacts,
@@ -38,6 +39,7 @@ import {
   healInjectJournal,
   recordInjection,
 } from './live/frameworks/journal.mjs';
+import { buildLiveScriptSrc } from './live/frameworks/script-src.mjs';
 import {
   buildTagBlock,
   insertTag,
@@ -45,7 +47,6 @@ import {
   removeTag,
   revertCspMeta,
 } from './live/frameworks/tag-strategy.mjs';
-import { buildLiveScriptSrc } from './live/frameworks/script-src.mjs';
 import { enterLiveRoot } from './live/roots.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -469,7 +470,7 @@ function validateConfig(cfg) {
     throw new Error("config.commentSyntax must be 'html' or 'jsx'");
   }
   if (cfg.cspChecked !== undefined && typeof cfg.cspChecked !== 'boolean') {
-    throw new Error("config.cspChecked, if present, must be a boolean");
+    throw new Error('config.cspChecked, if present, must be a boolean');
   }
 }
 

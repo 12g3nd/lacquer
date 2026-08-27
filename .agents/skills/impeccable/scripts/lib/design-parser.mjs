@@ -127,22 +127,22 @@ function stripInlineYamlComment(s) {
 // The full YAML 1.2 double-quote escape set (spec section 5.7).
 const YAML_SIMPLE_ESCAPES = {
   '0': '\0',
-  a: '\x07',
-  b: '\b',
-  t: '\t',
-  n: '\n',
-  v: '\v',
-  f: '\f',
-  r: '\r',
-  e: '\x1b',
+  "a": '\x07',
+  "b": '\b',
+  "t": '\t',
+  "n": '\n',
+  "v": '\v',
+  "f": '\f',
+  "r": '\r',
+  "e": '\x1b',
   ' ': ' ',
   '"': '"',
   '/': '/',
   '\\': '\\',
-  N: '\u0085',
-  _: '\u00a0',
-  L: '\u2028',
-  P: '\u2029',
+  "N": '\u0085',
+  "_": '\u00a0',
+  "L": '\u2028',
+  "P": '\u2029',
 };
 const YAML_HEX_ESCAPE_LENGTHS = { x: 2, u: 4, U: 8 };
 
@@ -405,7 +405,7 @@ function extractOverview(section) {
   const paragraphs = collectParagraphs(prose.split('\n')).filter(
     (p) =>
       !p.startsWith('**Creative North Star') &&
-      !p.startsWith('**Key Characteristics')
+      !p.startsWith('**Key Characteristics'),
   );
 
   return {
@@ -585,7 +585,7 @@ function extractTypography(section) {
   let character = characterMatch ? characterMatch[1].replace(/\n/g, ' ').trim() : null;
   if (!character) {
     const paragraphs = collectParagraphs(section.lines).filter(
-      (p) => !/^\*\*[\w\s/&]+Font/i.test(p) && !/^\*\*[\w\s/&]+\([^)]+\)/.test(p)
+      (p) => !/^\*\*[\w\s/&]+Font/i.test(p) && !/^\*\*[\w\s/&]+\([^)]+\)/.test(p),
     );
     if (paragraphs.length) character = paragraphs[0];
   }

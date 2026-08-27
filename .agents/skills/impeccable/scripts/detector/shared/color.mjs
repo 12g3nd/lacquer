@@ -59,8 +59,8 @@ function parseRgb(color) {
 }
 
 function relativeLuminance({ r, g, b }) {
-  const [rs, gs, bs] = [r / 255, g / 255, b / 255].map(c =>
-    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  const [rs, gs, bs] = [r / 255, g / 255, b / 255].map((c) =>
+    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4,
   );
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 }
@@ -118,7 +118,7 @@ function parseGradientColors(bgImage) {
   }
   for (const m of bgImage.matchAll(/#([0-9a-f]{6}|[0-9a-f]{3})\b/gi)) {
     // Nested hex inside color-mix is an ingredient, not a stop (issue #578).
-    if (tokenSpans.some(s => m.index >= s.start && m.index < s.end)) continue;
+    if (tokenSpans.some((s) => m.index >= s.start && m.index < s.end)) continue;
     const h = m[1];
     if (h.length === 6) {
       colors.push({ r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16), a: 1 });
@@ -149,7 +149,7 @@ function getHue(c) {
 
 function colorToHex(c) {
   if (!c) return '?';
-  return '#' + [c.r, c.g, c.b].map(v => v.toString(16).padStart(2, '0')).join('');
+  return '#' + [c.r, c.g, c.b].map((v) => v.toString(16).padStart(2, '0')).join('');
 }
 
 // ─── Color-space conversions ────────────────────────────────────────────────

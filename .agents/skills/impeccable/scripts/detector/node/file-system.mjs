@@ -136,7 +136,7 @@ function detectFrameworkConfig(dir) {
   const entrySet = new Set(entries);
 
   for (const cfg of FRAMEWORK_CONFIGS) {
-    const match = cfg.files.find(f => entrySet.has(f));
+    const match = cfg.files.find((f) => entrySet.has(f));
     if (!match) continue;
 
     const configPath = path.join(dir, match);

@@ -4,7 +4,6 @@
  */
 
 import { canCreateInsert } from './insert-ui.mjs';
-
 // The accepted protocol values come from the canonical vocabulary so the
 // validator, the store, the server, and the picker UI never drift. Imported
 // (not just re-exported) so they are also in scope for the validators below.

@@ -557,14 +557,14 @@ const ANTIPATTERNS = [
 ];
 
 const RULE_ENGINE_SUPPORT = {
-  regex: new Set(['source', 'page-analyzer']),
+  "regex": new Set(['source', 'page-analyzer']),
   'static-html': new Set(['element', 'page']),
-  browser: new Set(['element', 'page', 'layout']),
-  visual: new Set(['visual-contrast']),
+  "browser": new Set(['element', 'page', 'layout']),
+  "visual": new Set(['visual-contrast']),
 };
 
 function getAntipattern(id) {
-  return ANTIPATTERNS.find(rule => rule.id === id);
+  return ANTIPATTERNS.find((rule) => rule.id === id);
 }
 
 // Advisory rules are detected and reported, but never treated as failures:
@@ -572,7 +572,7 @@ function getAntipattern(id) {
 // exit codes or the failure count, and the design hook skips them by default.
 // The set is derived from the registry so a rule only needs `advisory: true`.
 const ADVISORY_RULE_IDS = new Set(
-  ANTIPATTERNS.filter(rule => rule.advisory === true).map(rule => rule.id),
+  ANTIPATTERNS.filter((rule) => rule.advisory === true).map((rule) => rule.id),
 );
 
 function isAdvisoryRule(id) {
@@ -580,7 +580,7 @@ function isAdvisoryRule(id) {
 }
 
 function getRulesForCategory(category) {
-  return ANTIPATTERNS.filter(rule => rule.category === category);
+  return ANTIPATTERNS.filter((rule) => rule.category === category);
 }
 
 function getRuleEngineSupport(engine) {
@@ -590,7 +590,7 @@ function getRuleEngineSupport(engine) {
 // Set of scope tags rules can declare (e.g. 'type', 'layout'). Used by the
 // CLI --scope flag to narrow output to one design domain.
 const RULE_SCOPES = new Set(
-  ANTIPATTERNS.flatMap(rule => rule.scopes || []),
+  ANTIPATTERNS.flatMap((rule) => rule.scopes || []),
 );
 
 // Keep only findings whose rule declares at least one of the requested
@@ -598,9 +598,9 @@ const RULE_SCOPES = new Set(
 function filterByScopes(findings, scopes = []) {
   if (!scopes || scopes.length === 0) return findings;
   const enabled = new Set(scopes);
-  return findings.filter(f => {
+  return findings.filter((f) => {
     const rule = getAntipattern(f.antipattern);
-    return (rule?.scopes || []).some(scope => enabled.has(scope));
+    return (rule?.scopes || []).some((scope) => enabled.has(scope));
   });
 }
 

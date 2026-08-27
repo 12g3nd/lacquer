@@ -6,16 +6,11 @@
  * variant back into the route source with props mapped to original bindings.
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
 import { createHash } from 'node:crypto';
-import {
-  analyzeSvelteMarkup,
-  buildPropsScriptV2,
-  loadSvelteCompiler,
-  restoreSvelteMarkup,
-} from './svelte-ast.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
 import {
   bakeParamValues,
   collectAllSelectors,
@@ -28,6 +23,12 @@ import {
   splitSelectorList,
 } from './accept-css.mjs';
 import { verifyAcceptedSource } from './accept-verify.mjs';
+import {
+  analyzeSvelteMarkup,
+  buildPropsScriptV2,
+  loadSvelteCompiler,
+  restoreSvelteMarkup,
+} from './svelte-ast.mjs';
 
 // Preview modules stay under node_modules on purpose: SvelteKit restricts
 // vite's server.fs.allow to src/lib, src/routes, .svelte-kit, and
@@ -63,7 +64,7 @@ export function ensureRuntimeHelper(cwd = process.cwd()) {
   const file = path.join(cwd, SVELTE_RUNTIME_FILE);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   if (!fs.existsSync(file)) {
-    fs.writeFileSync(file, `export { mount, unmount } from 'svelte';\n`, 'utf-8');
+    fs.writeFileSync(file, 'export { mount, unmount } from \'svelte\';\n', 'utf-8');
   }
   // Attach-time probe: the browser imports this through the dev server before
   // the first mount. A 404 here means the resolved app root and the dev
@@ -71,7 +72,7 @@ export function ensureRuntimeHelper(cwd = process.cwd()) {
   // of a silent fall-back to the picker at first variant.
   const probe = path.join(cwd, SVELTE_PROBE_FILE);
   if (!fs.existsSync(probe)) {
-    fs.writeFileSync(probe, `export const impeccableLivePreviewProbe = true;\n`, 'utf-8');
+    fs.writeFileSync(probe, 'export const impeccableLivePreviewProbe = true;\n', 'utf-8');
   }
   return file;
 }

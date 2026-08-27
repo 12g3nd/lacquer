@@ -9,6 +9,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { isGeneratedFile } from './lib/is-generated.mjs';
 import {
   buildSearchQueries,
@@ -21,12 +22,12 @@ import {
   buildCssAuthoring,
   buildCssSelectorPrefixExamples,
 } from './live-wrap.mjs';
+import { enterLiveRoot } from './live/roots.mjs';
 import {
   buildSvelteComponentCssAuthoring,
   scaffoldSvelteComponentInsertSession,
   shouldUseSvelteComponentInjection,
 } from './live/svelte-component.mjs';
-import { enterLiveRoot } from './live/roots.mjs';
 
 const INSERT_POSITIONS = new Set(['before', 'after']);
 

@@ -5,10 +5,11 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { createLiveSessionStore } from './live/session-store.mjs';
+
 import { readLiveServerInfo } from './lib/impeccable-paths.mjs';
-import { enterLiveRoot } from './live/roots.mjs';
 import { verifyAcceptedFile } from './live/accept-verify.mjs';
+import { enterLiveRoot } from './live/roots.mjs';
+import { createLiveSessionStore } from './live/session-store.mjs';
 
 function parseArgs(argv) {
   const out = { status: 'complete' };
@@ -28,7 +29,7 @@ function parseArgs(argv) {
 export async function completeCli() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.id) {
-    console.log(`Usage: node live-complete.mjs --id SESSION_ID [--discarded|--error MESSAGE] [--force]\n\nAppend the final durable session acknowledgement. Use after accept/discard cleanup is verified.\nCompletion is refused while the session's source file still carries live-mode leftovers\n(markers, data-p-* attributes, unbaked --p-* vars); fix the file or pass --force.`);
+    console.log('Usage: node live-complete.mjs --id SESSION_ID [--discarded|--error MESSAGE] [--force]\n\nAppend the final durable session acknowledgement. Use after accept/discard cleanup is verified.\nCompletion is refused while the session\'s source file still carries live-mode leftovers\n(markers, data-p-* attributes, unbaked --p-* vars); fix the file or pass --force.');
     process.exit(args.help ? 0 : 1);
   }
 

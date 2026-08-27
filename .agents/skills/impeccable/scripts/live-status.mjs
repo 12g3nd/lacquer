@@ -3,10 +3,10 @@
  * Print durable recovery status for Impeccable live sessions.
  */
 
-import { createLiveSessionStore } from './live/session-store.mjs';
 import { readLiveServerInfo } from './lib/impeccable-paths.mjs';
 import { manualApplyResumeHint, mountFailureAction, renderSummary } from './live-resume.mjs';
 import { enterLiveRoot } from './live/roots.mjs';
+import { createLiveSessionStore } from './live/session-store.mjs';
 
 function readServerInfo() {
   return readLiveServerInfo(process.cwd())?.info || null;

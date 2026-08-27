@@ -28,6 +28,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { PATCH_UNDOERS } from './index.mjs';
 
 export const INJECT_JOURNAL_VERSION = 1;

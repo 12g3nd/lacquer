@@ -1,17 +1,16 @@
 {
-  "name": "youtube-music",
-  "desktopName": "com.github.th-ch.youtube-music",
-  "productName": "YouTube Music",
+  "name": "lacquer",
+  "desktopName": "io.github.12g3nd.lacquer",
+  "productName": "Lacquer",
   "version": "3.12.0",
-  "description": "YouTube Music Desktop App - including custom plugins",
+  "description": "Lacquer - Windows-first YouTube Music client",
   "main": "./dist/main/index.js",
   "type": "module",
   "license": "MIT",
-  "repository": "pear-devs/pear-desktop",
+  "repository": "12g3nd/lacquer",
   "author": {
-    "name": "th-ch",
-    "email": "th-ch@users.noreply.github.com",
-    "url": "https://github.com/pear-devs/pear-desktop"
+    "name": "12g3nd",
+    "url": "https://github.com/12g3nd/lacquer"
   },
   "scripts": {
     "postinstall": "pnpm install-electron",

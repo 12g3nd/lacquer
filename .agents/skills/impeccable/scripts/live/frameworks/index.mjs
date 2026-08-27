@@ -38,14 +38,14 @@
 
 import path from 'node:path';
 
-import { sveltekit } from './sveltekit.mjs';
-import { nuxt } from './nuxt.mjs';
-import { tanstackStart } from './tanstack-start.mjs';
 import { astro } from './astro.mjs';
 import { nextjs } from './nextjs.mjs';
-import { viteGeneric } from './vite-generic.mjs';
+import { nuxt } from './nuxt.mjs';
 import { staticHtml } from './static-html.mjs';
+import { sveltekit } from './sveltekit.mjs';
 import { TAG_PATCH_MARKERS, unpatchTagFile } from './tag-strategy.mjs';
+import { tanstackStart } from './tanstack-start.mjs';
+import { viteGeneric } from './vite-generic.mjs';
 
 /** Priority order. Do not reorder without re-reading rule 1 above. */
 export const FRAMEWORKS = Object.freeze([

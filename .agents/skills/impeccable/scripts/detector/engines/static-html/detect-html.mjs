@@ -1,14 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { GENERIC_FONTS, OVERUSED_FONTS } from '../../shared/constants.mjs';
+import {
+  StaticDocument,
+  buildStaticStyleMap,
+  buildStaticWindow,
+  collectStaticCssText,
+} from './css-cascade.mjs';
+
 import {
   checkSourceDesignSystem,
   collectStaticDesignSystemFindings,
   mergeDesignSystemFindings,
 } from '../../design-system.mjs';
-import { isFullPage } from '../../shared/page.mjs';
-import { applyInlineIgnores } from '../../shared/inline-ignores.mjs';
 import { finding } from '../../findings.mjs';
 import { profileFindings, profileStep, profileStepAsync } from '../../profile/profiler.mjs';
 import {
@@ -36,24 +40,21 @@ import {
   resolveBackground,
   resolveBorderRadiusPx,
 } from '../../rules/checks.mjs';
+import { GENERIC_FONTS, OVERUSED_FONTS } from '../../shared/constants.mjs';
+import { applyInlineIgnores } from '../../shared/inline-ignores.mjs';
+import { isFullPage } from '../../shared/page.mjs';
 import { detectText, runTextContentAnalyzers } from '../regex/detect-text.mjs';
-import {
-  StaticDocument,
-  buildStaticStyleMap,
-  buildStaticWindow,
-  collectStaticCssText,
-} from './css-cascade.mjs';
 
 function checkStaticPageTypography(document, window) {
   const findings = [];
   const fonts = new Set();
   const overusedFound = new Set();
   for (const el of document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td, th, dd, blockquote, figcaption, a, button, label, span, div')) {
-    const hasText = el.childNodes.some(n => n.nodeType === 3 && n.textContent.trim().length > 0);
+    const hasText = el.childNodes.some((n) => n.nodeType === 3 && n.textContent.trim().length > 0);
     if (!hasText) continue;
     const ff = window.getComputedStyle(el).fontFamily || '';
-    const stack = ff.split(',').map(f => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase());
-    const primary = stack.find(f => f && !GENERIC_FONTS.has(f));
+    const stack = ff.split(',').map((f) => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase());
+    const primary = stack.find((f) => f && !GENERIC_FONTS.has(f));
     if (!primary) continue;
     fonts.add(primary);
     if (OVERUSED_FONTS.has(primary)) overusedFound.add(primary);
@@ -70,7 +71,7 @@ function checkStaticPageTypography(document, window) {
     const sorted = [...sizes].sort((a, b) => a - b);
     const ratio = sorted[sorted.length - 1] / sorted[0];
     if (ratio < 2.0) {
-      findings.push({ id: 'flat-type-hierarchy', snippet: `Sizes: ${sorted.map(s => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)` });
+      findings.push({ id: 'flat-type-hierarchy', snippet: `Sizes: ${sorted.map((s) => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)` });
     }
   }
   return findings;
@@ -147,7 +148,7 @@ async function detectHtml(filePath, options = {}) {
   'impeccable detect: DEGRADED - HTML parser modules unavailable ' +
   '(htmlparser2, css-select, css-tree, domutils).\n' +
   'Falling back to regex matching. Custom properties, selector matching and computed ' +
-  'contrast are NOT evaluated; findings are an undercount, not a clean bill of health.\n'
+  'contrast are NOT evaluated; findings are an undercount, not a clean bill of health.\n',
 );
   }
 
@@ -250,8 +251,8 @@ async function detectHtml(filePath, options = {}) {
       styleText: [cssText, ...styleAttrParts].join('\n'),
       classText: classAttrParts.join('\n'),
     };
-    for (const f of runPageCheck('html-patterns', () => checkHtmlPatterns(html, patternCorpora).filter(item =>
-      item.id !== 'bounce-easing' && item.id !== 'layout-transition'
+    for (const f of runPageCheck('html-patterns', () => checkHtmlPatterns(html, patternCorpora).filter((item) =>
+      item.id !== 'bounce-easing' && item.id !== 'layout-transition',
     ))) {
       // Selector-backed page findings honor scoped waivers here too, matching
       // the browser pass: resolve the selector and drop the finding when an
@@ -262,7 +263,7 @@ async function detectHtml(filePath, options = {}) {
         try {
           matches = document.querySelectorAll(String(f.selector).replace(/::?[a-zA-Z-]+(\([^)]*\))?/g, '').trim());
         } catch { matches = null; }
-        if (matches && matches.length > 0 && [...matches].every(el => scopedIgnoreActive(el, f.id))) continue;
+        if (matches && matches.length > 0 && [...matches].every((el) => scopedIgnoreActive(el, f.id))) continue;
       }
       const item = finding(f.id, filePath, f.snippet);
       // Position-aware severity promotion: checks may attach a per-finding

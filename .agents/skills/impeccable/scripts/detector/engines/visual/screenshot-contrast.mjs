@@ -40,7 +40,7 @@ async function compareScreenshotContrast(page, beforeBase64, afterBase64, candid
     const afterPixels = ctx.getImageData(0, 0, width, height).data;
 
     const luminance = ({ r, g, b }) => {
-      const convert = c => {
+      const convert = (c) => {
         const v = c / 255;
         return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
       };
@@ -94,7 +94,7 @@ async function compareScreenshotContrast(page, beforeBase64, afterBase64, candid
     }
 
     ratios.sort((a, b) => a - b);
-    const pick = pct => ratios[Math.min(ratios.length - 1, Math.max(0, Math.floor((pct / 100) * ratios.length)))];
+    const pick = (pct) => ratios[Math.min(ratios.length - 1, Math.max(0, Math.floor((pct / 100) * ratios.length)))];
     return {
       glyphPixels,
       strongestDelta,

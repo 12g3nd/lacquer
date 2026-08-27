@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
 /**
  * Visual question server: present a decision to the user as a themed page
  * instead of a plain-text prompt, then block until they answer.
@@ -107,10 +109,9 @@
  *   node serve-question.mjs --payload question.json [--timeout 900] [--idle-grace 600] [--no-open] [--port 0]
  */
 import http from 'node:http';
-import fs from 'node:fs';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+
 import { openSystemBrowser } from './lib/open-system-browser.mjs';
 
 function arg(name, fallback = null) {
@@ -468,7 +469,7 @@ function page(waiting = false) {
   // means the page renders already stalled and never starts a heartbeat.
   const waitBudgetMs = waiting ? Math.max(0, awaitingNextSince + idleGraceMs - Date.now()) : idleGraceMs;
   const flipChip = (label) => `<button type="button" class="chip flip" aria-label="Flip the card"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 1 1-8 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 5.5V12h6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${label}</span></button>`;
-  const expandChip = `<button type="button" class="chip expand" aria-label="Expand the image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+  const expandChip = '<button type="button" class="chip expand" aria-label="Expand the image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
   // Structured anatomy: chips and one-line facts render when the payload
   // carries them; a plain body falls back to the prose block. Palette chips
   // and material tags give a text-only direction an immediate identity that

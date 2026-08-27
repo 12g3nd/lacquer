@@ -12,20 +12,20 @@
  * Same finding shape and severities as lib/staleness.mjs.
  */
 
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const VISUAL_SOURCE_DIRS = ['src', 'app', 'pages', 'components', 'site', 'styles', 'public'];
 
 const HOOK_MANIFESTS_BY_PROVIDER = Object.freeze({
   'claude-code': ['.claude/settings.local.json', '.claude/settings.json'],
-  codex: ['.codex/hooks.json'],
-  agents: ['.codex/hooks.json'],
-  cursor: ['.cursor/hooks.json'],
-  github: ['.github/hooks/impeccable.json'],
-  grok: ['.grok/hooks/impeccable.json'],
+  "codex": ['.codex/hooks.json'],
+  "agents": ['.codex/hooks.json'],
+  "cursor": ['.cursor/hooks.json'],
+  "github": ['.github/hooks/impeccable.json'],
+  "grok": ['.grok/hooks/impeccable.json'],
 });
 
 const HOOK_SCRIPT_MARKERS = [
@@ -131,7 +131,7 @@ function hasCoverageValue(value) {
 
 const SEED_DESIGN_MARKERS = ['/', '$'].map((prefix) =>
   '<!-- SEED: established with the user before implementation; '
-    + `re-run ${prefix}impeccable document once there's code to capture the actual tokens and components. -->`
+    + `re-run ${prefix}impeccable document once there's code to capture the actual tokens and components. -->`,
 );
 
 export function checkDesignCoverage({ design, designPath, parseDesignMd }) {
@@ -335,7 +335,7 @@ export function checkHookInstallation({ projectRoot, repoRoot, providerId }) {
           summary: `${installedAt} installs the design hook, but its script path does not exist: `
             + `${broken.map((command) => `\`${command}\``).join(', ')}. The hook runs as a no-op, so UI edits `
             + 'have been going unscanned while the project looks covered.',
-          fix: `Reinstall with \`impeccable hooks on\`, which rewrites the manifest against the skill's current location.`,
+          fix: 'Reinstall with `impeccable hooks on`, which rewrites the manifest against the skill\'s current location.',
         }));
       }
     }

@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { resolveProjectRoot } from '../context.mjs';
+
 import { designSidecarCandidatesFor } from './staleness.mjs';
+
+import { resolveProjectRoot } from '../context.mjs';
 export { IMPECCABLE_COMMAND_PREFIX } from './provider.mjs';
 
 export const IMPECCABLE_DIR = '.impeccable';

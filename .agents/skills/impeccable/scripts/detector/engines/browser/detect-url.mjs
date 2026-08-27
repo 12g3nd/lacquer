@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 import { finding } from '../../findings.mjs';
 import { profileFindingsAsync, profileStep, profileStepAsync } from '../../profile/profiler.mjs';
-import { captureVisualContrastCandidate } from '../visual/screenshot-contrast.mjs';
 import { checkContentHiddenAtRest } from '../../rules/checks.mjs';
+import { captureVisualContrastCandidate } from '../visual/screenshot-contrast.mjs';
 
 // On Windows, puppeteer's bundled Chrome lives in a user-writable cache
 // directory. Its GPU process can be denied (STATUS_ACCESS_DENIED) by security
@@ -55,10 +55,10 @@ async function measureContentHiddenAfterReveal(page) {
     );
     for (let y = 0; y <= max; y += step) {
       window.scrollTo({ top: y, left: 0, behavior: 'instant' });
-      await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 40)));
+      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 40)));
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    await new Promise(resolve => setTimeout(resolve, 700));
+    await new Promise((resolve) => setTimeout(resolve, 700));
   });
   return page.evaluate(() => {
     if (typeof window.impeccableMeasureHiddenText !== 'function') return null;
@@ -74,13 +74,13 @@ function serializeDesignSystemForBrowser(designSystem) {
     allowedFonts: Array.from(designSystem.allowedFonts || []),
     hasColors: designSystem.hasColors === true,
     allowedColors: Array.from(designSystem.allowedColorKeys?.values?.() || [])
-      .map(entry => entry?.color)
-      .filter(color => color && Number.isFinite(color.r) && Number.isFinite(color.g) && Number.isFinite(color.b))
-      .map(color => ({ r: color.r, g: color.g, b: color.b })),
+      .map((entry) => entry?.color)
+      .filter((color) => color && Number.isFinite(color.r) && Number.isFinite(color.g) && Number.isFinite(color.b))
+      .map((color) => ({ r: color.r, g: color.g, b: color.b })),
     hasRadii: designSystem.hasRadii === true,
     allowedRadii: (designSystem.allowedRadii || [])
-      .map(entry => Number(entry?.px))
-      .filter(px => Number.isFinite(px)),
+      .map((entry) => Number(entry?.px))
+      .filter((px) => Number.isFinite(px)),
     hasPillRadius: designSystem.hasPillRadius === true,
   };
 }
@@ -93,9 +93,9 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
   const scrollOffscreen = options?.visualContrastScrollOffscreen !== false;
   const existingLowContrastSelectors = new Set(
     serializedGroups
-      .filter(group => group.findings?.some(f => f.type === 'low-contrast'))
-      .map(group => group.selector)
-      .filter(Boolean)
+      .filter((group) => group.findings?.some((f) => f.type === 'low-contrast'))
+      .map((group) => group.selector)
+      .filter(Boolean),
   );
 
   let browserAnalyses = [];
@@ -112,8 +112,8 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
         return window.impeccableAnalyzeVisualContrast({ maxCandidates, scrollOffscreen });
       }, { maxCandidates, scrollOffscreen });
       return browserAnalyses
-        .filter(result => result.finding && !existingLowContrastSelectors.has(result.selector))
-        .map(result => result.finding);
+        .filter((result) => result.finding && !existingLowContrastSelectors.has(result.selector))
+        .map((result) => result.finding);
     });
     findings.push(...browserFindings);
   }
@@ -134,13 +134,13 @@ async function runVisualContrastFallback(page, serializedGroups, options, profil
   const viewport = options?.viewport || { width: 1280, height: 800 };
   const browserResolvedSelectors = new Set(
     browserAnalyses
-      .filter(result => result.status === 'fail' || result.status === 'pass')
-      .map(result => result.selector)
-      .filter(Boolean)
+      .filter((result) => result.status === 'fail' || result.status === 'pass')
+      .map((result) => result.selector)
+      .filter(Boolean),
   );
-  const filtered = candidates.filter(candidate =>
+  const filtered = candidates.filter((candidate) =>
     !existingLowContrastSelectors.has(candidate.selector) &&
-    !browserResolvedSelectors.has(candidate.selector)
+    !browserResolvedSelectors.has(candidate.selector),
   );
   if (options?.visualContrastPixel === false) return findings;
   for (const candidate of filtered) {
@@ -187,7 +187,7 @@ async function detectUrl(url, options = {}) {
     path.dirname(fileURLToPath(import.meta.url)),
     '..',
     '..',
-    'detect-antipatterns-browser.js'
+    'detect-antipatterns-browser.js',
   );
   let browserScript;
   try {
@@ -250,7 +250,7 @@ async function detectUrl(url, options = {}) {
         phase: 'load',
         ruleId: 'settle',
         target: url,
-      }, () => new Promise(resolve => setTimeout(resolve, settleMs)));
+      }, () => new Promise((resolve) => setTimeout(resolve, settleMs)));
     }
 
     // Inject the browser detection script and collect results
@@ -285,7 +285,7 @@ async function detectUrl(url, options = {}) {
         return window.impeccableDetect({ decorate: false, serialize: true });
       });
       return serializedGroups.flatMap(({ findings }) =>
-        findings.map(f => ({ id: f.type, snippet: f.detail, ignoreValue: f.ignoreValue || '', severity: f.severity || '' }))
+        findings.map((f) => ({ id: f.type, snippet: f.detail, ignoreValue: f.ignoreValue || '', severity: f.severity || '' })),
       );
     });
     // Content invisible at rest: reveal sweep, then re-measure. Runs after
@@ -326,7 +326,7 @@ async function detectUrl(url, options = {}) {
       }, () => browser.close());
     }
   }
-  return results.map(f => {
+  return results.map((f) => {
     const item = finding(f.id, url, f.snippet);
     if (f.ignoreValue) item.ignoreValue = f.ignoreValue;
     // Per-finding severity promotion (e.g. hero-region pulsing dot)

@@ -3,8 +3,8 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { finding } from './findings.mjs';
-import { GENERIC_FONTS } from './shared/constants.mjs';
 import { parseAnyColor, resolveLengthPx } from './rules/checks.mjs';
+import { GENERIC_FONTS } from './shared/constants.mjs';
 
 const DESIGN_NAMES = ['DESIGN.md', 'Design.md', 'design.md'];
 const FALLBACK_DIRS = ['.agents/context', 'docs'];
@@ -61,7 +61,7 @@ function resolveDesignSidecarPath(cwd = process.cwd(), contextDir = cwd) {
     path.join(contextDir, 'DESIGN.json'),
   ];
   return candidates.find((candidate, index) =>
-    candidates.indexOf(candidate) === index && fs.existsSync(candidate)
+    candidates.indexOf(candidate) === index && fs.existsSync(candidate),
   ) || null;
 }
 
@@ -155,22 +155,22 @@ function stripInlineYamlComment(s) {
 // The full YAML 1.2 double-quote escape set (spec section 5.7).
 const YAML_SIMPLE_ESCAPES = {
   '0': '\0',
-  a: '\x07',
-  b: '\b',
-  t: '\t',
-  n: '\n',
-  v: '\v',
-  f: '\f',
-  r: '\r',
-  e: '\x1b',
+  "a": '\x07',
+  "b": '\b',
+  "t": '\t',
+  "n": '\n',
+  "v": '\v',
+  "f": '\f',
+  "r": '\r',
+  "e": '\x1b',
   ' ': ' ',
   '"': '"',
   '/': '/',
   '\\': '\\',
-  N: '\u0085',
-  _: '\u00a0',
-  L: '\u2028',
-  P: '\u2029',
+  "N": '\u0085',
+  "_": '\u00a0',
+  "L": '\u2028',
+  "P": '\u2029',
 };
 const YAML_HEX_ESCAPE_LENGTHS = { x: 2, u: 4, U: 8 };
 
@@ -252,7 +252,7 @@ function splitFontStack(stack) {
 
 function primaryFont(stack) {
   if (!stack || /var\(/i.test(stack) || !isLiteralFontStack(stack)) return '';
-  return splitFontStack(stack).find(font => !GENERIC_FONTS.has(font)) || '';
+  return splitFontStack(stack).find((font) => !GENERIC_FONTS.has(font)) || '';
 }
 
 function isLiteralFontStack(stack) {
@@ -527,7 +527,7 @@ function normalizeDesignSystem(input = {}) {
   // Gate on *enumerated* steps only. A fully fluid system declares clamp
   // endpoints but no discrete ramp, so treating those endpoints as the whole
   // allowlist would flag every intermediate size. Abstain instead.
-  out.hasFontSizes = out.allowedFontSizes.some(entry => !entry.fluid);
+  out.hasFontSizes = out.allowedFontSizes.some((entry) => !entry.fluid);
   return out;
 }
 
@@ -647,7 +647,7 @@ function isAllowedShadowColorRaw(raw, designSystem) {
   if (!designSystem?.allowedShadowColors?.length) return false;
   const parsed = parseDesignColor(String(raw || '').trim().toLowerCase());
   if (!parsed) return false;
-  return designSystem.allowedShadowColors.some(entry =>
+  return designSystem.allowedShadowColors.some((entry) =>
     colorsClose(parsed, entry.color) &&
     Math.abs((parsed.a ?? 1) - (entry.color.a ?? 1)) <= SHADOW_ALPHA_TOLERANCE,
   );
@@ -661,7 +661,7 @@ function isAllowedRadiusRaw(raw, designSystem) {
   const px = resolveLengthPx(text, 16);
   if (px == null || !Number.isFinite(px) || px <= RADIUS_TOLERANCE_PX) return true;
   if (designSystem.hasPillRadius && px >= 99) return true;
-  return designSystem.allowedRadii.some(entry => Math.abs(entry.px - px) <= RADIUS_TOLERANCE_PX);
+  return designSystem.allowedRadii.some((entry) => Math.abs(entry.px - px) <= RADIUS_TOLERANCE_PX);
 }
 
 // One term of a font-size value. `unjudgeable` covers var(), calc(), percentages
@@ -673,7 +673,7 @@ function fontSizeStepStatus(raw, designSystem) {
   const px = resolveLengthPx(text, 16);
   if (px == null || !Number.isFinite(px) || px <= 0) return 'unjudgeable';
   return designSystem.allowedFontSizes.some(
-    entry => Math.abs(entry.px - px) <= FONT_SIZE_TOLERANCE_PX,
+    (entry) => Math.abs(entry.px - px) <= FONT_SIZE_TOLERANCE_PX,
   ) ? 'on-ramp' : 'off-ramp';
 }
 
@@ -689,7 +689,7 @@ export function offRampClampEndpoints(raw, designSystem) {
   const args = parseClampArgs(String(raw || '').trim().replace(/\s*!important\s*$/i, ''));
   if (!args) return null;
   return [args[0], args[2]].filter(
-    endpoint => fontSizeStepStatus(endpoint, designSystem) === 'off-ramp',
+    (endpoint) => fontSizeStepStatus(endpoint, designSystem) === 'off-ramp',
   );
 }
 
@@ -736,7 +736,7 @@ function isProbablyColorLiteral(line, match) {
 // nesting would need a parser, so the regex deliberately fails safe there:
 // the context check misses and the finding fires — a false positive a waiver
 // can silence, never a leak.
-const QUOTED_STRING_SRC = `"[^"]*"|'[^']*'`;
+const QUOTED_STRING_SRC = '"[^"]*"|\'[^\']*\'';
 const INTERPOLATION_SRC =
   `\\$\\{(?:${QUOTED_STRING_SRC}|\\{(?:${QUOTED_STRING_SRC}|[^{}"'\`])*\\}|[^{}"'\`])*\\}`;
 // The two shadow-context tails. Unlike jsColorKeyContext, the JS tail admits
@@ -793,7 +793,7 @@ function decodeGoogleFamily(value) {
 function checkFontStack(stack, filePath, line, designSystem, context) {
   const primary = primaryFont(stack);
   if (!primary || isAllowedFont(primary, designSystem)) return [];
-  const display = primary.replace(/\b\w/g, ch => ch.toUpperCase());
+  const display = primary.replace(/\b\w/g, (ch) => ch.toUpperCase());
   return [makeDesignFinding(
     'design-system-font',
     filePath,
@@ -807,7 +807,7 @@ function extractRadiusTokens(value) {
   return String(value || '')
     .replace(/\s*\/\s*/g, ' ')
     .split(/\s+/)
-    .map(token => token.trim())
+    .map((token) => token.trim())
     .filter(Boolean);
 }
 
@@ -934,7 +934,7 @@ function checkSourceDesignSystem(content, filePath, options = {}) {
 }
 
 function hasDirectText(el) {
-  return Array.from(el.childNodes || []).some(node => node.nodeType === 3 && node.textContent.trim().length > 0);
+  return Array.from(el.childNodes || []).some((node) => node.nodeType === 3 && node.textContent.trim().length > 0);
 }
 
 function sampleText(el) {

@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { getLegacyLiveSessionsDir, getLiveSessionsDir, safeSessionId } from '../lib/impeccable-paths.mjs';
+
 import { COMPLETED_SESSION_PHASES, GENERATION_FENCED_SESSION_PHASES } from './vocabulary.mjs';
+
+import { getLegacyLiveSessionsDir, getLiveSessionsDir, safeSessionId } from '../lib/impeccable-paths.mjs';
 
 const COMPLETED_PHASES = new Set(COMPLETED_SESSION_PHASES);
 export const GENERATION_FENCED_PHASES = new Set(GENERATION_FENCED_SESSION_PHASES);

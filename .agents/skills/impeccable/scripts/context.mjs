@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 /**
  * Context loader: prints PRODUCT.md, DESIGN.md when present, the matching
  * persisted surface brief when one can be resolved, and native-platform
@@ -27,19 +28,19 @@
  * shape rather than the markdown block.
  */
 import fs from 'node:fs';
-import { spawnSync } from 'node:child_process';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseTargetOptions } from './lib/target-args.mjs';
+
 import { IMPECCABLE_COMMAND, IMPECCABLE_PROVIDER_ID } from './lib/provider.mjs';
-import { resolveSurfaceBrief } from './lib/surface-briefs.mjs';
-import { collectBootFindings, designSidecarCandidatesFor } from './lib/staleness.mjs';
 import {
   buildStalenessDirective,
   filterFreshFindings,
   stalenessCheckDisabled,
 } from './lib/staleness-notice.mjs';
+import { collectBootFindings, designSidecarCandidatesFor } from './lib/staleness.mjs';
+import { resolveSurfaceBrief } from './lib/surface-briefs.mjs';
+import { parseTargetOptions } from './lib/target-args.mjs';
 
 const PRODUCT_NAMES = ['PRODUCT.md', 'Product.md', 'product.md'];
 const DESIGN_NAMES = ['DESIGN.md', 'Design.md', 'design.md'];
@@ -949,8 +950,8 @@ export function extractPlatform(product) {
   // android`) = adaptive. Only list separators and the two platform words may
   // appear; anything else (prose, negations) is unrecognized and falls
   // through to the CLI's WARNING path.
-  const tokens = value.split(/[\s,+&/]+/).filter(t => t && t !== 'and');
-  if (tokens.length >= 2 && tokens.every(t => t === 'ios' || t === 'android')
+  const tokens = value.split(/[\s,+&/]+/).filter((t) => t && t !== 'and');
+  if (tokens.length >= 2 && tokens.every((t) => t === 'ios' || t === 'android')
     && tokens.includes('ios') && tokens.includes('android')) {
     return 'adaptive';
   }
@@ -993,8 +994,8 @@ function writeUpdateCache(cache) {
 
 /** Compare dotted numeric versions. Returns >0 when a is newer than b. */
 function compareSemver(a, b) {
-  const pa = String(a).split('.').map(n => parseInt(n, 10) || 0);
-  const pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+  const pa = String(a).split('.').map((n) => parseInt(n, 10) || 0);
+  const pb = String(b).split('.').map((n) => parseInt(n, 10) || 0);
   for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
     const diff = (pa[i] || 0) - (pb[i] || 0);
     if (diff !== 0) return diff;
@@ -1021,14 +1022,14 @@ async function fetchLatestSkillVersion() {
 // files the session is reading and only takes effect in the next one anyway.
 function buildUpdateDirective(localVersion, latestVersion) {
   return (
-    `UPDATE_AVAILABLE: A newer Impeccable skill is available ` +
+    'UPDATE_AVAILABLE: A newer Impeccable skill is available ' +
     `(installed v${localVersion}, latest v${latestVersion}). ` +
     `Mention it once, in this form: "A newer Impeccable (v${latestVersion}) is available. ` +
-    `Update now? It runs \`npx impeccable update\`." ` +
-    `Do not run \`npx impeccable update\` in this turn, whatever the user answers: it rewrites the skill files ` +
-    `this session is reading, and the update only takes effect in the next session, so there is nothing to gain now. ` +
-    `Run it in a later turn, only after the user has asked for it in their own words. ` +
-    `Continue the current task now without waiting, and do not raise this again.`
+    'Update now? It runs `npx impeccable update`." ' +
+    'Do not run `npx impeccable update` in this turn, whatever the user answers: it rewrites the skill files ' +
+    'this session is reading, and the update only takes effect in the next session, so there is nothing to gain now. ' +
+    'Run it in a later turn, only after the user has asked for it in their own words. ' +
+    'Continue the current task now without waiting, and do not raise this again.'
   );
 }
 
@@ -1224,11 +1225,11 @@ function pathExistsForTarget(cwd, targetPath) {
 
 const HOOK_MANIFESTS_BY_PROVIDER = Object.freeze({
   'claude-code': ['.claude/settings.local.json', '.claude/settings.json'],
-  codex: ['.codex/hooks.json'],
-  agents: ['.codex/hooks.json'],
-  cursor: ['.cursor/hooks.json'],
-  github: ['.github/hooks/impeccable.json'],
-  grok: ['.grok/hooks/impeccable.json'],
+  "codex": ['.codex/hooks.json'],
+  "agents": ['.codex/hooks.json'],
+  "cursor": ['.cursor/hooks.json'],
+  "github": ['.github/hooks/impeccable.json'],
+  "grok": ['.grok/hooks/impeccable.json'],
 });
 
 function truthyEnv(value) {

@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { readFileSync } from 'node:fs';
+
 import { WELL_TIERS } from './roll-selection.mjs';
 
 export const CONCEPT_STATUSES = new Set(['approved', 'rejected']);
@@ -66,15 +67,15 @@ export function validateConceptEntry(concept, { existingForms = new Map(), axes 
     if (typeof concept.axes !== 'object' || Array.isArray(concept.axes)) {
       errors.push(`concept ${id} axes must be an object of axis id to value id`);
     } else if (axes) {
-      const byId = new Map((axes.axes || []).map(axis => [axis.id, axis]));
+      const byId = new Map((axes.axes || []).map((axis) => [axis.id, axis]));
       for (const [axisId, valueId] of Object.entries(concept.axes)) {
         const axis = byId.get(axisId);
         if (!axis) {
           errors.push(`concept ${id} names unknown axis "${axisId}"`);
-        } else if (!(axis.values || []).some(value => value.id === valueId)) {
+        } else if (!(axis.values || []).some((value) => value.id === valueId)) {
           errors.push(
             `concept ${id} axis "${axisId}" has unknown value "${valueId}" `
-            + `(expected one of ${(axis.values || []).map(v => v.id).join(', ')})`
+            + `(expected one of ${(axis.values || []).map((v) => v.id).join(', ')})`,
           );
         }
       }
@@ -106,7 +107,7 @@ export function validateConceptEntry(concept, { existingForms = new Map(), axes 
   }
   if (!Array.isArray(concept?.tags)
     || concept.tags.length !== 3
-    || concept.tags.some(tag => typeof tag !== 'string' || !tag.trim())) {
+    || concept.tags.some((tag) => typeof tag !== 'string' || !tag.trim())) {
     errors.push(`concept ${id} must have exactly three structural tags`);
   }
   // The slop this world in particular is at risk of. Optional, because 541
@@ -117,13 +118,13 @@ export function validateConceptEntry(concept, { existingForms = new Map(), axes 
     if (!Array.isArray(concept.avoid)
       || concept.avoid.length < 2
       || concept.avoid.length > 3
-      || concept.avoid.some(item => typeof item !== 'string' || item.trim().length < 12 || item.trim().length > 160)) {
+      || concept.avoid.some((item) => typeof item !== 'string' || item.trim().length < 12 || item.trim().length > 160)) {
       errors.push(`concept ${id} avoid must be two or three negations of 12–160 characters`);
     }
   }
   if (!Array.isArray(concept?.system)
     || concept.system.length !== SYSTEM_PREFIXES.length
-    || concept.system.some(rule => typeof rule !== 'string' || rule.trim().length < 12 || rule.trim().length > 180)) {
+    || concept.system.some((rule) => typeof rule !== 'string' || rule.trim().length < 12 || rule.trim().length > 180)) {
     errors.push(`concept ${id} needs system grammar with exactly five rules of 12–180 characters`);
   } else {
     const uniqueRules = new Set(concept.system.map(normalizeConceptForm));
@@ -175,7 +176,7 @@ export function readConceptCatalog(catalogPath, reviewsPath) {
   const catalog = JSON.parse(readFileSync(catalogPath, 'utf8'));
   const reviewData = JSON.parse(readFileSync(reviewsPath, 'utf8'));
   const reviews = reviewData.reviews || {};
-  const wellsById = new Map((catalog.wells || []).map(well => [well.id, well]));
+  const wellsById = new Map((catalog.wells || []).map((well) => [well.id, well]));
   const concepts = [];
 
   for (const family of catalog.families || []) {
@@ -248,7 +249,7 @@ export function validateConceptCatalog(catalog, reviewData, {
       errors.push(`well ${well.id || '(unknown)'} needs a tier of ${WELL_TIERS.join(', ')}, got: ${String(well.tier)}`);
     }
   }
-  const tiersPresent = new Set((catalog?.wells || []).map(well => well.tier).filter(tier => WELL_TIERS.includes(tier)));
+  const tiersPresent = new Set((catalog?.wells || []).map((well) => well.tier).filter((tier) => WELL_TIERS.includes(tier)));
   for (const tier of WELL_TIERS) {
     if ((catalog?.wells || []).length > 0 && !tiersPresent.has(tier)) {
       errors.push(`no well declares the ${tier} tier`);
@@ -307,7 +308,7 @@ export function validateConceptCatalog(catalog, reviewData, {
   if (!Number.isInteger(reviewData?.schemaVersion) || reviewData.schemaVersion < 2) {
     errors.push('reviews.schemaVersion must be 2 or newer');
   }
-  const conceptsById = new Map(concepts.map(concept => [concept.id, concept]));
+  const conceptsById = new Map(concepts.map((concept) => [concept.id, concept]));
   for (const [id, review] of Object.entries(reviewData?.reviews || {})) {
     if (!conceptIds.has(id)) errors.push(`review references missing concept: ${id}`);
     if (!CONCEPT_STATUSES.has(review?.status)) errors.push(`invalid review status for ${id}: ${String(review?.status)}`);
@@ -348,7 +349,7 @@ export function validateConceptCatalog(catalog, reviewData, {
     if (review?.allowedModes !== undefined) {
       if (!Array.isArray(review.allowedModes) || review.allowedModes.length === 0) {
         errors.push(`review ${id} allowedModes must be a non-empty array, or omitted to allow every mode`);
-      } else if (review.allowedModes.some(mode => !SEED_MODES.has(mode))) {
+      } else if (review.allowedModes.some((mode) => !SEED_MODES.has(mode))) {
         errors.push(`review ${id} allowedModes may only contain ${[...SEED_MODES].join(', ')}`);
       } else if (new Set(review.allowedModes).size !== review.allowedModes.length) {
         errors.push(`review ${id} allowedModes must not repeat a mode`);
@@ -358,13 +359,13 @@ export function validateConceptCatalog(catalog, reviewData, {
     }
   }
 
-  const wellTierById = new Map((catalog?.wells || []).map(well => [well.id, well.tier]));
-  const approved = concepts.filter(concept => reviewData?.reviews?.[concept.id]?.status === 'approved');
+  const wellTierById = new Map((catalog?.wells || []).map((well) => [well.id, well.tier]));
+  const approved = concepts.filter((concept) => reviewData?.reviews?.[concept.id]?.status === 'approved');
   const approvedTiers = new Set(
     (catalog?.families || [])
-      .filter(family => family.concepts?.some(concept => reviewData?.reviews?.[concept.id]?.status === 'approved'))
-      .map(family => wellTierById.get(family.well))
-      .filter(tier => WELL_TIERS.includes(tier))
+      .filter((family) => family.concepts?.some((concept) => reviewData?.reviews?.[concept.id]?.status === 'approved'))
+      .map((family) => wellTierById.get(family.well))
+      .filter((tier) => WELL_TIERS.includes(tier)),
   );
   if (requireApprovedMinimum && approved.length < 3) errors.push('at least three concepts must be approved');
   if (requireApprovedMinimum && approvedTiers.size < WELL_TIERS.length) {
@@ -380,15 +381,15 @@ export function validateConceptCatalog(catalog, reviewData, {
       concepts: concepts.length,
       approved: approved.length,
       pending: concepts.length - Object.keys(reviewData?.reviews || {}).length,
-      rejected: Object.values(reviewData?.reviews || {}).filter(review => review?.status === 'rejected').length,
+      rejected: Object.values(reviewData?.reviews || {}).filter((review) => review?.status === 'rejected').length,
     },
   };
 }
 
 export function approvedPoolRevision(concepts) {
   const payload = concepts
-    .filter(concept => concept.status === 'approved')
-    .map(concept => `${concept.familyId}:${concept.id}:${concept.strength}:${concept.form}:${concept.spark}:${JSON.stringify(concept.system)}:${concept.webLeverage}`)
+    .filter((concept) => concept.status === 'approved')
+    .map((concept) => `${concept.familyId}:${concept.id}:${concept.strength}:${concept.form}:${concept.spark}:${JSON.stringify(concept.system)}:${concept.webLeverage}`)
     .sort()
     .join('\n');
   return crypto.createHash('sha256').update(payload).digest('hex').slice(0, 12);

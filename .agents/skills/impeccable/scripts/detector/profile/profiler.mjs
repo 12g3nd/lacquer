@@ -35,7 +35,7 @@ function recordProfileEvent(profile, event) {
 
 function extractFindingIds(findings) {
   if (!Array.isArray(findings) || findings.length === 0) return [];
-  return [...new Set(findings.map(f => f?.id || f?.type || f?.antipattern).filter(Boolean))];
+  return [...new Set(findings.map((f) => f?.id || f?.type || f?.antipattern).filter(Boolean))];
 }
 
 function profileFindings(profile, meta, callback) {
@@ -134,7 +134,7 @@ function summarizeDetectorProfile(profile) {
     group.samples.push(ms);
   }
   return [...groups.values()]
-    .map(group => {
+    .map((group) => {
       const samples = group.samples.sort((a, b) => a - b);
       return {
         engine: group.engine,

@@ -92,13 +92,14 @@
 import crypto from 'node:crypto';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { readCompositionCatalog } from './lib/composition-catalog.mjs';
 import {
   approvedPoolRevision,
   readConceptCatalog,
   validateConceptCatalog,
   WELL_TIERS,
 } from './lib/concept-catalog.mjs';
-import { readCompositionCatalog } from './lib/composition-catalog.mjs';
 import {
   COMPOSITION_GRAINS,
   COMPOSITION_PLATFORMS,
@@ -130,7 +131,7 @@ function loadLocal(catalogDir = CATALOG_DIR) {
   try {
     const catalogState = readConceptCatalog(
       join(catalogDir, 'concept-ingredients.json'),
-      join(catalogDir, 'concept-reviews.json')
+      join(catalogDir, 'concept-reviews.json'),
     );
     const validation = validateConceptCatalog(catalogState.catalog, catalogState.reviewData);
     if (validation.errors.length > 0) {
@@ -138,7 +139,7 @@ function loadLocal(catalogDir = CATALOG_DIR) {
     }
     const compositionState = readCompositionCatalog(
       join(catalogDir, 'composition-ingredients.json'),
-      join(catalogDir, 'composition-reviews.json')
+      join(catalogDir, 'composition-reviews.json'),
     );
     localState = {
       concepts: catalogState.concepts,
@@ -171,7 +172,7 @@ async function fetchRoll({ scope, key, mode, grain, platform, reroll }) {
     // TCP connect phase, so a blackholed route would otherwise stall ~10s.
     const response = await Promise.race([
       fetch(`${API_BASE}/roll?${params}`, { signal: controller.signal }),
-      new Promise(resolveTimeout => setTimeout(() => resolveTimeout(null), apiBudgetMs())),
+      new Promise((resolveTimeout) => setTimeout(() => resolveTimeout(null), apiBudgetMs())),
     ]);
     if (!response) return null;
     if (!response.ok) return null;
@@ -231,7 +232,7 @@ export async function pingChosen({ chosenId, key, scope, mode, kind, register })
 const CARD_BASE = process.env.IMPECCABLE_CARD_BASE || 'https://impeccable.style/worlds/cards';
 
 export function renderChallenger(concept, index) {
-  const system = concept.system.map(rule => `       - ${rule}`).join('\n');
+  const system = concept.system.map((rule) => `       - ${rule}`).join('\n');
   const board = concept.cardBoard || `${CARD_BASE}/${concept.id}.webp`;
   const hero = concept.cardHero || `${CARD_BASE}/${concept.id}-hero.webp`;
   return `  ${index + 1}. ${concept.form}
@@ -244,7 +245,7 @@ ${system}
 }
 
 export function renderComposition(composition, index = null) {
-  const grammar = composition.grammar.map(rule => `       - ${rule}`).join('\n');
+  const grammar = composition.grammar.map((rule) => `       - ${rule}`).join('\n');
   return `  ${index == null ? '' : `${index + 1}. `}${composition.form}
      SOURCE ID: ${composition.id}
      SPARK: ${composition.spark}
@@ -259,7 +260,7 @@ ${grammar}
 // driving the generator with Node's synchronous hash, which keeps a local render
 // synchronous for prepared eval sessions and tests.
 function driveSelection(generator) {
-  return runSyncSelection(generator, input => crypto.createHash('sha256').update(input).digest('hex'));
+  return runSyncSelection(generator, (input) => crypto.createHash('sha256').update(input).digest('hex'));
 }
 
 export function dealCompositions({ scope, key, reroll = 0, mode = null, grain = null, platform = null, sourceCompositions = null, count = 3 }) {
@@ -301,7 +302,7 @@ export function renderConceptSeed({
   platform = null,
   candidateCount = 7,
   catalogDir = CATALOG_DIR,
-  _resolvedData = undefined,
+  _resolvedData,
 } = {}) {
   if (scope !== 'surface' && scope !== 'direction') {
     throw new Error('concept-seed: --scope must be direction or surface');
@@ -381,7 +382,7 @@ export function renderConceptSeed({
     } else {
       // Keep local renders synchronous for prepared eval sessions and tests;
       // installed skills without a bundled catalog resolve through the API.
-      return fetchRoll({ scope, key, mode, grain, platform, reroll }).then(roll => renderConceptSeed({
+      return fetchRoll({ scope, key, mode, grain, platform, reroll }).then((roll) => renderConceptSeed({
         scope,
         key,
         reroll,

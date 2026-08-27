@@ -133,7 +133,7 @@ export function patchTanStackRoot(content, componentImport) {
   if (!out.includes(TANSTACK_MARKER_OPEN)) {
     const block =
       `${TANSTACK_MARKER_OPEN}\n`
-      + `        <ImpeccableLiveRoot />\n`
+      + '        <ImpeccableLiveRoot />\n'
       + `        ${TANSTACK_MARKER_CLOSE}\n        `;
     // Anchor before <Scripts …/> (the stable TanStack Start document marker);
     // fall back to before </body>.

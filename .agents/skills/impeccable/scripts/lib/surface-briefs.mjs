@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { slugFromTarget } from './target-slug.mjs';
 
 export const SURFACE_BRIEF_VERSION = 1;
@@ -59,7 +60,7 @@ export function parseSurfaceBrief(text, filePath = null) {
       const key = line.slice(0, colon).trim();
       const raw = line.slice(colon + 1).trim();
       if (!key) continue;
-      if (/^(?:\[|\{|\")/.test(raw) || /^(?:true|false|null|-?\d+(?:\.\d+)?)$/.test(raw)) {
+      if (/^(?:\[|\{|")/.test(raw) || /^(?:true|false|null|-?\d+(?:\.\d+)?)$/.test(raw)) {
         try { meta[key] = JSON.parse(raw); continue; } catch { /* keep string */ }
       }
       meta[key] = raw.replace(/^['"]|['"]$/g, '');

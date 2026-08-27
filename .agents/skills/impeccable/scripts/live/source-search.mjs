@@ -15,6 +15,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { IMPECCABLE_DIR } from '../lib/impeccable-paths.mjs';
 import { matchesTemplateExtension } from '../lib/template-extensions.mjs';
 

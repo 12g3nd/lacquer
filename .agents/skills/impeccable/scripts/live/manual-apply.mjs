@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { getLiveDir } from '../lib/impeccable-paths.mjs';
+
 import { readBuffer as readManualEditsBuffer } from './manual-edits-buffer.mjs';
+
+import { getLiveDir } from '../lib/impeccable-paths.mjs';
 
 const APPLY_EVENT_HARD_TIMEOUT_MS = Number(process.env.IMPECCABLE_LIVE_APPLY_EVENT_HARD_TIMEOUT_MS || 150_000);
 const APPLY_EVENT_SOFT_DEADLINE_MS = Number(process.env.IMPECCABLE_LIVE_APPLY_EVENT_SOFT_DEADLINE_MS || 120_000);

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { execFileSync } from 'node:child_process';
 /**
  * Context-signals gatherer for the bare Impeccable invocation
  * (no-argument) path. Collects cheap, deterministic signals about the current
@@ -20,7 +21,7 @@ import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
+
 import { loadContext, extractPlatform } from './context.mjs';
 import { readLatestSnapshotAcrossTargets } from './critique-storage.mjs';
 

@@ -251,7 +251,7 @@ if (refs.length) {
 } else {
   response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+    headers: { "Authorization": `Bearer ${key}`, 'content-type': 'application/json' },
     body: JSON.stringify({ model: 'gpt-image-2', prompt, size, quality, n: 1 }),
   });
 }

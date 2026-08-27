@@ -13,30 +13,16 @@
  *   node <scripts_path>/live-server.mjs --help
  */
 
-import http from 'node:http';
-import { randomUUID } from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
-import path from 'node:path';
+import http from 'node:http';
 import net from 'node:net';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseDesignMd } from './lib/design-parser.mjs';
+
 import { loadContext } from './context.mjs';
-import {
-  assembleLiveBrowserScript,
-  assertLiveBrowserScriptParts,
-  readLiveBrowserScriptParts,
-  resolveLiveBrowserScriptParts,
-} from './live/browser-script-parts.mjs';
-import { createLiveSessionStore, GENERATION_FENCED_PHASES } from './live/session-store.mjs';
-import { runGenerationPreflight } from './live/generation-preflight.mjs';
-import { validateEvent } from './live/event-validation.mjs';
-import { selectAvailablePendingEvent } from './live/poll-lanes.mjs';
-import { createManualEditRoutes } from './live/manual-edit-routes.mjs';
-import {
-  LIVE_COMMANDS,
-  VARIANT_PROGRESS_CHECKPOINT_REASONS as VARIANT_PROGRESS_CHECKPOINT_REASON_LIST,
-} from './live/vocabulary.mjs';
+import { parseDesignMd } from './lib/design-parser.mjs';
 import {
   getDesignSidecarPath,
   getLiveDir,
@@ -47,11 +33,23 @@ import {
   resolveDesignSidecarPath,
   writeLiveServerInfo,
 } from './lib/impeccable-paths.mjs';
-import { countByPage as countPendingByPage } from './live/manual-edits-buffer.mjs';
+import {
+  assembleLiveBrowserScript,
+  assertLiveBrowserScriptParts,
+  readLiveBrowserScriptParts,
+  resolveLiveBrowserScriptParts,
+} from './live/browser-script-parts.mjs';
+import { validateEvent } from './live/event-validation.mjs';
+import { runGenerationPreflight } from './live/generation-preflight.mjs';
 import {
   createManualApplyController,
   summarizeManualApplyFailures,
 } from './live/manual-apply.mjs';
+import { createManualEditRoutes } from './live/manual-edit-routes.mjs';
+import { countByPage as countPendingByPage } from './live/manual-edits-buffer.mjs';
+import { selectAvailablePendingEvent } from './live/poll-lanes.mjs';
+import { enterLiveRoot } from './live/roots.mjs';
+import { createLiveSessionStore, GENERATION_FENCED_PHASES } from './live/session-store.mjs';
 import {
   applyDeferredSvelteComponentAccepts,
   bumpSvelteComponentPreviewRevision,
@@ -59,7 +57,10 @@ import {
   removeAllSvelteComponentSessions,
   sweepInactiveSvelteComponentSessions,
 } from './live/svelte-component.mjs';
-import { enterLiveRoot } from './live/roots.mjs';
+import {
+  LIVE_COMMANDS,
+  VARIANT_PROGRESS_CHECKPOINT_REASONS as VARIANT_PROGRESS_CHECKPOINT_REASON_LIST,
+} from './live/vocabulary.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Anchor the whole process on the live roots manifest before anything derives
@@ -1608,7 +1609,7 @@ if (args.includes('stop')) {
 // print the connection JSON, then exit.  This keeps the startup command
 // simple (no shell backgrounding or chained commands).
 if (args.includes('--background')) {
-  const childArgs = args.filter(a => a !== '--background');
+  const childArgs = args.filter((a) => a !== '--background');
   const child = spawn(process.execPath, [fileURLToPath(import.meta.url), ...childArgs], {
     detached: true,
     stdio: 'ignore',
@@ -1630,7 +1631,7 @@ if (args.includes('--background')) {
     // The detached child is typically listening in 35-45ms. A 200ms polling
     // floor dominated configured cold Live startup; poll cheaply and return
     // as soon as the child has written its ready record.
-    await new Promise(r => setTimeout(r, 5));
+    await new Promise((r) => setTimeout(r, 5));
   }
   console.error('Timed out waiting for live server to start.');
   process.exit(1);
@@ -1660,7 +1661,7 @@ sweepOrphanSvelteComponentSessionsOnStartup();
 sweepStaleAcceptReceiptsOnStartup();
 restorePendingEventsFromStore();
 manualApply.pruneStaleEvidence();
-const portArg = args.find(a => a.startsWith('--port='));
+const portArg = args.find((a) => a.startsWith('--port='));
 state.port = portArg ? parseInt(portArg.split('=')[1], 10) : await findOpenPort();
 // Annotation screenshots live in the project root so the agent's Read tool
 // doesn't trip a per-file permission prompt. Sessioned by token so concurrent

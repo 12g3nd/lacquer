@@ -12,10 +12,11 @@
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { completionAckForAcceptResult, completionTypeForAcceptResult } from './live/completion.mjs';
+
 import { readLiveServerInfo } from './lib/impeccable-paths.mjs';
-import { enterLiveRoot } from './live/roots.mjs';
+import { completionAckForAcceptResult, completionTypeForAcceptResult } from './live/completion.mjs';
 import { instructionsForEvent } from './live/instructions.mjs';
+import { enterLiveRoot } from './live/roots.mjs';
 
 // Absolute path to a sibling script in this skill's scripts dir, so runtime
 // error hints print a directly-runnable command instead of a placeholder.
@@ -83,7 +84,7 @@ export function parseReplyArgs(args) {
     i > replyIdx + 2
     && !a.startsWith('--')
     && i !== fileIdx + 1
-    && i !== dataIdx + 1
+    && i !== dataIdx + 1,
   ) || undefined;
   return { id, type: status, message, file, data };
 }

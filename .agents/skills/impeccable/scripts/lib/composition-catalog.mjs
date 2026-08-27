@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { readFileSync } from 'node:fs';
+
 import { CONCEPT_STATUSES, normalizeConceptForm } from './concept-catalog.mjs';
 // Defined in roll-selection.mjs for the same reason WELL_TIERS is: this file
 // reads the filesystem, and the roll API imports the taxonomy to validate its
@@ -75,7 +76,7 @@ export function validateCompositionEntry(composition, { existingForms = new Map(
     const list = composition.platforms;
     if (!Array.isArray(list) || list.length === 0) {
       errors.push(`composition ${id} platforms must be a non-empty array, or omitted to allow every platform`);
-    } else if (list.some(entry => !isPlatform(entry))) {
+    } else if (list.some((entry) => !isPlatform(entry))) {
       errors.push(`composition ${id} platforms may only contain ${COMPOSITION_PLATFORMS.join(', ')}`);
     } else if (new Set(list).size !== list.length) {
       errors.push(`composition ${id} platforms must not repeat a platform`);
@@ -85,12 +86,12 @@ export function validateCompositionEntry(composition, { existingForms = new Map(
   }
   if (!Array.isArray(composition?.tags)
     || composition.tags.length !== 3
-    || composition.tags.some(tag => typeof tag !== 'string' || !tag.trim())) {
+    || composition.tags.some((tag) => typeof tag !== 'string' || !tag.trim())) {
     errors.push(`composition ${id} must have exactly three structural tags`);
   }
   if (!Array.isArray(composition?.grammar)
     || composition.grammar.length !== COMPOSITION_GRAMMAR_PREFIXES.length
-    || composition.grammar.some(rule => typeof rule !== 'string' || rule.trim().length < 12 || rule.trim().length > 180)) {
+    || composition.grammar.some((rule) => typeof rule !== 'string' || rule.trim().length < 12 || rule.trim().length > 180)) {
     errors.push(`composition ${id} needs grammar with exactly four rules of 12–180 characters`);
   } else {
     const unique = new Set(composition.grammar.map(normalizeConceptForm));
@@ -118,8 +119,8 @@ export function readCompositionCatalog(catalogPath, reviewsPath) {
   const catalog = JSON.parse(readFileSync(catalogPath, 'utf8'));
   const reviewData = JSON.parse(readFileSync(reviewsPath, 'utf8'));
   const reviews = reviewData.reviews || {};
-  const familiesById = new Map((catalog.families || []).map(family => [family.id, family]));
-  const compositions = (catalog.compositions || []).map(composition => ({
+  const familiesById = new Map((catalog.families || []).map((family) => [family.id, family]));
+  const compositions = (catalog.compositions || []).map((composition) => ({
     ...composition,
     familyLabel: familiesById.get(composition.familyId)?.label || null,
     status: reviews[composition.id]?.status || 'pending',
@@ -170,7 +171,7 @@ export function validateCompositionCatalog(catalog, reviewData, { minimumTotal }
     if (typeof review?.formHash !== 'string' || !review.formHash.trim()) {
       errors.push(`composition review ${id} needs a formHash`);
     } else {
-      const entry = (catalog?.compositions || []).find(composition => composition.id === id);
+      const entry = (catalog?.compositions || []).find((composition) => composition.id === id);
       if (entry && review.formHash !== compositionContentHash(entry)) {
         errors.push(`composition review ${id} is stale: content changed since review`);
       }
@@ -193,8 +194,8 @@ export function validateCompositionCatalog(catalog, reviewData, { minimumTotal }
     stats: {
       families: familyIds.size,
       compositions: (catalog?.compositions || []).length,
-      approved: Object.values(reviewData?.reviews || {}).filter(review => review?.status === 'approved').length,
-      rejected: Object.values(reviewData?.reviews || {}).filter(review => review?.status === 'rejected').length,
+      approved: Object.values(reviewData?.reviews || {}).filter((review) => review?.status === 'approved').length,
+      rejected: Object.values(reviewData?.reviews || {}).filter((review) => review?.status === 'rejected').length,
     },
   };
 }

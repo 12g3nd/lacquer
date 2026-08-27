@@ -275,7 +275,7 @@ function findSvelteKitLayout(cwd) {
 }
 
 function defaultSvelteLayout() {
-  return `<script>\n  let { children } = $props();\n</script>\n\n{@render children?.()}\n`;
+  return '<script>\n  let { children } = $props();\n</script>\n\n{@render children?.()}\n';
 }
 
 function fileIncludes(file, text) {

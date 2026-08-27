@@ -15,19 +15,20 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { isGeneratedFile } from './lib/is-generated.mjs';
+
 import { getLiveDir, safeSessionId } from './lib/impeccable-paths.mjs';
+import { isGeneratedFile } from './lib/is-generated.mjs';
 import { resolveLiveTemplateExtensions } from './lib/template-extensions.mjs';
 import { readBuffer as readManualEditsBuffer, writeBuffer as writeManualEditsBuffer } from './live/manual-edits-buffer.mjs';
-import { NEVER_SOURCE_DIRS, findSourceFile } from './live/source-search.mjs';
+import { enterLiveRoot } from './live/roots.mjs';
 import { withSourceLockSync } from './live/source-lock.mjs';
+import { NEVER_SOURCE_DIRS, findSourceFile } from './live/source-search.mjs';
 import {
   applyDeferredSvelteComponentAccepts,
   findSvelteComponentManifest,
   inlineSvelteComponentAccept,
   removeSvelteComponentSession,
 } from './live/svelte-component.mjs';
-import { enterLiveRoot } from './live/roots.mjs';
 
 const ACCEPT_LOCK_WAIT_MS = 1_000;
 // Mirrors VARIANT_ID_PATTERN in live/event-validation.mjs, which gates the same
@@ -859,7 +860,7 @@ function deindentContent(contentLines, baseIndent) {
   if (minIndent === Infinity) minIndent = 0;
 
   // Strip the extra indentation and re-add base indent
-  return contentLines.map(line => {
+  return contentLines.map((line) => {
     if (line.trim() === '') return '';
     return baseIndent + line.slice(minIndent);
   });

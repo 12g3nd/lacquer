@@ -1,16 +1,4 @@
 import {
-  BORDER_SAFE_TAGS,
-  EM_DASH_CHARS_PER_DASH,
-  EM_DASH_FLOOR,
-  GENERIC_FONTS,
-  KNOWN_SERIF_FONTS,
-  OVERUSED_FONTS,
-  SAFE_TAGS,
-  WCAG_LARGE_BOLD_TEXT_PX,
-  WCAG_LARGE_TEXT_PX,
-  isBrandFontOnOwnDomain,
-} from '../shared/constants.mjs';
-import {
   CSS_NAMED_COLORS,
   colorToHex,
   compositeColorOver,
@@ -27,6 +15,18 @@ import {
   relativeLuminance,
   splitTopLevelCommas,
 } from '../shared/color.mjs';
+import {
+  BORDER_SAFE_TAGS,
+  EM_DASH_CHARS_PER_DASH,
+  EM_DASH_FLOOR,
+  GENERIC_FONTS,
+  KNOWN_SERIF_FONTS,
+  OVERUSED_FONTS,
+  SAFE_TAGS,
+  WCAG_LARGE_BOLD_TEXT_PX,
+  WCAG_LARGE_TEXT_PX,
+  isBrandFontOnOwnDomain,
+} from '../shared/constants.mjs';
 import { extractGoogleFontFamilies } from '../shared/fonts.mjs';
 
 const DETECTOR_IS_BROWSER = typeof window !== 'undefined';
@@ -49,8 +49,8 @@ function checkBorders(tag, widths, colors, radius, opts = {}) {
     const w = widths[side];
     if (w < 1 || isNeutralColor(colors[side])) continue;
 
-    const otherSides = sides.filter(s => s !== side);
-    const maxOther = Math.max(...otherSides.map(s => widths[s]));
+    const otherSides = sides.filter((s) => s !== side);
+    const maxOther = Math.max(...otherSides.map((s) => widths[s]));
     if (!(w >= 2 && (maxOther <= 1 || w >= maxOther * 2))) continue;
 
     const sn = side.toLowerCase();
@@ -163,13 +163,13 @@ function checkColors(opts) {
       // Gray on colored background — flag if every stop is chromatic
       const textLum = relativeLuminance(textColor);
       const isGray = !hasChroma(textColor, 20) && textLum > 0.05 && textLum < 0.85;
-      if (isGray && bgs.every(b => hasChroma(b, 40))) {
+      if (isGray && bgs.every((b) => hasChroma(b, 40))) {
         const bgLabel = effectiveBg ? colorToHex(effectiveBg) : `gradient(${bgs.map(colorToHex).join(', ')})`;
         findings.push({ id: 'gray-on-color', snippet: `text ${colorToHex(textColor)} on bg ${bgLabel}` });
       }
 
       // Low contrast (WCAG AA) — worst case across all bg stops
-      const ratios = bgs.map(b => contrastRatio(textColor, b));
+      const ratios = bgs.map((b) => contrastRatio(textColor, b));
       let worstIdx = 0;
       for (let i = 1; i < ratios.length; i++) if (ratios[i] < ratios[worstIdx]) worstIdx = i;
       const ratio = ratios[worstIdx];
@@ -330,8 +330,8 @@ function checkIconTile(opts) {
 // Returns { primary, isSerif } so the snippet can name the face.
 function resolveSerif(fontFamily) {
   if (!fontFamily) return { primary: null, isSerif: false };
-  const tokens = fontFamily.split(',').map(f => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase());
-  const primary = tokens.find(f => f && !GENERIC_FONTS.has(f)) || null;
+  const tokens = fontFamily.split(',').map((f) => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase());
+  const primary = tokens.find((f) => f && !GENERIC_FONTS.has(f)) || null;
   if (!primary) return { primary: null, isSerif: false };
   if (KNOWN_SERIF_FONTS.has(primary)) return { primary, isSerif: true };
   if (tokens.includes('serif')) return { primary, isSerif: true };
@@ -497,7 +497,7 @@ function checkHeroEyebrow(opts) {
 function checkKickerAboveHeading(opts) {
   const { candidates } = opts;
   if (!Array.isArray(candidates)) return [];
-  return candidates.map(candidate => ({
+  return candidates.map((candidate) => ({
     id: 'kicker-above-heading',
     snippet: `kicker "${candidate.kickerText}" above ${candidate.headingTag} "${candidate.headingText}"`,
   }));
@@ -538,8 +538,8 @@ function checkMotion(opts) {
 
   // --- Layout property transition ---
   if (transitionProperty && transitionProperty !== 'all' && transitionProperty !== 'none') {
-    const props = transitionProperty.split(',').map(p => p.trim().toLowerCase());
-    const layoutFound = props.filter(p => LAYOUT_TRANSITION_PROPS.has(p));
+    const props = transitionProperty.split(',').map((p) => p.trim().toLowerCase());
+    const layoutFound = props.filter((p) => LAYOUT_TRANSITION_PROPS.has(p));
     if (layoutFound.length > 0) {
       findings.push({ id: 'layout-transition', snippet: `transition: ${layoutFound.join(', ')}` });
     }
@@ -802,12 +802,12 @@ function scanCssTextForRadialHalo(content) {
 
       // Optional prelude (shape / size / `at <pos>`) carries no color.
       const colorTokenRe = /(?:rgba?|hsla?|oklch|oklab|lab|lch|hwb|color-mix)\([^)]*(?:\([^)]*\))?[^)]*\)|#[0-9a-f]{3,8}\b|\btransparent\b/i;
-      const stops = args.filter(a => colorTokenRe.test(a));
+      const stops = args.filter((a) => colorTokenRe.test(a));
       if (stops.length < 2) continue;
 
       // Dot/texture exemption: px-sized stop positions mean a repeating
       // background-size pattern, not a page-scale halo.
-      const pxStop = stops.some(s => {
+      const pxStop = stops.some((s) => {
         const pm = s.match(/(-?[\d.]+)px\b/);
         return pm && Math.abs(parseFloat(pm[1])) <= 24;
       });
@@ -1182,7 +1182,7 @@ function infiniteAnimationNames(decls) {
   if (shorthand) {
     for (const layer of shorthand.split(/,(?![^(]*\))/)) {
       if (!/\binfinite\b/i.test(layer)) continue;
-      const name = layer.split(/\s+/).find(t =>
+      const name = layer.split(/\s+/).find((t) =>
         /^[a-zA-Z_-][\w-]*$/.test(t) && !ANIMATION_VALUE_KEYWORDS.has(t.toLowerCase()));
       if (name) out.push(name);
     }
@@ -1336,7 +1336,7 @@ function scanCssTextForPulsingDot(content, markup = content) {
   for (const [selector, decls] of merged) {
     const names = infiniteAnimationNames(decls);
     if (names.length === 0) continue;
-    const pulseName = names.find(n => {
+    const pulseName = names.find((n) => {
       const known = keyframes.get(n);
       if (known != null) return known;
       return /pulse|blink|ping/i.test(n);
@@ -1561,13 +1561,13 @@ function checkHtmlPatterns(html, corpora) {
     const v = Math.round(parseFloat(sm[1]) * 16);
     if (v > 0 && v < 200) spacingValues.push(v);
   }
-  const roundedSpacing = spacingValues.map(v => Math.round(v / 4) * 4);
+  const roundedSpacing = spacingValues.map((v) => Math.round(v / 4) * 4);
   if (roundedSpacing.length >= 10) {
     const counts = {};
     for (const v of roundedSpacing) counts[v] = (counts[v] || 0) + 1;
     const maxCount = Math.max(...Object.values(counts));
     const dominantPct = maxCount / roundedSpacing.length;
-    const unique = [...new Set(roundedSpacing)].filter(v => v > 0);
+    const unique = [...new Set(roundedSpacing)].filter((v) => v > 0);
     if (dominantPct > 0.6 && unique.length <= 3) {
       const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
       findings.push({
@@ -1916,7 +1916,7 @@ function resolveGradientStops(el, win, customPropMap) {
     if (stops) {
       const composited = compositeGradientStops(stops, current, win, customPropMap);
       if (!composited || overlays.length === 0) return composited;
-      return composited.map(stop => {
+      return composited.map((stop) => {
         let acc = stop;
         for (let i = overlays.length - 1; i >= 0; i--) acc = compositeColorOver(overlays[i], acc);
         return acc;
@@ -1945,7 +1945,7 @@ function resolveGradientStops(el, win, customPropMap) {
 // the translucent stop rather than guess: a dropped stop can't manufacture a
 // false finding, and skipping beats a wrong ratio.
 function compositeGradientStops(stops, gradientEl, win, customPropMap) {
-  const hasAlpha = stops.some(s => (s.a ?? 1) < 0.99);
+  const hasAlpha = stops.some((s) => (s.a ?? 1) < 0.99);
   if (!hasAlpha) return stops;
   const base = resolveBackground(gradientEl.parentElement || gradientEl, win, customPropMap);
   const out = [];
@@ -2153,7 +2153,7 @@ function checkElementColorsDOM(el) {
   // decks) are not user-visible, and measuring their inherited colors against
   // whatever surface happens to sit behind the stack is noise, not audit.
   if (style.visibility === 'hidden' || effectiveOpacityDOM(el) <= 0.02) return [];
-  const directText = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('');
+  const directText = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('');
   const hasDirectText = directText.trim().length > 0;
   const bgInfo = resolveBackgroundInfo(el);
   let effectiveBg = bgInfo.color;
@@ -2206,7 +2206,7 @@ function checkElementIconTileDOM(el) {
   // (the "card-icon" pattern from many AI-generated demos).
   const iconChild = sibling.querySelector('svg, i[data-lucide], i[class*="fa-"], i[class*="icon"]');
   const iconRect = iconChild?.getBoundingClientRect();
-  const sibDirectText = [...sibling.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('');
+  const sibDirectText = [...sibling.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('');
   const hasInlineEmojiIcon = sibling.children.length === 0 && isEmojiOnlyText(sibDirectText);
 
   return checkIconTile({
@@ -2370,8 +2370,8 @@ const KICKER_CARD_CONTEXT_SELECTOR = [
 
 function cleanInlineText(el) {
   return [...el.childNodes]
-    .filter(n => n.nodeType === 3)
-    .map(n => n.textContent)
+    .filter((n) => n.nodeType === 3)
+    .map((n) => n.textContent)
     .join(' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -2385,7 +2385,7 @@ function isKickerCardContext(heading, kicker) {
 // Meta lines above headlines join category and date (or path crumbs) with
 // separator glyphs, or carry a year. A kicker is one short phrase; metadata
 // keeps its markers.
-const KICKER_META_TEXT_RE = /[·•|]|\s[\/›»>]\s|\b(19|20)\d{2}\b/;
+const KICKER_META_TEXT_RE = /[·•|]|\s[/›»>]\s|\b(19|20)\d{2}\b/;
 // Legal and document numbering: "Section 4.2", "Article IX", "§ 12.3",
 // dotted decimal outlines. The label identifies the clause, so it stays.
 const KICKER_DOC_NUMBERING_RE = /^(§|\d+(\.\d+)+\b|(section|article|clause|appendix|exhibit|schedule|chapter|part|rule|title)\s+([\divxlc]+\b|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b)/i;
@@ -2613,9 +2613,9 @@ function checkNumberedSectionLabels(opts) {
   const { candidates, minCount = 2 } = opts;
   if (!Array.isArray(candidates) || candidates.length < minCount) return [];
   // A repeated identical number is some other device; the scaffold counts up.
-  const distinctIndices = new Set(candidates.map(c => c.index));
+  const distinctIndices = new Set(candidates.map((c) => c.index));
   if (distinctIndices.size < 2) return [];
-  return candidates.map(candidate => ({
+  return candidates.map((candidate) => ({
     id: 'numbered-section-labels',
     snippet: `tiny numbered label "${candidate.labelText}" beside ${candidate.headingTag} "${candidate.headingText}" (${candidates.length} on page)`,
   }));
@@ -2814,9 +2814,9 @@ function parseRadialGradientStops(value) {
     if (end < 0) return null;
     const args = splitTopLevelCommas(value.slice(open + 1, end));
     // The optional prelude (shape / size / `at <pos>`) carries no color token.
-    const stopArgs = args.filter(a => SPOTLIGHT_COLOR_TOKEN_RE.test(a));
+    const stopArgs = args.filter((a) => SPOTLIGHT_COLOR_TOKEN_RE.test(a));
     if (stopArgs.length < 2) return null;
-    return stopArgs.map(a => {
+    return stopArgs.map((a) => {
       const tok = a.match(SPOTLIGHT_COLOR_TOKEN_RE);
       if (!tok) return { color: null, transparent: false };
       if (/^transparent$/i.test(tok[0])) return { color: null, transparent: true };
@@ -2839,16 +2839,16 @@ function checkRadialSpotlight({ gradientValue, width, height, label }) {
   if (lastAlpha > 0.05) return [];
 
   // The visible (non-transparent, parseable) color stops.
-  const colored = stops.filter(s => !s.transparent && s.color && (s.color.a ?? 1) > 0.05);
+  const colored = stops.filter((s) => !s.transparent && s.color && (s.color.a ?? 1) > 0.05);
   if (colored.length === 0) return [];
   // One soft glow, not a multi-color composition: at most two visible stops.
   if (colored.length > 2) return [];
   // Every visible stop must be LOW opacity. Any opaque stop means a real fill
   // or a saturated halo (`radial-halo`'s job), not this translucent spotlight.
-  if (colored.some(s => (s.color.a ?? 1) >= 0.45)) return [];
+  if (colored.some((s) => (s.color.a ?? 1) >= 0.45)) return [];
   // At least one visible stop must be chromatic. A neutral (grayscale)
   // near-black / near-white vignette is a legitimate lighting move, exempt.
-  const chromatic = colored.find(s => hasChroma(s.color, 24));
+  const chromatic = colored.find((s) => hasChroma(s.color, 24));
   if (!chromatic) return [];
 
   // Decorative-scale gate. Badges, avatars, and actual small "lights" are
@@ -3123,7 +3123,7 @@ function checkQuality(opts) {
       bottom: parseFloat(style.borderBottomWidth) || 0,
       left: parseFloat(style.borderLeftWidth) || 0,
     };
-    const borderCount = Object.values(borders).filter(w => w > 0).length;
+    const borderCount = Object.values(borders).filter((w) => w > 0).length;
     const hasBg = hasVisibleBackgroundBoundary(style, el, win);
     if (borderCount >= 2 || hasBg) {
       const vPads = [], hPads = [];
@@ -3173,16 +3173,16 @@ function checkQuality(opts) {
       el.children && el.children.length > 0
     ) {
       const borderW = {
-        top:    parseFloat(style.borderTopWidth)    || 0,
-        right:  parseFloat(style.borderRightWidth)  || 0,
+        top:    parseFloat(style.borderTopWidth) || 0,
+        right:  parseFloat(style.borderRightWidth) || 0,
         bottom: parseFloat(style.borderBottomWidth) || 0,
-        left:   parseFloat(style.borderLeftWidth)   || 0,
+        left:   parseFloat(style.borderLeftWidth) || 0,
       };
       const borderVisible = {
-        top:    borderW.top    > 0 && !cssColorIsTransparent(style.borderTopColor),
-        right:  borderW.right  > 0 && !cssColorIsTransparent(style.borderRightColor),
+        top:    borderW.top > 0 && !cssColorIsTransparent(style.borderTopColor),
+        right:  borderW.right > 0 && !cssColorIsTransparent(style.borderRightColor),
         bottom: borderW.bottom > 0 && !cssColorIsTransparent(style.borderBottomColor),
-        left:   borderW.left   > 0 && !cssColorIsTransparent(style.borderLeftColor),
+        left:   borderW.left > 0 && !cssColorIsTransparent(style.borderLeftColor),
       };
       // Outline detection. jsdom decomposes `border` shorthand into
       // border{Top,…}Width/Color but does NOT decompose `outline` —
@@ -3211,10 +3211,10 @@ function checkQuality(opts) {
         // computed px value; parseFloat would strip the unit and treat
         // 1.5rem as 1.5px, false-flagging legitimate insets).
         const pad = {
-          top:    resolveLengthPx(style.paddingTop,    fontSize) ?? 0,
-          right:  resolveLengthPx(style.paddingRight,  fontSize) ?? 0,
+          top:    resolveLengthPx(style.paddingTop, fontSize) ?? 0,
+          right:  resolveLengthPx(style.paddingRight, fontSize) ?? 0,
           bottom: resolveLengthPx(style.paddingBottom, fontSize) ?? 0,
-          left:   resolveLengthPx(style.paddingLeft,   fontSize) ?? 0,
+          left:   resolveLengthPx(style.paddingLeft, fontSize) ?? 0,
         };
         const PAD_THRESHOLD = 2;
         // Children-insulate-this-side: a side is insulated if ANY direct
@@ -3234,16 +3234,16 @@ function checkQuality(opts) {
           let childStyle = getComputedStyleFor(win, child);
           if (!childStyle) continue;
           const childPad = {
-            top:    resolveLengthPx(childStyle.paddingTop,    fontSize) ?? 0,
-            right:  resolveLengthPx(childStyle.paddingRight,  fontSize) ?? 0,
+            top:    resolveLengthPx(childStyle.paddingTop, fontSize) ?? 0,
+            right:  resolveLengthPx(childStyle.paddingRight, fontSize) ?? 0,
             bottom: resolveLengthPx(childStyle.paddingBottom, fontSize) ?? 0,
-            left:   resolveLengthPx(childStyle.paddingLeft,   fontSize) ?? 0,
+            left:   resolveLengthPx(childStyle.paddingLeft, fontSize) ?? 0,
           };
           const childMargin = {
-            top:    resolveLengthPx(childStyle.marginTop,    fontSize) ?? 0,
-            right:  resolveLengthPx(childStyle.marginRight,  fontSize) ?? 0,
+            top:    resolveLengthPx(childStyle.marginTop, fontSize) ?? 0,
+            right:  resolveLengthPx(childStyle.marginRight, fontSize) ?? 0,
             bottom: resolveLengthPx(childStyle.marginBottom, fontSize) ?? 0,
-            left:   resolveLengthPx(childStyle.marginLeft,   fontSize) ?? 0,
+            left:   resolveLengthPx(childStyle.marginLeft, fontSize) ?? 0,
           };
           if (rect && typeof child.getBoundingClientRect === 'function') {
             try {
@@ -3288,7 +3288,7 @@ function checkQuality(opts) {
               ? el.className.trim().split(/\s+/)[0]
               : '';
             const boundaryParts = [];
-            const borderSidesVisible = ['top', 'right', 'bottom', 'left'].filter(s => borderVisible[s]);
+            const borderSidesVisible = ['top', 'right', 'bottom', 'left'].filter((s) => borderVisible[s]);
             if (borderSidesVisible.length === 4) boundaryParts.push('border');
             else if (borderSidesVisible.length > 0) boundaryParts.push(`border-${borderSidesVisible.join('/')}`);
             if (outlineVisible) boundaryParts.push('outline');
@@ -3389,8 +3389,8 @@ function checkQuality(opts) {
   // Uppercase letterspaced micro-labels are still functional — not exempt.
   {
     const directText = [...el.childNodes]
-      .filter(n => n.nodeType === 3)
-      .map(n => n.textContent || '')
+      .filter((n) => n.nodeType === 3)
+      .map((n) => n.textContent || '')
       .join('')
       .replace(/\s+/g, ' ')
       .trim();
@@ -3463,7 +3463,7 @@ function checkQuality(opts) {
 function checkElementQualityDOM(el) {
   const tag = el.tagName.toLowerCase();
   const style = getComputedStyle(el);
-  const hasDirectText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 10);
+  const hasDirectText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 10);
   const textLen = el.textContent?.trim().length || 0;
   // Browser getComputedStyle resolves everything to px — direct parseFloat
   // works.
@@ -3500,7 +3500,7 @@ function checkPageQualityFromDoc(doc) {
 
 // Browser adapter (returns the legacy { type, detail } shape used by the overlay loop)
 function checkPageQualityDOM() {
-  return checkPageQualityFromDoc(document).map(f => ({ type: f.id, detail: f.snippet }));
+  return checkPageQualityFromDoc(document).map((f) => ({ type: f.id, detail: f.snippet }));
 }
 
 // Node adapters — take pre-extracted jsdom computed style
@@ -3510,7 +3510,7 @@ function checkPageQualityDOM() {
 // font-size inheritance), and pass `rect: null` to skip the two rules that
 // genuinely need element rects (line-length, cramped-padding).
 function checkElementQuality(el, style, tag, window) {
-  const hasDirectText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 10);
+  const hasDirectText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 10);
   const textLen = el.textContent?.trim().length || 0;
   const fontSize = resolveFontSizePx(el, window);
   const lineHeightPx = resolveLengthPx(style.lineHeight, fontSize);
@@ -3562,7 +3562,7 @@ function checkElementColors(el, style, tag, window, customPropMap, hasAnchorInhe
     effOpacity *= parseFloat(window.getComputedStyle(cur).opacity || '1');
   }
   if (effOpacity <= 0.02) return [];
-  const directText = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('');
+  const directText = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('');
   const hasDirectText = directText.trim().length > 0;
 
   const bgInfo = resolveBackgroundInfo(el, window, customPropMap);
@@ -3648,7 +3648,7 @@ function checkElementHoverContrast(el, style, tag, window) {
   const hover = window.getHoverStyle(el);
   if (!hover) return [];
 
-  const directText = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('');
+  const directText = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('');
   if (directText.trim().length === 0) return [];
 
   const textColor = parseAnyColor(hover.color);
@@ -3700,7 +3700,7 @@ function checkElementIconTile(el, tag, window) {
     iconWidth = parseFloat(iconStyle.width) || parseFloat(iconChild.getAttribute('width')) || 0;
   }
   // Or: tile contains an emoji/symbol character directly as its only content
-  const sibDirectText = [...sibling.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('');
+  const sibDirectText = [...sibling.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('');
   const hasInlineEmojiIcon = sibling.children.length === 0 && isEmojiOnlyText(sibDirectText);
 
   return checkIconTile({
@@ -3811,13 +3811,13 @@ function checkTypography() {
     // Skip impeccable's own elements
     if (el.closest && el.closest('.impeccable-overlay, .impeccable-label, .impeccable-banner, .impeccable-tooltip')) continue;
     // Only count elements that actually have visible direct text
-    const hasText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 0);
+    const hasText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 0);
     if (!hasText) continue;
     const style = getComputedStyle(el);
     const ff = style.fontFamily;
     if (!ff) continue;
-    const stack = ff.split(',').map(f => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase());
-    const primary = stack.find(f => f && !GENERIC_FONTS.has(f));
+    const stack = ff.split(',').map((f) => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase());
+    const primary = stack.find((f) => f && !GENERIC_FONTS.has(f));
     if (!primary) continue;
     fontUsage.set(primary, (fontUsage.get(primary) || 0) + 1);
     totalTextElements++;
@@ -3844,7 +3844,7 @@ function checkTypography() {
     const sorted = [...sizes].sort((a, b) => a - b);
     const ratio = sorted[sorted.length - 1] / sorted[0];
     if (ratio < 2.0) {
-      findings.push({ type: 'flat-type-hierarchy', detail: `Sizes: ${sorted.map(s => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)` });
+      findings.push({ type: 'flat-type-hierarchy', detail: `Sizes: ${sorted.map((s) => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)` });
     }
   }
 
@@ -4039,7 +4039,7 @@ function checkHeadingRhythmDOM() {
   }
 
   if (candidates.length < MIN_VIOLATIONS) return [];
-  return candidates.map(c => ({
+  return candidates.map((c) => ({
     type: 'heading-rhythm',
     detail: `${c.tag} "${c.text}" has ${Math.round(c.above)}px above vs ${Math.round(c.below)}px below — it reads as bound to the block above (${candidates.length} headings on page)`,
     el: c.el,
@@ -4062,8 +4062,8 @@ function checkPageTypography(doc, win) {
       if (rule.type !== 1) continue;
       const ff = rule.style?.fontFamily;
       if (!ff) continue;
-      const stack = ff.split(',').map(f => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase());
-      const primary = stack.find(f => f && !GENERIC_FONTS.has(f));
+      const stack = ff.split(',').map((f) => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase());
+      const primary = stack.find((f) => f && !GENERIC_FONTS.has(f));
       if (primary) {
         fonts.add(primary);
         if (OVERUSED_FONTS.has(primary)) overusedFound.add(primary);
@@ -4082,7 +4082,7 @@ function checkPageTypography(doc, win) {
   const ffRe = /font-family\s*:\s*([^;}]+)/gi;
   let fm;
   while ((fm = ffRe.exec(html)) !== null) {
-    for (const f of fm[1].split(',').map(f => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase())) {
+    for (const f of fm[1].split(',').map((f) => f.trim().replace(/^['"]|['"]$/g, '').toLowerCase())) {
       if (f && !GENERIC_FONTS.has(f)) {
         fonts.add(f);
         if (OVERUSED_FONTS.has(f)) overusedFound.add(f);
@@ -4106,7 +4106,7 @@ function checkPageTypography(doc, win) {
     const sorted = [...sizes].sort((a, b) => a - b);
     const ratio = sorted[sorted.length - 1] / sorted[0];
     if (ratio < 2.0) {
-      findings.push({ id: 'flat-type-hierarchy', snippet: `Sizes: ${sorted.map(s => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)` });
+      findings.push({ id: 'flat-type-hierarchy', snippet: `Sizes: ${sorted.map((s) => s + 'px').join(', ')} (ratio ${ratio.toFixed(1)}:1)` });
     }
   }
 
@@ -4216,7 +4216,7 @@ function isRepeatedTextContainer(style) {
   if (!style) return false;
   const hasShadow = !!(style.boxShadow && style.boxShadow !== 'none' && style.boxShadow !== '');
   const borderSides = ['Top', 'Right', 'Bottom', 'Left']
-    .filter(side => (parseFloat(style[`border${side}Width`]) || 0) >= 1).length;
+    .filter((side) => (parseFloat(style[`border${side}Width`]) || 0) >= 1).length;
   const hasBorder = borderSides >= 3;
   const hasRadius = (parseFloat(style.borderRadius) || 0) > 0;
   const bg = parseRgb(style.backgroundColor) || parseAnyColor(style.backgroundColor);
@@ -4261,8 +4261,8 @@ function collectRepeatedContainerTextFindings(doc, getStyle, opts = {}) {
       if (!isVisible(d)) continue;
 
       const direct = [...d.childNodes]
-        .filter(n => n.nodeType === 3)
-        .map(n => n.textContent)
+        .filter((n) => n.nodeType === 3)
+        .map((n) => n.textContent)
         .join(' ')
         .replace(/\s+/g, ' ')
         .trim();
@@ -4445,7 +4445,7 @@ function shadowMaxBlurPx(boxShadow, { minAlpha = 0 } = {}) {
     // unitless zeros ("0 0 24px"); browsers normalize to px ("0px 0px 24px") —
     // both reduce to the same numbers here.
     const cleaned = layer.replace(CSS_COLOR_TOKEN_RE, ' ').replace(/\b[a-z]+\b/gi, ' ');
-    const nums = [...cleaned.matchAll(/-?\d*\.?\d+/g)].map(m => parseFloat(m[0]));
+    const nums = [...cleaned.matchAll(/-?\d*\.?\d+/g)].map((m) => parseFloat(m[0]));
     if (nums.length >= 3) maxBlur = Math.max(maxBlur, nums[2]);
   }
   return maxBlur;
@@ -4593,7 +4593,7 @@ function positionedStyleImpliesEscape(style) {
     style.insetBlockEnd,
     style.insetInlineStart,
     style.insetInlineEnd,
-  ].filter(Boolean).map(value => String(value).trim().toLowerCase());
+  ].filter(Boolean).map((value) => String(value).trim().toLowerCase());
   for (const value of values) {
     if (/(^|[\s(])-+(?:\d|\.)/.test(value)) return true;
     if (/(^|[\s(])100(?:\.0+)?%/.test(value)) return true;
@@ -4608,7 +4608,7 @@ function positionedChildEscapesClip(el, child, clipX, clipY) {
   const threshold = 2;
   return Boolean(
     (clipX && (childRect.left < parentRect.left - threshold || childRect.right > parentRect.right + threshold)) ||
-    (clipY && (childRect.top < parentRect.top - threshold || childRect.bottom > parentRect.bottom + threshold))
+    (clipY && (childRect.top < parentRect.top - threshold || childRect.bottom > parentRect.bottom + threshold)),
   );
 }
 
@@ -4676,27 +4676,27 @@ function clippedByInset(clipPath) {
   const beforeRound = match[1].split(/\s+round\s+/)[0].trim();
   if (!beforeRound) return false;
   const values = expandBoxShorthand(beforeRound.split(/\s+/).slice(0, 4));
-  const percents = values.map(value => String(value).trim().match(/^(-?\d+(?:\.\d+)?)%$/));
-  if (percents.some(match => !match)) return false;
-  const [top, right, bottom, left] = percents.map(match => parseFloat(match[1]));
+  const percents = values.map((value) => String(value).trim().match(/^(-?\d+(?:\.\d+)?)%$/));
+  if (percents.some((match) => !match)) return false;
+  const [top, right, bottom, left] = percents.map((match) => parseFloat(match[1]));
   return top + bottom >= 100 || left + right >= 100;
 }
 
 function clippedByRect(clip) {
   const match = String(clip || '').trim().toLowerCase().match(/^rect\s*\(([^)]*)\)$/);
   if (!match) return false;
-  const values = match[1].split(/[,\s]+/).map(value => value.trim()).filter(Boolean);
+  const values = match[1].split(/[,\s]+/).map((value) => value.trim()).filter(Boolean);
   if (values.length !== 4) return false;
-  const [top, right, bottom, left] = values.map(value => metricLengthPx(value, 16));
-  if ([top, right, bottom, left].some(value => value === null)) return false;
+  const [top, right, bottom, left] = values.map((value) => metricLengthPx(value, 16));
+  if ([top, right, bottom, left].some((value) => value === null)) return false;
   return bottom <= top || right <= left;
 }
 
 function isScreenReaderOnlyTextStyle(style, metrics = {}) {
   if (!style) return false;
   const overflowValues = [style.overflow, style.overflowX, style.overflowY]
-    .map(value => String(value || '').toLowerCase());
-  const clipsOverflow = overflowValues.some(value => value === 'hidden' || value === 'clip');
+    .map((value) => String(value || '').toLowerCase());
+  const clipsOverflow = overflowValues.some((value) => value === 'hidden' || value === 'clip');
 
   const fontSize = metricLengthPx(style.fontSize, 16) || 16;
   const width = firstMetricLengthPx(fontSize, metrics.width, metrics.clientWidth, style.width, style.inlineSize);
@@ -4732,7 +4732,7 @@ function checkElementTextOverflowDOM(el) {
   if (!isRenderedForBrowserRule(el)) return [];
   // Only the element that actually owns overflowing text — not its ancestors,
   // which inherit a wider scrollWidth from the spilling descendant.
-  const hasDirectText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim().length > 0);
+  const hasDirectText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 0);
   if (!hasDirectText) return [];
   const style = getComputedStyle(el);
   const rect = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
@@ -4835,12 +4835,12 @@ function checkElementBlinkingCursorDOM(el) {
   if (['input', 'textarea', 'select', 'img', 'svg', 'script', 'style'].includes(tag)) return [];
   const style = getComputedStyle(el);
 
-  const iterations = (style.animationIterationCount || '').split(',').map(s => s.trim());
+  const iterations = (style.animationIterationCount || '').split(',').map((s) => s.trim());
   if (!iterations.includes('infinite')) return [];
-  const names = (style.animationName || '').split(',').map(s => s.trim()).filter(n => n && n !== 'none');
+  const names = (style.animationName || '').split(',').map((s) => s.trim()).filter((n) => n && n !== 'none');
   if (names.length === 0) return [];
-  const blinkName = names.find(n => /blink|caret|cursor/i.test(n))
-    || names.find(n => keyframesToggleVisibilityDOM(n));
+  const blinkName = names.find((n) => /blink|caret|cursor/i.test(n))
+    || names.find((n) => keyframesToggleVisibilityDOM(n));
   if (!blinkName) return [];
 
   // Real caret contexts are exempt.
@@ -4863,7 +4863,7 @@ function checkElementBlinkingCursorDOM(el) {
     const bg = parseAnyColor(style.backgroundColor || '');
     const filled = bg && (bg.a ?? 1) > 0.2;
     const hasBorderFill = ['Left', 'Right', 'Bottom'].some(
-      side => (parseFloat(style[`border${side}Width`]) || 0) >= 1,
+      (side) => (parseFloat(style[`border${side}Width`]) || 0) >= 1,
     );
     if (!filled && !hasBorderFill) return [];
     const vertical = rect.width >= 1 && rect.width <= 24 && rect.height >= 6 && rect.height <= 48 && rect.height >= rect.width;
@@ -5022,7 +5022,7 @@ function checkEdgeFlushCardsDOM() {
       const bg = parseAnyColor(cs.backgroundColor || '');
       const hasBg = !!(bg && (bg.a ?? 1) > 0.5);
       const borderSides = ['Top', 'Right', 'Bottom', 'Left']
-        .filter(side => (parseFloat(cs[`border${side}Width`]) || 0) > 0).length;
+        .filter((side) => (parseFloat(cs[`border${side}Width`]) || 0) > 0).length;
       if (!hasBg && borderSides < 2) continue;
       const leftGutter = rect.left - contentLeft;
       const rightGap = contentRight - rect.right;

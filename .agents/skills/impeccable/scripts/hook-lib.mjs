@@ -47,6 +47,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
+
 import { extractPlatform, loadContext } from './context.mjs';
 import { IMPECCABLE_COMMAND } from './lib/provider.mjs';
 // `detector.extensions` (issue #316) is shared with Live's source search, which
@@ -550,7 +551,7 @@ export function normalizeIgnoreValueEntries(entries) {
     const normalized = { rule, value };
     const files = uniqueStrings([
       ...(typeof entry.file === 'string' && entry.file.trim() ? [entry.file.trim()] : []),
-      ...(Array.isArray(entry.files) ? entry.files.filter(v => typeof v === 'string' && v.trim()).map(v => v.trim()) : []),
+      ...(Array.isArray(entry.files) ? entry.files.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim()) : []),
     ]);
     if (files.length > 0) normalized.files = files;
     // Key order is rule, value, files, createdAt, reason and must stay that way:
@@ -954,7 +955,7 @@ export function dedupeAgainstCache(findings, cache, sessionId, filePath) {
 // Callers must pass the complete current finding set, not just the fresh ones.
 export function rememberFindings(cache, sessionId, filePath, findings) {
   const fileEntry = ensureFile(cache, sessionId, filePath);
-  const keys = new Set((findings || []).map(f => findingCacheKey(f)));
+  const keys = new Set((findings || []).map((f) => findingCacheKey(f)));
   fileEntry.findings = Array.from(keys);
   ensureSession(cache, sessionId).updatedAt = Date.now();
 }
@@ -1192,7 +1193,7 @@ function quoteCommandArg(value) {
   if (process.platform === 'win32') {
     return `"${text.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
   }
-  return `'${text.replace(/'/g, `'\\''`)}'`;
+  return `'${text.replace(/'/g, '\'\\\'\'')}'`;
 }
 
 function relativize(filePath, cwd) {
@@ -2036,7 +2037,7 @@ export async function runHook({ stdinJson, env = {}, cwd = process.cwd(), now = 
 
       if (immediate.length > 0 && !pendingWinner) {
         // Count the live scan, not the session's history.
-        pendingWinner = { filePath, known: immediate.map(f => findingCacheKey(f)) };
+        pendingWinner = { filePath, known: immediate.map((f) => findingCacheKey(f)) };
       } else if (immediate.length === 0 && !cleanWinner) {
         // The clean ack carries no finding, only the standing steer that a
         // silent hook is not a verdict on the design. Repeating it on every

@@ -84,7 +84,7 @@ function buildBorderOverrideMap(document, window) {
         if (v) return resolveVar(v, depth + 1);
         if (fallback) return resolveVar(fallback.trim(), depth + 1);
         return '';
-      }
+      },
     );
   }
 
@@ -371,7 +371,7 @@ const NAMED_COLOR_TOKENS = [...Object.keys(CSS_NAMED_COLORS), ...Object.keys(STA
   .join('|');
 const STATIC_COLOR_TOKEN_RE = new RegExp(
   `(?:rgba?\\([^)]+\\)|oklch\\([^)]+\\)|oklab\\([^)]+\\)|lch\\([^)]+\\)|lab\\([^)]+\\)|hsla?\\([^)]+\\)|hwb\\([^)]+\\)|#[0-9a-f]{3,8}\\b|\\b(?:${NAMED_COLOR_TOKENS})\\b)`,
-  'i'
+  'i',
 );
 
 function splitCssList(value) {
@@ -529,9 +529,9 @@ function parseStaticTransition(value) {
   const timings = [];
   for (const item of splitCssList(value)) {
     const tokens = splitCssTokens(item);
-    const timing = tokens.find(token => /^(?:ease|linear|step-|cubic-bezier\()/i.test(token));
+    const timing = tokens.find((token) => /^(?:ease|linear|step-|cubic-bezier\()/i.test(token));
     if (timing) timings.push(timing);
-    const prop = tokens.find(token => /^[a-z-]+$/i.test(token) && !/^(?:ease|linear|infinite|alternate|forwards|backwards|both|normal|none)$/.test(token) && !/s$/.test(token));
+    const prop = tokens.find((token) => /^[a-z-]+$/i.test(token) && !/^(?:ease|linear|infinite|alternate|forwards|backwards|both|normal|none)$/.test(token) && !/s$/.test(token));
     if (prop) props.push(prop);
   }
   return {
@@ -545,11 +545,11 @@ function parseStaticAnimation(value) {
   const timings = [];
   for (const item of splitCssList(value)) {
     const tokens = splitCssTokens(item);
-    const timing = tokens.find(token => /^(?:ease|linear|step-|cubic-bezier\()/i.test(token));
+    const timing = tokens.find((token) => /^(?:ease|linear|step-|cubic-bezier\()/i.test(token));
     if (timing) timings.push(timing);
-    const name = tokens.find(token =>
+    const name = tokens.find((token) =>
       /^[a-z_-][\w-]*$/i.test(token) &&
-      !/^(?:ease|linear|infinite|alternate|forwards|backwards|both|normal|none|running|paused)$/.test(token)
+      !/^(?:ease|linear|infinite|alternate|forwards|backwards|both|normal|none|running|paused)$/.test(token),
     );
     if (name) names.push(name);
   }
@@ -598,8 +598,8 @@ function expandStaticDeclaration(prop, value) {
     // the width and effectively hides the outline.
     const tokens = splitCssTokens(v);
     const parsed = parseStaticBorder(v);
-    const styleToken = tokens.find(t =>
-      /^(none|hidden|solid|dashed|dotted|double|groove|ridge|inset|outset)$/i.test(t)
+    const styleToken = tokens.find((t) =>
+      /^(none|hidden|solid|dashed|dotted|double|groove|ridge|inset|outset)$/i.test(t),
     );
     const out = [];
     if (parsed.width) out.push(['outlineWidth', parsed.width]);
@@ -736,12 +736,12 @@ function collectStaticCssRules(cssText, csstree) {
   }
   let order = 0;
   const walkList = (list, atRuleStack = []) => {
-    list?.forEach?.(node => {
+    list?.forEach?.((node) => {
       if (node.type === 'Rule' && node.block) {
-        if (atRuleStack.some(name => /keyframes$/i.test(name))) return;
+        if (atRuleStack.some((name) => /keyframes$/i.test(name))) return;
         const selectorText = csstree.generate(node.prelude).trim();
         const declarations = [];
-        node.block.children?.forEach?.(child => {
+        node.block.children?.forEach?.((child) => {
           if (child.type !== 'Declaration') return;
           declarations.push({
             prop: child.property,
@@ -798,10 +798,10 @@ class StaticElement {
     return cur ? this._doc.wrap(cur) : null;
   }
   get children() {
-    return (this.node.children || []).filter(child => child.type === 'tag').map(child => this._doc.wrap(child));
+    return (this.node.children || []).filter((child) => child.type === 'tag').map((child) => this._doc.wrap(child));
   }
   get childNodes() {
-    return (this.node.children || []).map(child => {
+    return (this.node.children || []).map((child) => {
       if (child.type === 'text') return { nodeType: 3, textContent: child.data || '' };
       if (child.type === 'tag') return this._doc.wrap(child);
       return { nodeType: 8, textContent: child.data || '' };
@@ -829,7 +829,7 @@ class StaticElement {
   }
   querySelectorAll(selector) {
     try {
-      return this._doc.selectAll(selector, this.node.children || []).map(node => this._doc.wrap(node));
+      return this._doc.selectAll(selector, this.node.children || []).map((node) => this._doc.wrap(node));
     } catch {
       return [];
     }
@@ -900,7 +900,7 @@ class StaticDocument {
   }
   querySelectorAll(selector) {
     try {
-      return this.selectAll(selector, this.root.children || []).map(node => this.wrap(node));
+      return this.selectAll(selector, this.root.children || []).map((node) => this.wrap(node));
     } catch {
       return [];
     }
@@ -1048,10 +1048,10 @@ function buildStaticStyleMap(root, staticDoc, cssText, modules, profile, filePat
           // checks measure text against the surface the browser renders.
           const pseudoPos = String(decls.get('position') || '').toLowerCase();
           if (pseudoPos === 'absolute' || pseudoPos === 'fixed') {
-            const zeroLen = v => v != null && /^0(?:px)?$/.test(String(v).trim());
+            const zeroLen = (v) => v != null && /^0(?:px)?$/.test(String(v).trim());
             const insetRaw = String(decls.get('inset') || '').trim();
-            const coversBox = (insetRaw !== '' && insetRaw.split(/\s+/).every(t => /^0(?:px)?$/.test(t)))
-              || ['top', 'right', 'bottom', 'left'].every(side => zeroLen(decls.get(side)))
+            const coversBox = (insetRaw !== '' && insetRaw.split(/\s+/).every((t) => /^0(?:px)?$/.test(t)))
+              || ['top', 'right', 'bottom', 'left'].every((side) => zeroLen(decls.get(side)))
               || (String(decls.get('width') || '').trim() === '100%'
                 && String(decls.get('height') || '').trim() === '100%');
             if (coversBox && decls.has('content')) {

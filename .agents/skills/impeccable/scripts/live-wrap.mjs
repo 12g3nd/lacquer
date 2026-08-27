@@ -13,17 +13,18 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { isGeneratedFile } from './lib/is-generated.mjs';
 import { resolveLiveTemplateExtensions } from './lib/template-extensions.mjs';
-import { readBuffer as readManualEditsBuffer } from './live/manual-edits-buffer.mjs';
-import { findSourceFile } from './live/source-search.mjs';
 import { resolveSourceTraits } from './live/frameworks/index.mjs';
+import { readBuffer as readManualEditsBuffer } from './live/manual-edits-buffer.mjs';
+import { enterLiveRoot } from './live/roots.mjs';
+import { findSourceFile } from './live/source-search.mjs';
 import {
   buildSvelteComponentCssAuthoring,
   scaffoldSvelteComponentSession,
   shouldUseSvelteComponentInjection,
 } from './live/svelte-component.mjs';
-import { enterLiveRoot } from './live/roots.mjs';
 
 export async function wrapCli() {
   const args = process.argv.slice(2);
@@ -642,7 +643,7 @@ function buildSearchQueries(elementId, classes, tag, query) {
 }
 
 function splitClassList(classes) {
-  return String(classes).split(/[,\s]+/).map(c => c.trim()).filter(Boolean);
+  return String(classes).split(/[,\s]+/).map((c) => c.trim()).filter(Boolean);
 }
 
 function attrEscapeDouble(str) {

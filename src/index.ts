@@ -61,6 +61,9 @@ unhandled({
   showDialog: false,
 });
 
+// Lacquer: Use YouTube Music userData for seamless session continuity
+app.setPath('userData', path.join(app.getPath('appData'), 'YouTube Music'));
+
 // Prevent window being garbage collected
 let mainWindow: Electron.BrowserWindow | null;
 electronUpdater.autoUpdater.autoDownload = false;
@@ -308,6 +311,9 @@ function initTheme(win: BrowserWindow) {
   const themes: string[] = config.get('options.themes');
   if (Array.isArray(themes)) {
     for (const cssFile of themes) {
+      if (cssFile.includes('.local-reference')) {
+        continue;
+      }
       fileExists(
         cssFile,
         () => {
@@ -675,8 +681,7 @@ app.whenReady().then(async () => {
 
   // Register appID on windows
   if (is.windows()) {
-    const appID =
-      'com.github.th-ch.\u0079\u006f\u0075\u0074\u0075\u0062\u0065\u002d\u006d\u0075\u0073\u0069\u0063';
+    const appID = 'io.github.12g3nd.lacquer';
     app.setAppUserModelId(appID);
     const appLocation = process.execPath;
     const appData = app.getPath('appData');
@@ -711,7 +716,7 @@ app.whenReady().then(async () => {
           {
             target: appLocation,
             cwd: path.dirname(appLocation),
-            description: `${APPLICATION_NAME} Desktop App - including custom plugins`,
+            description: 'Lacquer - Windows-first YouTube Music client',
             appUserModelId: appID,
           },
         );

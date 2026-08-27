@@ -2,16 +2,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { loadDesignSystemForTarget } from '../design-system.mjs';
-import { RULE_SCOPES, filterByScopes } from '../registry/antipatterns.mjs';
-import { createBrowserDetector, detectUrl } from '../engines/browser/detect-url.mjs';
-import { detectHtml } from '../engines/static-html/detect-html.mjs';
-import { detectText } from '../engines/regex/detect-text.mjs';
 import {
   filterDetectionFindings,
   readDetectionConfig,
   shouldIgnoreDetectionFile,
 } from '../../lib/impeccable-config.mjs';
+import { loadDesignSystemForTarget } from '../design-system.mjs';
+import { createBrowserDetector, detectUrl } from '../engines/browser/detect-url.mjs';
+import { detectText } from '../engines/regex/detect-text.mjs';
+import { detectHtml } from '../engines/static-html/detect-html.mjs';
 import {
   HTML_EXTENSIONS,
   buildImportGraph,
@@ -19,6 +18,7 @@ import {
   isPortListening,
   walkDir,
 } from '../node/file-system.mjs';
+import { RULE_SCOPES, filterByScopes } from '../registry/antipatterns.mjs';
 
 // ---------------------------------------------------------------------------
 // Output formatting
@@ -196,7 +196,7 @@ Examples:
 }
 
 async function detectCli() {
-  let args = process.argv.slice(2).map(arg => {
+  let args = process.argv.slice(2).map((arg) => {
     if (arg === '-json') return '--json';
     if (arg === '-fast') return '--fast';
     return arg;
@@ -230,7 +230,7 @@ async function detectCli() {
     const inline = args[i].startsWith('--scope=');
     const value = inline ? args[i].slice('--scope='.length) : args[i + 1];
     const parsed = (value && !value.startsWith('--'))
-      ? value.split(',').map(s => s.trim()).filter(Boolean)
+      ? value.split(',').map((s) => s.trim()).filter(Boolean)
       : [];
     // A bare `--scope` would otherwise fall out of `targets` and scan unscoped;
     // fail loudly so a mistyped pre-scan never runs the wrong rule set.
@@ -258,7 +258,7 @@ async function detectCli() {
     args.splice(i, inline ? 1 : 2);
     i -= 1;
   }
-  const unknownScopes = scopes.filter(s => !RULE_SCOPES.has(s));
+  const unknownScopes = scopes.filter((s) => !RULE_SCOPES.has(s));
   if (unknownScopes.length > 0) {
     process.stderr.write(
       `Error: unknown --scope value(s): ${unknownScopes.join(', ')}. Valid scopes: ${[...RULE_SCOPES].join(', ')}\n`,
@@ -283,7 +283,7 @@ async function detectCli() {
     const designSystem = loadDesignSystemForTarget(localPath, { cache: designSystemCache });
     return designSystem ? { ...baseScanOptions, designSystem } : baseScanOptions;
   };
-  const targets = args.filter(a => !a.startsWith('--'));
+  const targets = args.filter((a) => !a.startsWith('--'));
 
   if (helpMode) { printUsage(); process.exit(0); }
 
@@ -298,7 +298,7 @@ async function detectCli() {
     // browser-grade scan of a local artifact can pass file:///abs/path.html
     // instead of the bare path (which stays on the static engine).
     const urlRe = /^(?:https?|file):\/\//i;
-    const urlTargetCount = paths.filter(target => urlRe.test(target)).length;
+    const urlTargetCount = paths.filter((target) => urlRe.test(target)).length;
     const browserDetector = urlTargetCount > 1 ? await createBrowserDetector() : null;
 
     try {
@@ -334,34 +334,34 @@ async function detectCli() {
               if (probe.listening && probe.matched) {
                 process.stderr.write(
                   `\n${fwConfig.name} dev server detected on localhost:${fwConfig.port}.\n` +
-                  `For more accurate results, scan the running site:\n` +
-                  `  npx impeccable detect http://localhost:${fwConfig.port}\n\n`
+                  'For more accurate results, scan the running site:\n' +
+                  `  npx impeccable detect http://localhost:${fwConfig.port}\n\n`,
                 );
               } else if (probe.listening && !probe.matched) {
                 process.stderr.write(
                   `\n${fwConfig.name} project detected (${path.basename(fwConfig.configPath)}).\n` +
-                  `Port ${fwConfig.port} is in use by another service. Start the ${fwConfig.name} dev server and scan via URL for best results.\n\n`
+                  `Port ${fwConfig.port} is in use by another service. Start the ${fwConfig.name} dev server and scan via URL for best results.\n\n`,
                 );
               } else {
                 process.stderr.write(
                   `\n${fwConfig.name} project detected (${path.basename(fwConfig.configPath)}).\n` +
-                  `Start the dev server and scan via URL for best results:\n` +
-                  `  npx impeccable detect http://localhost:${fwConfig.port}\n\n`
+                  'Start the dev server and scan via URL for best results:\n' +
+                  `  npx impeccable detect http://localhost:${fwConfig.port}\n\n`,
                 );
               }
             }
           }
 
           const files = walkDir(resolved)
-            .filter(file => !shouldIgnoreDetectionFile(file, process.cwd(), detectionConfig));
-          const htmlCount = files.filter(f => HTML_EXTENSIONS.has(path.extname(f).toLowerCase())).length;
+            .filter((file) => !shouldIgnoreDetectionFile(file, process.cwd(), detectionConfig));
+          const htmlCount = files.filter((f) => HTML_EXTENSIONS.has(path.extname(f).toLowerCase())).length;
 
           // Warn and confirm if scanning many files (static HTML/CSS processes each HTML file)
           if (files.length > 50 && process.stdin.isTTY && !jsonMode && !quietMode) {
             process.stderr.write(
               `\nFound ${files.length} files (${htmlCount} HTML) in ${target}.\n` +
               `Scanning may take a while${htmlCount > 10 ? ' (static HTML/CSS processes each HTML file individually)' : ''}.\n` +
-              `Target a specific subdirectory to narrow scope.\n`
+              'Target a specific subdirectory to narrow scope.\n'
             );
             const ok = await confirm('Continue?');
             if (!ok) { process.stderr.write('Aborted.\n'); process.exit(0); }
@@ -386,7 +386,7 @@ async function detectCli() {
             // Annotate findings with import context
             const importers = importedByMap.get(file);
             if (importers && importers.size > 0) {
-              const importerNames = [...importers].map(f => path.basename(f));
+              const importerNames = [...importers].map((f) => path.basename(f));
               for (const f of fileFindings) {
                 f.importedBy = importerNames;
               }

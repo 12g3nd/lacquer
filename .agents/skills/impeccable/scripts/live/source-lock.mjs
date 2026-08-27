@@ -1,6 +1,7 @@
+import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { createHash, randomUUID } from 'node:crypto';
+
 import { getLiveDir, isLiveServerPidReachable } from '../lib/impeccable-paths.mjs';
 
 // Only used to retire a lock whose contents we cannot read (empty or truncated

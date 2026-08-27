@@ -15,15 +15,16 @@
  *   { applied, failed, files, cleared, count, pageUrl }
  */
 
-import { buildManualEditEvidence } from './live-manual-edit-evidence.mjs';
-import { readBuffer, readBufferStrict, writeBuffer, countByPage } from './live/manual-edits-buffer.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { isGeneratedFile } from './lib/is-generated.mjs';
 import {
   runCopyEditBatchAgent,
   runCopyEditPostApplyChecks,
 } from './live-copy-edit-agent.mjs';
-import fs from 'node:fs';
-import path from 'node:path';
+import { buildManualEditEvidence } from './live-manual-edit-evidence.mjs';
+import { readBuffer, readBufferStrict, writeBuffer, countByPage } from './live/manual-edits-buffer.mjs';
 
 const ROLLBACK_EXTENSIONS = new Set([
   '.astro',
@@ -527,7 +528,7 @@ function findUnappliedEntrySourceChanges({ batch, entries, reportedFiles, cwd, r
       const targets = verificationTargetsForOp(batch, op, reportedFiles, cwd);
       const leakedTargets = targets.filter((target) =>
         verificationTargetPasses(cwd, target, op)
-        && !snapshotTargetPasses(rollbackSnapshot, target, op)
+        && !snapshotTargetPasses(rollbackSnapshot, target, op),
       );
       if (leakedTargets.length === 0) continue;
       failures.push({
@@ -904,11 +905,11 @@ async function repairPostApplyValidation({
 export async function commitManualEdits({
   cwd = process.cwd(),
   pageUrl = null,
-  provider = undefined,
+  provider,
   env = process.env,
-  timeoutMs = undefined,
-  applyBatchToSource = undefined,
-  chatAvailable = undefined,
+  timeoutMs,
+  applyBatchToSource,
+  chatAvailable,
   repairOnly = false,
   transactionId = null,
   batch: providedBatch = null,

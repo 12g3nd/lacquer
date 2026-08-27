@@ -21,10 +21,11 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { resolveTargetSelection } from './context.mjs';
-import { resolveFiles } from './live-inject.mjs';
 import { readLiveServerInfo } from './lib/impeccable-paths.mjs';
 import { resolveSurfaceBrief } from './lib/surface-briefs.mjs';
+import { resolveFiles } from './live-inject.mjs';
 import { resolveLiveTarget } from './live-target.mjs';
 import { bootInstructions } from './live/instructions.mjs';
 import { resolveRoots, writeRootsManifest } from './live/roots.mjs';
