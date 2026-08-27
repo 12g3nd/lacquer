@@ -91,8 +91,7 @@ function isContextRelevant(key: string): boolean {
       'ytmusic-player-page tp-yt-paper-tab[aria-selected="true"]',
     );
     return (
-      queuePanel?.textContent?.trim()?.toLowerCase()?.includes('queue') ??
-      false
+      queuePanel?.textContent?.trim()?.toLowerCase()?.includes('queue') ?? false
     );
   }
   return true;

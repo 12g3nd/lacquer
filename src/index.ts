@@ -32,6 +32,7 @@ import { allPlugins, mainPlugins } from 'virtual:plugins';
 import * as config from '@/config';
 import { APPLICATION_NAME, loadI18n, setLanguage, t } from '@/i18n';
 import lacquerCss from '@/lacquer/lacquer.css?inline';
+import { migratePearSession } from '@/lacquer/session-migration';
 import {
   forceLoadMainPlugin,
   forceUnloadMainPlugin,
@@ -61,8 +62,12 @@ unhandled({
   showDialog: false,
 });
 
-// Lacquer: Use YouTube Music userData for seamless session continuity
-app.setPath('userData', path.join(app.getPath('appData'), 'YouTube Music'));
+// Lacquer resolves userData to Electron's default (<appData>/Lacquer, from
+// productName). The previous `app.setPath` override here did not do what its
+// comment claimed: `electron-store` is instantiated when `@/config` is
+// imported, which under ESM runs before this module body, so config already
+// resolved to <appData>/Lacquer while only the Chromium session honoured the
+// override. See `@/lacquer/session-migration` for the one-time carry-over.
 
 // Prevent window being garbage collected
 let mainWindow: Electron.BrowserWindow | null;
@@ -652,6 +657,10 @@ const getDefaultLocale = async (locale: string) =>
   Object.keys(await languageResources()).includes(locale) ? locale : null;
 
 app.whenReady().then(async () => {
+  // Must run before the first BrowserWindow, while Chromium has not yet opened
+  // the cookie store. Never throws; a failure means signing in again.
+  migratePearSession();
+
   if (!config.get('options.language')) {
     const locale = await getDefaultLocale(app.getLocale());
     if (locale) {

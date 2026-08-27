@@ -81,7 +81,7 @@ export function initSettingsPanel() {
     addMenuItem('Reload', () => {
       window.location.reload();
     });
-    
+
     addMenuItem('Developer Tools', () => {
       window.ipcRenderer.send('toggle-in-app-menu');
     });

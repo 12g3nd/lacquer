@@ -158,7 +158,6 @@ export const mainMenuTemplate = async (
     {
       label: t('main.menu.options.label'),
       submenu: [
-
         {
           label: t('main.menu.options.submenu.resume-on-start'),
           type: 'checkbox',

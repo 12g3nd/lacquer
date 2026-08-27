@@ -24,10 +24,13 @@ class SignalChain {
   private widthInputGain!: GainNode;
   private widthSplitter!: ChannelSplitterNode;
   private widthMerger!: ChannelMergerNode;
-  private widthGainM_L!: GainNode;
-  private widthGainM_R!: GainNode;
-  private widthGainS_L!: GainNode;
-  private widthGainS_R!: GainNode;
+  // Mid/side is realised as a 2x2 matrix rather than discrete M and S nodes:
+  // L' = a*L + b*R and R' = b*L + a*R, where a = (1+w)/2 and b = (1-w)/2.
+  // Each merger input must therefore receive from BOTH splitter outputs.
+  private widthLtoL!: GainNode;
+  private widthRtoL!: GainNode;
+  private widthLtoR!: GainNode;
+  private widthRtoR!: GainNode;
 
   private reverbDryGain!: GainNode;
   private reverbWetGain!: GainNode;
@@ -37,6 +40,8 @@ class SignalChain {
   private compressorInputGain!: GainNode;
   private compressorNode!: DynamicsCompressorNode;
 
+  private limiterBypassGain!: GainNode;
+  private limiterInputGain!: GainNode;
   private limiterNode!: DynamicsCompressorNode;
 
   private outputGain!: GainNode;
@@ -97,10 +102,10 @@ class SignalChain {
     this.widthInputGain = ctx.createGain();
     this.widthSplitter = ctx.createChannelSplitter(2);
     this.widthMerger = ctx.createChannelMerger(2);
-    this.widthGainM_L = ctx.createGain();
-    this.widthGainM_R = ctx.createGain();
-    this.widthGainS_L = ctx.createGain();
-    this.widthGainS_R = ctx.createGain();
+    this.widthLtoL = ctx.createGain();
+    this.widthRtoL = ctx.createGain();
+    this.widthLtoR = ctx.createGain();
+    this.widthRtoR = ctx.createGain();
 
     this.reverbDryGain = ctx.createGain();
     this.reverbWetGain = ctx.createGain();
@@ -110,6 +115,8 @@ class SignalChain {
     this.compressorInputGain = ctx.createGain();
     this.compressorNode = ctx.createDynamicsCompressor();
 
+    this.limiterBypassGain = ctx.createGain();
+    this.limiterInputGain = ctx.createGain();
     this.limiterNode = ctx.createDynamicsCompressor();
     this.limiterNode.threshold.value = -1;
     this.limiterNode.ratio.value = 20;
@@ -131,17 +138,19 @@ class SignalChain {
     this.eqOutputGain.connect(this.widthBypassGain);
     this.eqOutputGain.connect(this.widthInputGain);
 
-    // Width
+    // Width — mid/side as a 2x2 matrix. Both merger inputs are fed from both
+    // splitter outputs; without the cross terms this degenerates into
+    // independent per-channel gain, which is not mid/side at all.
     this.widthInputGain.connect(this.widthSplitter);
-    this.widthSplitter.connect(this.widthGainM_L, 0); // L -> M_L
-    this.widthSplitter.connect(this.widthGainS_L, 0); // L -> S_L
-    this.widthSplitter.connect(this.widthGainM_R, 1); // R -> M_R
-    this.widthSplitter.connect(this.widthGainS_R, 1); // R -> S_R
+    this.widthSplitter.connect(this.widthLtoL, 0); // L -> left out
+    this.widthSplitter.connect(this.widthLtoR, 0); // L -> right out (cross)
+    this.widthSplitter.connect(this.widthRtoL, 1); // R -> left out  (cross)
+    this.widthSplitter.connect(this.widthRtoR, 1); // R -> right out
 
-    this.widthGainM_L.connect(this.widthMerger, 0, 0);
-    this.widthGainS_L.connect(this.widthMerger, 0, 0);
-    this.widthGainM_R.connect(this.widthMerger, 0, 1);
-    this.widthGainS_R.connect(this.widthMerger, 0, 1);
+    this.widthLtoL.connect(this.widthMerger, 0, 0);
+    this.widthRtoL.connect(this.widthMerger, 0, 0);
+    this.widthLtoR.connect(this.widthMerger, 0, 1);
+    this.widthRtoR.connect(this.widthMerger, 0, 1);
 
     this.widthMerger.connect(this.reverbDryGain);
     this.widthMerger.connect(this.reverbConvolver);
@@ -158,11 +167,16 @@ class SignalChain {
 
     // Compressor
     this.compressorInputGain.connect(this.compressorNode);
-    this.compressorNode.connect(this.limiterNode);
-    this.compressorBypassGain.connect(this.limiterNode);
+    this.compressorNode.connect(this.limiterInputGain);
+    this.compressorNode.connect(this.limiterBypassGain);
+    this.compressorBypassGain.connect(this.limiterInputGain);
+    this.compressorBypassGain.connect(this.limiterBypassGain);
 
-    // Limiter to output
+    // Limiter — bypassable, so Original is genuinely neutral. Presets that add
+    // reverb wet on top of full dry can exceed 0 dBFS and do want it engaged.
+    this.limiterInputGain.connect(this.limiterNode);
     this.limiterNode.connect(this.outputGain);
+    this.limiterBypassGain.connect(this.outputGain);
     this.outputGain.connect(ctx.destination);
 
     // Analyser tap
@@ -172,7 +186,10 @@ class SignalChain {
     this.setPreset('Original');
   }
 
-  private route(stage: 'eq' | 'width' | 'compressor', active: boolean) {
+  private route(
+    stage: 'eq' | 'width' | 'compressor' | 'limiter',
+    active: boolean,
+  ) {
     if (!this.audioContext) return;
     const t = this.audioContext.currentTime;
 
@@ -190,6 +207,9 @@ class SignalChain {
         break;
       case 'compressor':
         setGains(this.compressorBypassGain, this.compressorInputGain);
+        break;
+      case 'limiter':
+        setGains(this.limiterBypassGain, this.limiterInputGain);
         break;
     }
   }
@@ -225,6 +245,20 @@ class SignalChain {
     this.route('eq', true);
   }
 
+  /**
+   * Stereo width via mid/side.
+   *
+   *   M = (L + R) / 2          S = (L - R) / 2
+   *   L' = M + S*w             R' = M - S*w
+   *
+   * Expanded into the matrix the graph actually implements:
+   *
+   *   L' = a*L + b*R           R' = b*L + a*R
+   *   a = (1 + w) / 2          b = (1 - w) / 2
+   *
+   * At w = 1 this is a = 1, b = 0 — the identity, matching bypass exactly.
+   * At w = 0 it collapses to mono. Above 1 it widens.
+   */
   setWidth(width: number) {
     if (!this.audioContext) return;
     if (width === 1.0) {
@@ -232,11 +266,13 @@ class SignalChain {
       return;
     }
 
-    this.widthGainM_L.gain.value = 0.5;
-    this.widthGainS_L.gain.value = 0.5 * width;
+    const direct = (1 + width) / 2;
+    const cross = (1 - width) / 2;
 
-    this.widthGainM_R.gain.value = 0.5;
-    this.widthGainS_R.gain.value = -0.5 * width;
+    this.widthLtoL.gain.value = direct;
+    this.widthRtoR.gain.value = direct;
+    this.widthRtoL.gain.value = cross;
+    this.widthLtoR.gain.value = cross;
 
     this.route('width', true);
   }
@@ -274,6 +310,10 @@ class SignalChain {
     this.route('compressor', false);
   }
 
+  setLimiter(active: boolean) {
+    this.route('limiter', active);
+  }
+
   setSpeed(rate: number, preservesPitch: boolean) {
     if (this.videoElement) {
       this.videoElement.playbackRate = rate;
@@ -289,6 +329,12 @@ class SignalChain {
 
   setPreset(preset: SignalChainPreset) {
     this.currentPreset = preset;
+
+    // Original must be audibly neutral and level-stable, so it takes no
+    // limiting. Every other preset sums reverb wet on top of full dry and can
+    // therefore exceed 0 dBFS, where the limiter earns its place.
+    this.setLimiter(preset !== 'Original');
+
     switch (preset) {
       case 'Original':
         this.setSpeed(1.0, true);

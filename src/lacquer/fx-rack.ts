@@ -47,7 +47,9 @@ export const initFXRack = () => {
   }
 
   // Allow context menu to apply preset without opening rack
-  document.addEventListener('lacquer:preset-changed', ((e: CustomEvent<{ preset: string }>) => {
+  document.addEventListener('lacquer:preset-changed', ((
+    e: CustomEvent<{ preset: string }>,
+  ) => {
     const preset = e.detail.preset;
     if (preset && PRESETS.includes(preset as SignalChainPreset)) {
       activePreset = preset as SignalChainPreset;
@@ -88,7 +90,9 @@ export const initFXRack = () => {
       signalChain.setPreset(preset);
       buttons.forEach((b) => b.updateState());
       window.localStorage.setItem('lacquer.fxPreset', preset);
-      document.dispatchEvent(new CustomEvent('lacquer:preset-changed', { detail: { preset } }));
+      document.dispatchEvent(
+        new CustomEvent('lacquer:preset-changed', { detail: { preset } }),
+      );
     };
 
     (btn as HTMLButtonElement & { updateState: () => void }).updateState =
@@ -139,7 +143,7 @@ export const initFXRack = () => {
         fxButton.setAttribute('data-lacquer-fx-active', 'true');
       }
     };
-    
+
     document.addEventListener('lacquer:preset-changed', updateIndicator);
     updateIndicator();
 

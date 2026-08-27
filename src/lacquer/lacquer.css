@@ -178,11 +178,13 @@ ytmusic-guide-entry-renderer:hover {
    ========================================================================== */
 #player-page {
   /* Album-reactive atmosphere */
-  background: radial-gradient(
-    circle at 50% 40%,
-    var(--lacquer-album-tint),
-    var(--lacquer-bg) 80%
-  ), var(--lacquer-bg) !important;
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      var(--lacquer-album-tint),
+      var(--lacquer-bg) 80%
+    ),
+    var(--lacquer-bg) !important;
 }
 
 #player:not([player-ui-state='PLAYER_BAR_ONLY']) {

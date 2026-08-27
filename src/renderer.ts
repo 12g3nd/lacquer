@@ -13,8 +13,6 @@ import { initContextMenu } from './lacquer/context-menu';
 import { initFXRack } from './lacquer/fx-rack';
 import { initSettingsPanel } from './lacquer/settings-panel';
 import { signalChain } from './lacquer/signal-chain';
-
-import type { SignalChainPreset } from './lacquer/signal-chain-types';
 import {
   createContext,
   forceLoadRendererPlugin,
@@ -26,6 +24,7 @@ import {
 import { startingPages } from './providers/extracted-data';
 import { setupSongInfo } from './providers/song-info-front';
 
+import type { SignalChainPreset } from './lacquer/signal-chain-types';
 import type { MusicPlayer } from '@/types/music-player';
 import type { MusicPlayerAppElement } from '@/types/music-player-app-element';
 import type { QueueResponse } from '@/types/music-player-desktop-internal';

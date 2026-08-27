@@ -85,8 +85,9 @@ export const onMainLoad = async ({
         action,
       );
 
-      const actionCallback = ((songControls as any)[action] ||
-        (customActions as Record<string, () => void>)[action]) as
+      const actionCallback = ((songControls as Record<string, unknown>)[
+        action
+      ] ?? (customActions as Record<string, () => void>)[action]) as
         | (() => void)
         | undefined;
 
