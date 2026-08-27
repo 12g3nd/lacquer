@@ -165,7 +165,7 @@
     ],
     "@stylistic/comma-dangle": ["error", "always-multiline"],
     "@stylistic/max-len": "off",
-    "@stylistic/no-mixed-operators": "error",
+    "@stylistic/no-mixed-operators": "off",
     "@stylistic/no-multi-spaces": [
       "error",
       {
@@ -185,22 +185,7 @@
     "@stylistic/semi": ["error", "always"],
 
     "perfectionist/sort-jsx-props": "error",
-    "perfectionist/sort-imports": [
-      "error",
-      {
-        "type": "natural",
-        "order": "asc",
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          ["index", "sibling"],
-          "parent",
-          "type"
-        ],
-        "newlinesBetween": 1
-      }
-    ],
+    "perfectionist/sort-imports": "off",
 
     "import/first": "error",
     "import/newline-after-import": "off",

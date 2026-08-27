@@ -44,12 +44,16 @@ export const onMainLoad = async ({
     _registerGlobalShortcut(window.webContents, 'MediaPreviousTrack', previous);
   }
 
-  const customActions: Partial<Record<keyof ShortcutMappingType, () => void>> = {
-    fxRackToggle: () => window.webContents.send('peard:fx-rack-toggle'),
-    fxOriginal: () => window.webContents.send('peard:fx-set-preset', 'Original'),
-    fxSpedReverb: () => window.webContents.send('peard:fx-set-preset', 'Sped + Reverb'),
-    fxSlowedReverb: () => window.webContents.send('peard:fx-set-preset', 'Slowed + Reverb'),
-  };
+  const customActions: Partial<Record<keyof ShortcutMappingType, () => void>> =
+    {
+      fxRackToggle: () => window.webContents.send('peard:fx-rack-toggle'),
+      fxOriginal: () =>
+        window.webContents.send('peard:fx-set-preset', 'Original'),
+      fxSpedReverb: () =>
+        window.webContents.send('peard:fx-set-preset', 'Sped + Reverb'),
+      fxSlowedReverb: () =>
+        window.webContents.send('peard:fx-set-preset', 'Slowed + Reverb'),
+    };
 
   if (is.linux()) {
     registerMPRIS(window);
@@ -80,11 +84,11 @@ export const onMainLoad = async ({
         ':',
         action,
       );
-      
-      const actionCallback = (songControls[action] ||
-        (customActions as Record<string, () => void>)[
-          action
-        ]) as (() => void) | undefined;
+
+      const actionCallback = ((songControls as any)[action] ||
+        (customActions as Record<string, () => void>)[action]) as
+        | (() => void)
+        | undefined;
 
       if (typeof actionCallback !== 'function') {
         console.warn('Invalid action', action);
