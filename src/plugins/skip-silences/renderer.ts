@@ -1,3 +1,5 @@
+import { signalChain } from '@/lacquer/signal-chain';
+
 import type { SkipSilencesPluginConfig } from './index';
 import type { RendererContext } from '@/types/contexts';
 
@@ -8,7 +10,7 @@ let hasAudioStarted = false;
 
 const smoothing = 0.1;
 const threshold = -100; // DB (-100 = absolute silence, 0 = loudest)
-const interval = 2; // Ms
+const interval = 50; // Ms
 const history = 10;
 const speakingHistory = Array.from({ length: history }).fill(0) as number[];
 
@@ -30,22 +32,26 @@ const getMaxVolume = (
   return maxVolume;
 };
 
-const audioCanPlayListener = (e: CustomEvent<Compressor>) => {
-  const video = document.querySelector('video');
-  const { audioContext } = e.detail;
-  const sourceNode = e.detail.audioSource;
+let currentAbortController: AbortController | null = null;
 
-  // Use an audio analyser similar to Hark
-  // https://github.com/otalk/hark/blob/master/hark.bundle.js
-  const analyser = audioContext.createAnalyser();
-  analyser.fftSize = 512;
+const audioCanPlayListener = () => {
+  const video = document.querySelector('video');
+
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
+  currentAbortController = new AbortController();
+  const signal = currentAbortController.signal;
+
+  const analyser = signalChain.getAnalyserNode();
   analyser.smoothingTimeConstant = smoothing;
   const fftBins = new Float32Array(analyser.frequencyBinCount);
 
-  sourceNode.connect(analyser);
-
   const looper = () => {
+    if (signal.aborted) return;
+
     setTimeout(() => {
+      if (signal.aborted) return;
       const currentVolume = getMaxVolume(analyser, fftBins);
 
       let history = 0;
@@ -124,6 +130,10 @@ export const onRendererLoad = async ({
 };
 
 export const onRendererUnload = () => {
+  if (currentAbortController) {
+    currentAbortController.abort();
+    currentAbortController = null;
+  }
   document.removeEventListener('peard:audio-can-play', audioCanPlayListener);
 
   if (playOrSeekHandler) {

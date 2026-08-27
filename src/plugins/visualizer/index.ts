@@ -1,4 +1,5 @@
 import { t } from '@/i18n';
+import { signalChain } from '@/lacquer/signal-chain';
 import { createPlugin } from '@/utils';
 
 import emptyStyle from './empty-player.css?inline';
@@ -192,8 +193,8 @@ export default createPlugin({
       }
 
       const gainNode = this.props.audioContext.createGain();
-      gainNode.gain.value = 1.25;
-      this.props.audioSource.connect(gainNode);
+      gainNode.gain.value = 1.0;
+      signalChain.getAnalyserNode().connect(gainNode);
 
       let visualizerType: {
         new (...args: ConstructorParameters<typeof vudio>): Visualizer;

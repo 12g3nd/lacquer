@@ -9,6 +9,8 @@ import {
   registerWindowDefaultTrustedTypePolicy,
 } from '@/utils/trusted-types';
 
+import { initFXRack } from './lacquer/fx-rack';
+import { signalChain } from './lacquer/signal-chain';
 import {
   createContext,
   forceLoadRendererPlugin,
@@ -312,7 +314,9 @@ async function onApiLoaded() {
   const video = document.querySelector('video')!;
   const audioContext = new AudioContext();
   const audioSource = audioContext.createMediaElementSource(video);
-  audioSource.connect(audioContext.destination);
+
+  signalChain.init(audioSource, audioContext, video);
+  initFXRack();
 
   for (const [id, plugin] of Object.entries(getAllLoadedRendererPlugins())) {
     if (typeof plugin.renderer !== 'function') {
