@@ -28,4 +28,17 @@
   /* Motion */
   --lacquer-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --lacquer-transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Materials (Fallback by default) */
+  --lacquer-material-bg: var(--lacquer-orbit-bg);
+  --lacquer-material-surface: var(--lacquer-orbit-surface);
+  --lacquer-material-surface-hover: rgba(255, 255, 255, 0.1);
+  --lacquer-material-text: var(--lacquer-orbit-text);
+  --lacquer-material-text-muted: var(--lacquer-orbit-text-muted);
+  --lacquer-material-accent: var(--lacquer-orbit-primary);
+
+  /* Blueglass / Transient */
+  --lacquer-blueglass-bg: rgba(20, 20, 30, 0.6);
+  --lacquer-blueglass-border: rgba(255, 255, 255, 0.1);
+  --lacquer-blueglass-blur: blur(24px);
 }

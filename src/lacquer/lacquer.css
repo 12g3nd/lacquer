@@ -1,17 +1,21 @@
 @import './tokens.css';
 @import './fonts.css';
 
-/* 1. Typography */
-body, * {
+/* ==========================================================================
+   1. GLOBAL & TYPOGRAPHY
+   ========================================================================== */
+body,
+* {
   font-family: var(--lacquer-font-sans) !important;
+  scrollbar-width: thin;
 }
 
-/* 2. Fallback Orbit Noir (when album color is not active) */
+/* Fallback Orbit Noir (when album color is not active) */
 :root {
-  --lacquer-bg: var(--lacquer-orbit-bg);
-  --lacquer-surface: var(--lacquer-orbit-surface);
-  --lacquer-text: var(--lacquer-orbit-text);
-  --lacquer-text-muted: var(--lacquer-orbit-text-muted);
+  --lacquer-bg: var(--lacquer-material-bg);
+  --lacquer-surface: var(--lacquer-material-surface);
+  --lacquer-text: var(--lacquer-material-text);
+  --lacquer-text-muted: var(--lacquer-material-text-muted);
 }
 
 body {
@@ -23,11 +27,36 @@ ytmusic-app {
   background: var(--lacquer-bg) !important;
 }
 
-/* Connect Album Color Theme */
-/* If album-color-theme provides variables, we can blend them here */
-/* For now, just rely on album-color-theme's existing style.css which works automatically */
+/* Album-reactive Materials mapping (when --ytmusic-album-color is available) */
+/* Pear's album-color-theme provides --ytmusic-album-color and --ytmusic-album-color-dark */
+:root {
+  /* We use Pear's injected variables directly when active to tint the shell */
+  --lacquer-album-tint: rgba(var(--ytmusic-album-color-dark, 19, 10, 31), 0.7);
+  --lacquer-album-accent: rgb(var(--ytmusic-album-color, 255, 42, 109));
+}
 
-/* 3. Branding replacement */
+/* Three-Voice Typography Specifics */
+/* Serif for large headings */
+yt-formatted-string.title,
+.title.ytmusic-detail-header-renderer,
+.title.ytmusic-player-bar {
+  font-family: var(--lacquer-font-serif) !important;
+  font-weight: 600 !important;
+}
+
+/* Mono for time, track numbers, readouts */
+.time-info.ytmusic-player-bar,
+.index.ytmusic-responsive-list-item-renderer,
+.duration.ytmusic-responsive-list-item-renderer,
+ytmusic-player-queue-item .duration {
+  font-family: var(--lacquer-font-mono) !important;
+  font-weight: 400 !important;
+}
+
+/* ==========================================================================
+   2. TOP / SEARCH / SHELL BRANDING
+   ========================================================================== */
+/* Remove YTM watermark */
 ytmusic-logo {
   visibility: hidden;
   position: relative;
@@ -47,14 +76,232 @@ ytmusic-logo::after {
   letter-spacing: -0.5px;
 }
 
-/* 4. Sidebar navigation clipping fix */
+/* Minimal Elegant Search */
+ytmusic-search-box {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: var(--lacquer-radius-full) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(8px);
+}
+
+ytmusic-search-box[has-query] {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ==========================================================================
+   3. LEFT COLLECTION RAIL
+   ========================================================================== */
+/* Compact authored navigation */
 ytmusic-guide-renderer {
   overflow-y: auto !important;
   overflow-x: hidden !important;
+  width: 220px !important; /* Compact width */
+  padding-top: var(--lacquer-space-4);
 }
 
 #items.ytmusic-guide-section-renderer {
   overflow: visible !important;
 }
 
-/* Remove YTM watermark/wordmark anywhere else obvious if needed */
+/* Rename Labels via CSS */
+ytmusic-guide-entry-renderer[tab-id='FEmusic_home'] yt-formatted-string {
+  font-size: 0 !important;
+}
+ytmusic-guide-entry-renderer[tab-id='FEmusic_home'] yt-formatted-string::after {
+  content: 'Listen';
+  font-size: 14px;
+  visibility: visible;
+}
+
+ytmusic-guide-entry-renderer[tab-id='FEmusic_explore'] yt-formatted-string {
+  font-size: 0 !important;
+}
+ytmusic-guide-entry-renderer[tab-id='FEmusic_explore']
+  yt-formatted-string::after {
+  content: 'Discover';
+  font-size: 14px;
+  visibility: visible;
+}
+
+ytmusic-guide-entry-renderer[tab-id='FEmusic_library_landing']
+  yt-formatted-string {
+  font-size: 0 !important;
+}
+ytmusic-guide-entry-renderer[tab-id='FEmusic_library_landing']
+  yt-formatted-string::after {
+  content: 'Collection';
+  font-size: 14px;
+  visibility: visible;
+}
+
+/* Clear selected/hover states without giant pills */
+ytmusic-guide-entry-renderer {
+  border-radius: var(--lacquer-radius-md) !important;
+  margin: 0 var(--lacquer-space-2) !important;
+}
+ytmusic-guide-entry-renderer[active] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  font-weight: 600 !important;
+}
+ytmusic-guide-entry-renderer:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ==========================================================================
+   4. CENTER PLAYBACK STAGE (ALBUM ART)
+   ========================================================================== */
+#player-page {
+  /* Album-reactive atmosphere */
+  background: radial-gradient(
+    circle at 50% 40%,
+    var(--lacquer-album-tint),
+    var(--lacquer-bg) 80%
+  ) !important;
+}
+
+#player:not([player-ui-state='PLAYER_BAR_ONLY']) {
+  border-radius: var(--lacquer-radius-lg) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+  max-width: 520px !important;
+  margin: 0 auto !important;
+}
+
+ytmusic-player[player-ui-state] #song-image {
+  border-radius: var(--lacquer-radius-lg) !important;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   5. RIGHT CONTEXTUAL INSPECTOR
+   ========================================================================== */
+/* One strong mode switch rather than four equally loud stock tabs */
+tp-yt-paper-tabs.ytmusic-player-page {
+  --paper-tabs-selection-bar-color: var(--lacquer-album-accent) !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+tp-yt-paper-tab.ytmusic-player-page.iron-selected {
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+/* Compact readable queue */
+ytmusic-player-queue-item {
+  border-radius: var(--lacquer-radius-sm) !important;
+  padding: 4px 8px !important;
+  min-height: 48px !important;
+}
+ytmusic-player-queue-item[play-button-state] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--lacquer-radius-md) !important;
+}
+ytmusic-player-queue-item[play-button-state] .title {
+  color: var(--lacquer-album-accent) !important;
+}
+
+/* ==========================================================================
+   6. BOTTOM TRANSPORT DECK
+   ========================================================================== */
+ytmusic-player-bar {
+  background: var(--lacquer-surface) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 0 var(--lacquer-space-4) !important;
+}
+
+/* Thin integrated progress line */
+#progress-bar.ytmusic-player-bar {
+  --paper-slider-active-color: var(--lacquer-album-accent) !important;
+  --paper-slider-container-color: rgba(255, 255, 255, 0.1) !important;
+  --paper-slider-height: 2px !important;
+  --paper-slider-knob-color: var(--lacquer-album-accent) !important;
+  position: absolute;
+  top: -15px; /* Pull it to the top edge of the player bar */
+  width: 100%;
+  left: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+#progress-bar.ytmusic-player-bar .slider-knob-inner {
+  transform: scale(0); /* Hide chunky knob unless hovered */
+  transition: transform var(--lacquer-transition-fast);
+}
+#progress-bar.ytmusic-player-bar:hover .slider-knob-inner {
+  transform: scale(1);
+}
+
+/* Mono time info */
+.time-info.ytmusic-player-bar {
+  font-family: var(--lacquer-font-mono) !important;
+  opacity: 0.7;
+}
+
+/* Center controls styling */
+.middle-controls.ytmusic-player-bar {
+  gap: var(--lacquer-space-2);
+}
+.middle-controls.ytmusic-player-bar paper-icon-button {
+  --iron-icon-height: 20px;
+  --iron-icon-width: 20px;
+}
+.play-pause-button.ytmusic-player-bar {
+  background: var(--lacquer-album-accent) !important;
+  color: #000 !important; /* High contrast on accent */
+  border-radius: var(--lacquer-radius-full) !important;
+  --iron-icon-height: 28px;
+  --iron-icon-width: 28px;
+}
+
+/* ==========================================================================
+   7. PANELS / DIALOGS / TOOLTIPS
+   ========================================================================== */
+/* Normalize to Lacquer materials/typography */
+tp-yt-paper-dialog,
+ytmusic-menu-popup-renderer,
+.dropdown-content.tp-yt-paper-menu-button {
+  background: var(--lacquer-blueglass-bg) !important;
+  backdrop-filter: var(--lacquer-blueglass-blur) !important;
+  border: 1px solid var(--lacquer-blueglass-border) !important;
+  border-radius: var(--lacquer-radius-lg) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+ytmusic-menu-navigation-item-renderer:hover,
+ytmusic-menu-service-item-renderer:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--lacquer-radius-md) !important;
+}
+
+/* Dialog actions */
+yt-button-renderer {
+  border-radius: var(--lacquer-radius-md) !important;
+}
+
+/* Tooltips */
+tp-yt-paper-tooltip .hidden {
+  display: none !important;
+}
+tp-yt-paper-tooltip {
+  --paper-tooltip-background: var(--lacquer-blueglass-bg);
+  --paper-tooltip-text-color: #fff;
+  border-radius: var(--lacquer-radius-sm);
+  backdrop-filter: var(--lacquer-blueglass-blur);
+  border: 1px solid var(--lacquer-blueglass-border);
+}
+
+/* ==========================================================================
+   8. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 900px) {
+  /* Collapse sidebar */
+  ytmusic-guide-renderer {
+    width: 72px !important;
+  }
+  ytmusic-guide-entry-renderer yt-formatted-string {
+    display: none !important;
+  }
+  /* Adjust player stage for smaller screens */
+  #player:not([player-ui-state='PLAYER_BAR_ONLY']) {
+    max-width: 360px !important;
+  }
+}
