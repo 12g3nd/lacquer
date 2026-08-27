@@ -31,8 +31,10 @@ import { allPlugins, mainPlugins } from 'virtual:plugins';
 
 import * as config from '@/config';
 import { APPLICATION_NAME, loadI18n, setLanguage, t } from '@/i18n';
-import lacquerCss from '@/lacquer/lacquer.css?inline';
+import lacquerFontsCss from '@/lacquer/fonts.css?inline';
 import { migratePearSession } from '@/lacquer/session-migration';
+import lacquerSuppressCss from '@/lacquer/suppress.css?inline';
+import lacquerTokensCss from '@/lacquer/tokens.css?inline';
 import {
   forceLoadMainPlugin,
   forceUnloadMainPlugin,
@@ -52,7 +54,7 @@ import {
 import { setupSongInfo } from '@/providers/song-info';
 import { setUpTray } from '@/tray';
 import { LoggerPrefix } from '@/utils';
-import { isTesting } from '@/utils/testing';
+import { isCapturing, isTesting } from '@/utils/testing';
 
 import type { PluginConfig } from '@/types/plugins';
 
@@ -208,7 +210,7 @@ const initHook = async (win: BrowserWindow) => {
     (_, id: string) =>
       deepmerge(
         allPluginStubs[id].config ?? { enabled: false },
-        config.get(`plugins.${id}`) ?? {},
+        config.plugins.getPlugins()[id] ?? {},
       ) as PluginConfig,
   );
   ipcMain.handle('peard:set-config', (_, name: string, obj: object) =>
@@ -311,7 +313,11 @@ const showNeedToRestartDialog = async (id: string) => {
 
 function initTheme(win: BrowserWindow) {
   injectCSS(win.webContents, musicPlayerCss);
-  injectCSS(win.webContents, lacquerCss);
+  // Order matters: tokens define the `--lq-*` custom properties, fonts load the
+  // four faces, suppression de-brands stock chrome using both.
+  injectCSS(win.webContents, lacquerTokensCss);
+  injectCSS(win.webContents, lacquerFontsCss);
+  injectCSS(win.webContents, lacquerSuppressCss);
   // Load user CSS
   const themes: string[] = config.get('options.themes');
   if (Array.isArray(themes)) {
@@ -335,11 +341,14 @@ function initTheme(win: BrowserWindow) {
   }
 
   win.webContents.once('did-finish-load', () => {
-    // Not under test: an unpackaged launch is `is.dev()`, so Playwright's
-    // Electron runs hit this too — and opening DevTools while Playwright holds
-    // its own CDP connection deadlocks startup, so no window is ever surfaced.
-    // That is what made the capture harness unable to drive a real profile.
-    if (is.dev() && !isTesting()) {
+    // Not under test or capture: an unpackaged launch is `is.dev()`, so
+    // Playwright's Electron runs hit this too — and opening DevTools while
+    // Playwright holds its own CDP connection deadlocks startup, so no window
+    // is ever surfaced. That is what made the capture harness unable to drive a
+    // real profile. The capture gate needs this suppression but must not take
+    // the `isTesting()` path (which sandboxes the preload); it sets
+    // `LACQUER_CAPTURE` instead.
+    if (is.dev() && !isTesting() && !isCapturing()) {
       console.debug(LoggerPrefix, t('main.console.did-finish-load.dev-tools'));
       win.webContents.openDevTools();
     }
@@ -358,13 +367,22 @@ async function createMainWindow() {
     height: 32,
   };
 
+  // Lacquer runs frameless with its own one-row titlebar (D8): the stock
+  // `ytmusic-nav-bar`, de-branded, with the "Lacquer" wordmark and back /
+  // forward relocated by `src/lacquer/titlebar.ts`. Window controls are the
+  // native Windows Controls Overlay — Pear's existing mechanism, not
+  // hand-drawn. `in-app-menu` (off by default) draws its own bar into the
+  // same frameless window if a user re-enables it. Linux is out of scope
+  // (D12) and keeps its native frame unless in-app-menu asks otherwise.
+  const framelessShell = is.windows() || is.macOS() || useInlineMenu;
+
   const decorations: Partial<BrowserWindowConstructorOptions> = {
-    frame: !is.macOS() && !useInlineMenu,
+    frame: !framelessShell,
     titleBarOverlay: defaultTitleBarOverlayOptions,
-    titleBarStyle: useInlineMenu
-      ? 'hidden'
-      : is.macOS()
-        ? 'hiddenInset'
+    titleBarStyle: is.macOS()
+      ? 'hiddenInset'
+      : framelessShell
+        ? 'hidden'
         : 'default',
     autoHideMenuBar: config.get('options.hideMenu'),
   };
@@ -381,7 +399,10 @@ async function createMainWindow() {
     height: windowSize.height,
     minWidth: 325,
     minHeight: 425,
-    backgroundColor: '#000',
+    // Orbit — the deepest Orbit Noir surface. DESIGN.md §3.3: very little pure
+    // black; #000 is not in the palette. This is the flash-of-nothing colour
+    // before the renderer paints.
+    backgroundColor: '#0b1731',
     show: false,
     webPreferences: {
       contextIsolation: true,
@@ -515,7 +536,7 @@ async function createMainWindow() {
   removeContentSecurityPolicy();
 
   win.webContents.on('dom-ready', () => {
-    if (useInlineMenu && is.windows()) {
+    if (framelessShell && is.windows()) {
       win.setTitleBarOverlay({
         ...defaultTitleBarOverlayOptions,
         height: Math.floor(

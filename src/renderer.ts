@@ -13,6 +13,7 @@ import { initContextMenu } from './lacquer/context-menu';
 import { initFXRack } from './lacquer/fx-rack';
 import { initSettingsPanel } from './lacquer/settings-panel';
 import { signalChain } from './lacquer/signal-chain';
+import { initTitleBar } from './lacquer/titlebar';
 import {
   createContext,
   forceLoadRendererPlugin,
@@ -330,14 +331,20 @@ async function onApiLoaded() {
     },
   );
 
+  // Shell injection is DOM-only and must not depend on playback: if nothing
+  // has played yet there is no <video> element, and the audio setup below
+  // throws — which previously took the titlebar, settings menu and context
+  // menu down with it. These use `whenElement`, so they are safe to run early.
+  initTitleBar();
+  initSettingsPanel();
+  initContextMenu();
+
   const video = document.querySelector('video')!;
   const audioContext = new AudioContext();
   const audioSource = audioContext.createMediaElementSource(video);
 
   signalChain.init(audioSource, audioContext, video);
   initFXRack();
-  initSettingsPanel();
-  initContextMenu();
 
   for (const [id, plugin] of Object.entries(getAllLoadedRendererPlugins())) {
     if (typeof plugin.renderer !== 'function') {

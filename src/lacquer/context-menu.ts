@@ -136,7 +136,7 @@ function createLacquerItem(
   textDiv.style.cursor = 'pointer';
   textDiv.style.fontSize = '14px';
   textDiv.style.color = 'var(--ytmusic-text-primary, #fff)';
-  textDiv.style.fontFamily = 'var(--lacquer-font-sans, Inter, sans-serif)';
+  textDiv.style.fontFamily = 'var(--lq-font-interface, Inter, sans-serif)';
   textDiv.textContent = label;
 
   item.appendChild(textDiv);
@@ -156,7 +156,7 @@ function createLacquerItem(
   // Hover style
   item.addEventListener('mouseenter', () => {
     item.style.background = 'rgba(255, 255, 255, 0.1)';
-    item.style.borderRadius = 'var(--lacquer-radius-md, 8px)';
+    item.style.borderRadius = 'var(--lq-radius-md, 8px)';
   });
   item.addEventListener('mouseleave', () => {
     item.style.background = '';

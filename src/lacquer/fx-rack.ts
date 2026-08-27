@@ -1,3 +1,4 @@
+import { whenElement } from './dom';
 import { signalChain } from './signal-chain';
 
 import type { SignalChainPreset } from './signal-chain-types';
@@ -101,64 +102,59 @@ export const initFXRack = () => {
     container.appendChild(btn);
   });
 
-  // Inject FX Button into right controls
-  const injectFXButton = () => {
-    const rightControls = document.querySelector(
-      'ytmusic-player-bar .right-controls-buttons',
-    );
-    if (!rightControls) return;
+  // Inject FX button into the transport's right controls.
+  whenElement('ytmusic-player-bar .right-controls-buttons').then(
+    (rightControls) => {
+      if (document.getElementById('lacquer-fx-button')) return;
 
-    if (document.getElementById('lacquer-fx-button')) return;
+      const fxButton = document.createElement('button');
+      fxButton.id = 'lacquer-fx-button';
+      fxButton.innerText = 'FX';
+      fxButton.style.background = 'transparent';
+      fxButton.style.border = '1px solid rgba(255,255,255,0.2)';
+      fxButton.style.borderRadius = '4px';
+      fxButton.style.color = '#fff';
+      fxButton.style.cursor = 'pointer';
+      fxButton.style.margin = '0 8px';
+      fxButton.style.padding = '4px 8px';
+      fxButton.style.fontSize = '12px';
+      fxButton.style.fontWeight = 'bold';
 
-    const fxButton = document.createElement('button');
-    fxButton.id = 'lacquer-fx-button';
-    fxButton.innerText = 'FX';
-    fxButton.style.background = 'transparent';
-    fxButton.style.border = '1px solid rgba(255,255,255,0.2)';
-    fxButton.style.borderRadius = '4px';
-    fxButton.style.color = '#fff';
-    fxButton.style.cursor = 'pointer';
-    fxButton.style.margin = '0 8px';
-    fxButton.style.padding = '4px 8px';
-    fxButton.style.fontSize = '12px';
-    fxButton.style.fontWeight = 'bold';
-    fxButton.style.position = 'relative';
+      fxButton.onclick = (e) => {
+        e.stopPropagation();
+        const isShowing = container.style.display === 'flex';
+        container.style.display = isShowing ? 'none' : 'flex';
+      };
 
-    fxButton.onclick = (e) => {
-      e.stopPropagation();
-      const isShowing = container.style.display === 'flex';
-      container.style.display = isShowing ? 'none' : 'flex';
-    };
+      document.addEventListener('click', (e) => {
+        if (!container.contains(e.target as Node) && e.target !== fxButton) {
+          container.style.display = 'none';
+        }
+      });
 
-    document.addEventListener('click', (e) => {
-      if (!container.contains(e.target as Node) && e.target !== fxButton) {
-        container.style.display = 'none';
-      }
-    });
+      const updateIndicator = () => {
+        if (activePreset === 'Original') {
+          fxButton.removeAttribute('data-lacquer-fx-active');
+        } else {
+          fxButton.setAttribute('data-lacquer-fx-active', 'true');
+        }
+      };
 
-    const updateIndicator = () => {
-      if (activePreset === 'Original') {
-        fxButton.removeAttribute('data-lacquer-fx-active');
-      } else {
-        fxButton.setAttribute('data-lacquer-fx-active', 'true');
-      }
-    };
+      document.addEventListener('lacquer:preset-changed', updateIndicator);
+      updateIndicator();
 
-    document.addEventListener('lacquer:preset-changed', updateIndicator);
-    updateIndicator();
+      // The rack is a *sibling* of the button, not a child: nested, every
+      // preset click bubbled to the button's own handler and toggled the rack
+      // shut again. A positioned wrapper anchors the rack's `bottom: 100%`.
+      const wrapper = document.createElement('div');
+      wrapper.id = 'lacquer-fx-wrapper';
+      wrapper.style.position = 'relative';
+      wrapper.style.display = 'inline-flex';
+      wrapper.style.alignItems = 'center';
+      wrapper.appendChild(fxButton);
+      wrapper.appendChild(container);
 
-    fxButton.appendChild(container);
-    rightControls.prepend(fxButton);
-    return true;
-  };
-
-  const observer = new MutationObserver(() => {
-    if (document.querySelector('ytmusic-player-bar .right-controls-buttons')) {
-      if (injectFXButton()) {
-        observer.disconnect();
-      }
-    }
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
+      rightControls.prepend(wrapper);
+    },
+  );
 };

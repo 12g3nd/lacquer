@@ -37,8 +37,51 @@ export interface DefaultConfig {
     themes: string[];
     customWindowTitle?: string;
   };
-  'plugins': Record<string, unknown>;
+  'plugins': Record<string, { enabled: boolean } & Record<string, unknown>>;
 }
+
+/*
+ * Lacquer's default plugin set — DECISIONS.md D11.
+ *
+ * These only take effect because Lacquer has its own `userData` (D9); on a
+ * profile carried over from Pear the user's saved choices still win. `isEnabled`
+ * deep-merges this over each plugin's own `config`, so an entry here overrides
+ * the upstream default — which is why `in-app-menu` (default-on for Windows
+ * upstream) and `navigation` / `performance-improvement` are listed explicitly
+ * even where the value matches: the table is the decision, in one place.
+ */
+const defaultPlugins: DefaultConfig['plugins'] = {
+  // On — the spine of the product.
+  // The design anchor; non-optional (D11). `enableSeekbar` off: its seekbar
+  // theme paints a pink gradient the Stage-A shell overrides anyway, and
+  // leaving it on fights `suppress.css` for the progress fill.
+  'album-color-theme': { enabled: true, enableSeekbar: false },
+  'do-not-track': { enabled: true }, // ad blocking — an ad on the Experience surface breaks the premise
+  'sponsorblock': { enabled: true },
+  'synced-lyrics': { enabled: true }, // the inspector's Lyrics surface depends on it
+  'navigation': { enabled: true }, // back / forward, relocated to the rail (D8)
+  'performance-improvement': { enabled: true },
+  'shortcuts': { enabled: true }, // media keys, and the FX shortcuts route through it
+  'taskbar-mediacontrol': { enabled: true }, // Windows 11 media overlay
+  'precise-volume': { enabled: true }, // finer volume; independent of the Signal Chain (see below)
+
+  // Off — superseded by the Signal Chain. Competing audio graphs are the exact
+  // conflict the Signal Chain audit was commissioned to prevent.
+  'equalizer': { enabled: false },
+  'audio-compressor': { enabled: false },
+  'playback-speed': { enabled: false },
+  'visualizer': { enabled: false },
+  'crossfade': { enabled: false },
+  'skip-silences': { enabled: false },
+
+  // Off — competing visual layers that inject their own styling and would fight
+  // the authored shell.
+  'ambient-mode': { enabled: false },
+  'blur-nav-bar': { enabled: false },
+  'transparent-player': { enabled: false },
+  'unobtrusive-player': { enabled: false },
+  'in-app-menu': { enabled: false }, // Lacquer builds its own titlebar (D8)
+};
 
 export const defaultConfig: DefaultConfig = {
   'window-size': {
@@ -73,5 +116,5 @@ export const defaultConfig: DefaultConfig = {
     usePodcastParticipantAsArtist: false,
     themes: [],
   },
-  'plugins': {},
+  'plugins': defaultPlugins,
 };

@@ -15,6 +15,16 @@ export const setupAppControls = () => {
   ipcMain.handle('peard:get-path', (_, ...args: string[]) =>
     path.join(...args),
   );
+
+  // Lacquer's settings menu (`src/lacquer/settings-panel.ts`). These replace
+  // two menu items that both sent `toggle-in-app-menu` and did nothing once
+  // that plugin was disabled by default (D8).
+  ipcMain.on('lacquer:toggle-dev-tools', () => {
+    BrowserWindow.getFocusedWindow()?.webContents.toggleDevTools();
+  });
+  ipcMain.on('lacquer:edit-config', () => {
+    config.edit();
+  });
 };
 
 function restartInternal() {

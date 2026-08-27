@@ -70,6 +70,12 @@ const port = await findFreePort();
 
 console.log(`[capture] starting Lacquer with debugging port ${port}`);
 
+// LACQUER_CAPTURE (not NODE_ENV=test) suppresses the dev-mode DevTools auto-open
+// — which would deadlock against Playwright's CDP attach — WITHOUT taking the
+// `isTesting()` branch that leaves the preload sandboxed. A sandboxed preload
+// cannot `require('electron-store')`, so `window.mainConfig` never exists and
+// none of `src/lacquer/*` initialises: every capture would then be a screenshot
+// of the app with its whole renderer shell missing.
 const app = spawn(
   electronPath,
   ['.', `--remote-debugging-port=${port}`, '--no-sandbox'],
@@ -77,7 +83,7 @@ const app = spawn(
     cwd: ROOT,
     stdio: 'ignore',
     shell: false,
-    env: { ...process.env, NODE_ENV: 'test' },
+    env: { ...process.env, LACQUER_CAPTURE: '1' },
   },
 );
 
@@ -105,11 +111,9 @@ try {
   const version = await waitForCdp(port);
   console.log(`[capture] attached to ${version.Browser}`);
 
-  exitCode = await run(
-    'npx',
-    ['playwright', 'test', '--project=capture'],
-    { LACQUER_CDP_ENDPOINT: `http://127.0.0.1:${port}` },
-  );
+  exitCode = await run('npx', ['playwright', 'test', '--project=capture'], {
+    LACQUER_CDP_ENDPOINT: `http://127.0.0.1:${port}`,
+  });
 
   console.log(
     exitCode === 0

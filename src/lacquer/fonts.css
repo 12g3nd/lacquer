@@ -1,9 +1,33 @@
-/* Local fonts provided by @fontsource */
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/600.css';
-@import '@fontsource/inter/700.css';
+/*
+ * Lacquer — font faces.
+ *
+ * Four voices, each with one job (DESIGN.md §5). All bundled locally via
+ * @fontsource; there is never a runtime network font request. This file loads
+ * the faces and binds nothing else — the role → face mapping lives on the
+ * `--lq-font-*` tokens in `tokens.css`, and each component picks the role it
+ * owns. There is deliberately no global `font-family` rule anywhere.
+ */
 
+/* Editorial — Newsreader. Player-page album/artist title, playlist detail
+   headers. Roughly six appearances on a player page, zero elsewhere. Roman
+   only; no italic display type. */
 @import '@fontsource/newsreader/400.css';
+@import '@fontsource/newsreader/500.css';
 @import '@fontsource/newsreader/600.css';
 
+/* Graphic — Space Grotesk. The Lacquer wordmark and section heads; ties
+   Lacquer to the rest of Orbit Noir. */
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/600.css';
+@import '@fontsource/space-grotesk/700.css';
+
+/* Interface — Inter. Navigation, search, menus, list rows, buttons, labels,
+   body. The workhorse. */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+
+/* Instrument — IBM Plex Mono. Time, duration, speed, semitones, FX readouts,
+   track indices. Always tabular-nums at the call site. */
 @import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';

@@ -4,11 +4,20 @@
 Lacquer is a public, installable Windows-first fork of Pear. It aims to function as a reliable daily YouTube Music client, prioritizing playback, navigation, and everyday usability while maintaining a visually distinct, calm, and highly polished interface.
 
 ## Design Philosophy
-- **Album-reactive Atmosphere**: The primary aesthetic is driven by the currently playing album's artwork. Large, centered artwork and deeply tinted surfaces form the core visual identity.
-- **Calm & Polished**: Avoid generic web styling and unnecessary clutter. Provide a premium, focused experience that feels native and purposeful.
-- **Fallback (Orbit Noir)**: When album artwork is unavailable, the fallback design is "Orbit Noir"—a colorful, retrofuturist look (incorporating deep purples and neon accents), moving away from generic dark grey.
-- **Restrained Typography**: Utilizes a combination of high-quality local fonts (Inter for UI, Newsreader for accents/serifs, IBM Plex Mono for monospace), avoiding network runtime imports.
-- **Reliability First**: Visual experiments must never compromise readability, discoverability, or interaction reliability.
+
+**The design section of this spec is superseded by
+[`DESIGN.md`](./DESIGN.md), which is the single, binding source of truth for how
+Lacquer looks** (locked 2026-08-27). It exists because an earlier build invented
+its own palette — deep purple and neon — and shipped it; that palette is
+discarded (DECISIONS.md D3). Read `DESIGN.md` and `DECISIONS.md` before any UI
+work.
+
+In brief, and only in brief: two surfaces (an always-stable **Operate** browse
+shell and an album-reactive **Experience** player page); the **Orbit Noir**
+palette — cobalt and navy ground, cyan and cobalt functional, violet and orange
+expressive, ivory text, almost no pure black; four type voices each with one
+job; colour first, imagery second, effects third. Everything specific is in
+`DESIGN.md`.
 
 ## Key Features & Foundations
 - **Seamless Library & Playback**: Preserves all core YouTube Music functionality through Pear's existing solid abstractions.

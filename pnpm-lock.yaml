@@ -51,6 +51,9 @@ importers:
       '@fontsource/newsreader':
         specifier: ^5.3.0
         version: 5.3.0
+      '@fontsource/space-grotesk':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@foobar404/wave':
         specifier: 2.0.5
         version: 2.0.5
@@ -757,6 +760,9 @@ packages:
 
   '@fontsource/newsreader@5.3.0':
     resolution: {integrity: sha512-AFR6ZKY89GNL+9qBI2P2+66NhD5bhOj/v6fsLnFYLM4E0JnMB1yKb+Ro8cA64i1hwAWoBfTq5CHJGWH1toLDkw==}
+
+  '@fontsource/space-grotesk@5.3.0':
+    resolution: {integrity: sha512-ksnGizDPXIDuvqcTYTSrmZ+evx9sDlS8rp7+42BQ7wU+spt3twEoXfbJz672C+5CLg6VeUQwRy5RXshWb67LcQ==}
 
   '@foobar404/wave@2.0.5':
     resolution: {integrity: sha512-V/ydadtv5ObCw8aEg+Qy3YSq1eyinEWzJfRI43Ovmj7VmAvEdWAdL7MatoMbiIVYPATkNDVF7GOxX1xirxM9dA==}
@@ -4583,6 +4589,8 @@ snapshots:
   '@fontsource/inter@5.3.0': {}
 
   '@fontsource/newsreader@5.3.0': {}
+
+  '@fontsource/space-grotesk@5.3.0': {}
 
   '@foobar404/wave@2.0.5': {}
 

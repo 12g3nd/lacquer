@@ -1,45 +1,89 @@
+/*
+ * Lacquer — Orbit Noir token layer.
+ *
+ * Tokens only. The single permitted selector is `:root`. Anything that needs
+ * an actual rule against stock YouTube Music DOM belongs in `suppress.css`
+ * (removal) or in an authored renderer module (structure). See
+ * `docs/lacquer/DESIGN.md` — this file is the machine-readable form of §3, §5
+ * and §6 and does not deviate from it.
+ */
+
 :root {
-  /* Orbit Noir Fallback Palette (colorful retrofuturist) */
-  --lacquer-orbit-bg: #130a1f; /* Deep violet dark */
-  --lacquer-orbit-surface: #241038; /* Lighter violet surface */
-  --lacquer-orbit-primary: #ff2a6d; /* Neon pink */
-  --lacquer-orbit-secondary: #05d9e8; /* Cyan */
-  --lacquer-orbit-text: #f1e9fb; /* Light violet text */
-  --lacquer-orbit-text-muted: #a491ba;
+  /* ── Orbit Noir palette · DESIGN.md §3.1 ──────────────────────────── */
+  --lq-orbit: #0b1731; /* deepest surface, app ground */
+  --lq-atlantic: #102a4c; /* panels, rail, transport, raised surfaces */
+  --lq-ion: #4f7dff; /* primary functional accent — focus, selection, active nav */
+  --lq-signal: #39d4d0; /* secondary functional — active states, readouts */
+  --lq-ultraviolet: #8a63f6; /* expressive accent */
+  --lq-solar: #ff9654; /* expressive warm — attention, highlight */
+  --lq-flare: #ff647c; /* rare expressive accent */
+  --lq-milkglass: #e8eff5; /* primary text */
+  --lq-moondust: #a8b8ca; /* secondary text */
 
-  /* Typography */
-  --lacquer-font-sans: 'Inter', sans-serif;
-  --lacquer-font-serif: 'Newsreader', serif;
-  --lacquer-font-mono: 'IBM Plex Mono', monospace;
+  /* ── Semantic roles ──────────────────────────────────────────────── */
+  --lq-ground: var(--lq-orbit);
+  --lq-instrument: var(
+    --lq-atlantic
+  ); /* opaque surface wherever legibility matters */
+  --lq-instrument-raised: #173a6a; /* list-row hover, pressed states — a touch brighter than Atlantic */
+  --lq-text: var(--lq-milkglass);
+  --lq-text-secondary: var(--lq-moondust);
 
-  /* Spacing */
-  --lacquer-space-compact: 2px;
-  --lacquer-space-1: 4px;
-  --lacquer-space-2: 8px;
-  --lacquer-space-3: 16px;
-  --lacquer-space-4: 24px;
-  --lacquer-space-5: 32px;
+  /* Functional colour never leaves this pair, on every screen (§3.2). */
+  --lq-accent: var(--lq-ion);
+  --lq-accent-secondary: var(--lq-signal);
+  --lq-focus: var(--lq-ion);
+  --lq-selection: var(--lq-ion);
 
-  /* Radii */
-  --lacquer-radius-sm: 4px;
-  --lacquer-radius-md: 8px;
-  --lacquer-radius-lg: 16px;
-  --lacquer-radius-full: 9999px;
+  /* ── Materials · DESIGN.md §4 ─────────────────────────────────────── */
+  /* Chrome — silver/white linework only, never a filled panel. */
+  --lq-hairline: rgba(232, 239, 245, 0.14);
+  --lq-hairline-strong: rgba(232, 239, 245, 0.28);
 
-  /* Motion */
-  --lacquer-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --lacquer-transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Blueglass — floating and transient surfaces only (menus, dialogs, FX rack). */
+  --lq-blueglass: rgba(16, 42, 76, 0.72);
+  --lq-blueglass-border: rgba(232, 239, 245, 0.12);
+  --lq-blueglass-blur: blur(24px);
 
-  /* Materials (Fallback by default) */
-  --lacquer-material-bg: var(--lacquer-orbit-bg);
-  --lacquer-material-surface: var(--lacquer-orbit-surface);
-  --lacquer-material-surface-hover: rgba(255, 255, 255, 0.1);
-  --lacquer-material-text: var(--lacquer-orbit-text);
-  --lacquer-material-text-muted: var(--lacquer-orbit-text-muted);
-  --lacquer-material-accent: var(--lacquer-orbit-primary);
+  /* ── Album-reactive tokens · DESIGN.md §3.4 ───────────────────────── */
+  /* Lacquer publishes its OWN album tokens; it does not consume the plugin's
+     `--ytmusic-album-color*` directly. Stage A only declares the fallbacks —
+     normalisation that fills these on track change is Stage B. Until then the
+     Experience surface is Orbit Noir, which is the correct plain baseline. */
+  --lq-album-atmosphere: var(
+    --lq-orbit
+  ); /* player-page gradient / bloom base */
+  --lq-album-fill: var(--lq-ion); /* progress-bar fill + play/pause button */
 
-  /* Blueglass / Transient */
-  --lacquer-blueglass-bg: rgba(20, 20, 30, 0.6);
-  --lacquer-blueglass-border: rgba(255, 255, 255, 0.1);
-  --lacquer-blueglass-blur: blur(24px);
+  /* ── Typography roles · DESIGN.md §5 ──────────────────────────────── */
+  /* Faces are declared in `fonts.css`; these bind a role to a stack. Never set
+     `font-family` globally — scope every use to the component that owns it. */
+  --lq-font-editorial: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --lq-font-graphic: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --lq-font-interface:
+    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --lq-font-instrument:
+    'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  /* ── Spacing · 4px base ──────────────────────────────────────────── */
+  --lq-space-1: 4px;
+  --lq-space-2: 8px;
+  --lq-space-3: 12px;
+  --lq-space-4: 16px;
+  --lq-space-5: 24px;
+  --lq-space-6: 32px;
+
+  /* ── Radii · restrained ──────────────────────────────────────────── */
+  --lq-radius-sm: 4px;
+  --lq-radius-md: 8px;
+  --lq-radius-lg: 14px;
+  --lq-radius-pill: 999px;
+
+  /* ── Motion · DESIGN.md §6 ────────────────────────────────────────── */
+  --lq-motion-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --lq-motion-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --lq-motion-atmosphere: 800ms ease-out;
+
+  /* ── Shell geometry ──────────────────────────────────────────────── */
+  --lq-titlebar-height: 44px;
 }
