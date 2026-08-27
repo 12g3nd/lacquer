@@ -19,3 +19,9 @@ node_modules
 # Playwright output, including Lacquer stage-gate captures
 test-results/
 playwright-report/
+
+# Local agent tooling — not part of the published fork
+.agents/skills/
+.claude/
+CLAUDE.md
+skills-lock.json

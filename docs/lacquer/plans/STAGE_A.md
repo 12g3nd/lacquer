@@ -185,22 +185,22 @@ Per **D12**:
 
 ### A9. The screenshot harness  ·  DONE
 
-**This is the deliverable that makes every later gate real.**
+Two suites. See **D13** for the full reasoning and the bisection table.
 
-Currently `tests/index.test.js` is one test — launch, assert URL, close — with no screenshots
-and no `playwright.config.ts`.
+- **`pnpm test`** — smoke, on a throwaway profile. Hermetic, ~9s. Includes a regression test
+  proving the width stage cross-mixes.
+- **`pnpm test:capture`** — the gate. `scripts/capture.mjs` starts Lacquer with a debugging
+  port, attaches over CDP using the **real authenticated profile**, captures, then tree-kills
+  the app.
 
-Build a capture harness:
+**The one thing you must not "simplify":** captures attach, they do not launch. Playwright's
+Electron launcher never surfaces a window when the profile has an authenticated YouTube Music
+session — verified by bisection, including with `config.json` deleted. Rewriting the capture
+spec to use `electron.launch()` will hang for 90+ seconds and produce nothing.
 
-- Launches the packaged-or-dev Electron app via `electron.launch()` + `app.firstWindow()`
-- Navigates to a named application state
-- Captures a full-window PNG to a known directory with a stable filename
-- Runs from a single command
-
-It must handle the authenticated session (which A3 preserves) and must not require manual
-interaction.
-
-Add a `playwright.config.ts`. Keep the existing smoke test working.
+Add your Stage A captures to `tests/lacquer/stage-a.capture.spec.ts`. Four already exist; the
+gate list below names the rest. The spec asserts the session is signed in and fails loudly if
+not, so captures cannot silently become worthless.
 
 ### A10. Rewrite `V1_STATUS.md`
 

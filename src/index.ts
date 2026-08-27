@@ -335,7 +335,11 @@ function initTheme(win: BrowserWindow) {
   }
 
   win.webContents.once('did-finish-load', () => {
-    if (is.dev()) {
+    // Not under test: an unpackaged launch is `is.dev()`, so Playwright's
+    // Electron runs hit this too — and opening DevTools while Playwright holds
+    // its own CDP connection deadlocks startup, so no window is ever surfaced.
+    // That is what made the capture harness unable to drive a real profile.
+    if (is.dev() && !isTesting()) {
       console.debug(LoggerPrefix, t('main.console.did-finish-load.dev-tools'));
       win.webContents.openDevTools();
     }

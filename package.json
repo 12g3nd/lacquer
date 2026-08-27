@@ -14,7 +14,7 @@
   },
   "scripts": {
     "postinstall": "pnpm install-electron",
-    "test": "pnpm playwright test --project=smoke",
+    "test": "pnpm build && pnpm playwright test --project=smoke",
     "test:debug": "pnpm cross-env DEBUG=pw:*,-pw:test:protocol playwright test",
     "build": "pnpm electron-vite build",
     "vite:inspect": "pnpm clean && electron-vite build --mode development && pnpm exec serve .vite-inspect",
@@ -41,8 +41,8 @@
     "release:win": "pnpm clean && pnpm build && pnpm electron-builder --win -p always",
     "typecheck": "pnpm tsc -p tsconfig.json --noEmit",
     "check": "pnpm lint && pnpm format:check && pnpm typecheck",
-    "test:capture": "pnpm playwright test --project=capture",
-    "test:all": "pnpm playwright test"
+    "test:capture": "pnpm build && node scripts/capture.mjs",
+    "test:nobuild": "pnpm playwright test --project=smoke"
   },
   "engines": {
     "node": ">=22",

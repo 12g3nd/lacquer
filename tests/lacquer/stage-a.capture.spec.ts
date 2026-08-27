@@ -1,6 +1,6 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-import { capture, launchLacquer, settle } from './harness';
+import { attachToLacquer, capture, isSignedIn, settle } from './harness';
 
 /**
  * Stage A's screenshot gate.
@@ -10,40 +10,48 @@ import { capture, launchLacquer, settle } from './harness';
  * looked at — that is the whole mechanism preventing another round of
  * "acceptance" declared without visual evidence.
  *
- * Captures are deliberately not asserted against golden images. Stage A
+ * Captures are deliberately not diffed against golden images. Stage A
  * intentionally makes the app look *plainer* than before, so a pixel baseline
- * would only encode the state we are moving away from. The gate is human
- * review of named evidence, not automated diffing.
+ * would only encode the state we are moving away from. The gate is human review
+ * of named evidence.
  *
- *   pnpm test:capture
+ * Run with `pnpm test:capture`, which starts the app and attaches. Running this
+ * spec directly will fail with a clear message: it attaches rather than
+ * launches, for the reasons in `harness.ts`.
  */
 
 test.describe.configure({ mode: 'serial' });
 
-test('Stage A — shell captures at 1280x800', async () => {
-  const { app, window } = await launchLacquer({
-    size: { width: 1280, height: 800 },
-  });
+test('Stage A — shell captures', async () => {
+  const { page, dispose } = await attachToLacquer();
 
-  await settle(window);
-  await capture(window, 'a2-home-1280x800');
+  try {
+    // A signed-out capture proves nothing about the states the gate asks for,
+    // so fail loudly rather than filing misleading evidence.
+    expect(
+      await isSignedIn(page),
+      'attached session is signed out — captures would not show real states',
+    ).toBe(true);
 
-  // The rail's top edge: back/forward live here after A5, and this is where
-  // the shipped build clipped its first item.
-  await capture(window, 'a3-rail-top');
+    await settle(page);
+    const written: string[] = [];
 
-  await window.keyboard.press('Control+KeyL').catch(() => undefined);
-  await settle(window, 600);
-  await capture(window, 'a7-search-focused');
+    written.push(await capture(page, 'a1-shell-current-size'));
 
-  await app.close();
-});
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await settle(page);
+    written.push(await capture(page, 'a2-shell-1280x800'));
 
-test('Stage A — shell captures maximised', async () => {
-  const { app, window } = await launchLacquer();
+    // The rail's top edge: back/forward live here after A5, and this is where
+    // the shipped build clipped its first item.
+    written.push(await capture(page, 'a3-rail-top'));
 
-  await settle(window);
-  await capture(window, 'a1-home-maximised');
+    await page.setViewportSize({ width: 1600, height: 1000 });
+    await settle(page);
+    written.push(await capture(page, 'a4-shell-wide'));
 
-  await app.close();
+    for (const file of written) console.log(`  captured ${file}`);
+  } finally {
+    await dispose();
+  }
 });

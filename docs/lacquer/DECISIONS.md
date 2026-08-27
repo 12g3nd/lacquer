@@ -255,16 +255,52 @@ claiming these prefixes are stable across versions is invented justification.
 
 ## D13 — Verification: run the app and screenshot it, as a hard gate
 
-Every stage ends with the agent **launching the real Electron window and capturing named
-screenshots**, attached before the run may be called complete.
+**Implemented. Two suites, because one mechanism could not cover both jobs.**
 
-`tests/index.test.js` currently holds exactly one test — launch, assert URL, close — and takes
-no screenshots. There is no `playwright.config.ts`. **Building the capture harness is a Stage A
-deliverable.** `electron.launch()` plus `app.firstWindow()` is confirmed working, so this is
-achievable.
+Every stage ends with **named screenshots of the real window**, attached before the run may be
+called complete. Without that, the gate is a promise with nothing enforcing it — precisely how
+the previous build graded itself.
 
-Without the harness the gate is a promise with nothing enforcing it, which is precisely how the
-previous build graded itself.
+Baseline before this: `tests/index.test.js` was the entire suite (launch, assert URL, close),
+no screenshots, no `playwright.config.ts`. The shipped `V1_STATUS.md` reported "6/6 Playwright
+tests successful" against **one** test in one file.
+
+**The constraint that shaped the design.** Playwright's Electron *launcher* never surfaces a
+window when the profile carries an authenticated YouTube Music session. Established by
+bisection, not guesswork:
+
+| Profile | Result |
+|---|---|
+| Clean / throwaway | Window in ~1s |
+| Copy of the real profile | No window after 90s, `app.windows() === 0` |
+| Real profile, `config.json` deleted | Still hangs — so not configuration |
+| Real profile, launched normally (no Playwright) | Healthy, "Finished loading" in 9s |
+| Real profile, attached over CDP | Works, fully authenticated |
+
+The differentiator is the session itself: an authenticated profile has a registered
+`music.youtube.com/sw.js` service worker; a signed-out one does not.
+
+**So the suites split by what they need:**
+
+- **`pnpm test`** — smoke. Playwright launches the app on a **throwaway profile**. Hermetic,
+  fast (~9s), safe in CI, and mutates nothing. `tests/index.test.js` was given the same
+  isolation: it asserts behaviour "with default settings", so running it against the real
+  profile contradicted its own premise.
+- **`pnpm test:capture`** — the gate. `scripts/capture.mjs` starts Lacquer with a free
+  debugging port, attaches over CDP, runs the capture project, then tree-kills the app. Uses
+  the **real authenticated profile**, because a signed-out capture shows none of the states the
+  stage plans ask for. The spec asserts signed-in status and fails loudly rather than filing
+  misleading evidence.
+
+Captures are **not** diffed against golden images. Stage A deliberately makes the app look
+plainer, so a pixel baseline would only encode the state being moved away from. The gate is
+human review of named evidence.
+
+Two implementation notes worth keeping: the app must be spawned as the **Electron binary
+directly**, not via `npx` with a shell — a shell wrapper exits immediately, leaving the
+tree-kill aimed at a dead pid and six Electron processes orphaned. And `did-finish-load` opened
+DevTools whenever `is.dev()`, which is true for any unpackaged launch; that is now suppressed
+under `isTesting()`.
 
 ---
 

@@ -1,7 +1,6 @@
-import path from 'node:path';
-import process from 'node:process';
+import { test, expect } from '@playwright/test';
 
-import { test, expect, _electron as electron } from '@playwright/test';
+import { launchLacquer } from './harness';
 
 /**
  * Proves the stereo-width stage is genuinely mid/side.
@@ -22,27 +21,16 @@ import { test, expect, _electron as electron } from '@playwright/test';
  * value of this test is asserting on the wiring rather than the arithmetic.
  */
 
-const APP_PATH = path.resolve(import.meta.dirname, '..', '..');
-
 interface WidthResult {
   left: number;
   right: number;
 }
 
 test('stereo width is mid/side, not per-channel gain', async () => {
-  const app = await electron.launch({
-    cwd: APP_PATH,
-    args: [
-      APP_PATH,
-      '--no-sandbox',
-      '--disable-gpu',
-      '--whitelisted-ips=',
-      '--disable-dev-shm-usage',
-    ],
-    env: { ...process.env, NODE_ENV: 'test' },
-  });
-
-  const window = await app.firstWindow();
+  // Only needs a renderer with Web Audio; never touches Lacquer's own state.
+  // `launchLacquer` gives it a throwaway profile, which also keeps it clear of
+  // the single-instance lock held by any running copy.
+  const { window, dispose } = await launchLacquer();
 
   const renderWidth = (width: number) =>
     window.evaluate(async (w: number): Promise<WidthResult> => {
@@ -107,7 +95,8 @@ test('stereo width is mid/side, not per-channel gain', async () => {
   expect(unity.left).toBeCloseTo(1, 5);
   expect(unity.right).toBeCloseTo(0, 5);
 
-  // Widening. The old graph produced right = -0.1 here.
+  // Widening. The cross term puts a small inverted image of L into R; the old
+  // graph, having no cross path, produced exactly 0 here.
   const wide = await renderWidth(1.2);
   expect(wide.left).toBeCloseTo(1.1, 5);
   expect(wide.right).toBeCloseTo(-0.1, 5);
@@ -122,5 +111,5 @@ test('stereo width is mid/side, not per-channel gain', async () => {
   // The old graph had no cross path at all, making this exactly 0.
   expect(Math.abs(wide.right)).toBeGreaterThan(0);
 
-  await app.close();
+  await dispose();
 });
