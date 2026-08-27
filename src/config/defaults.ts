@@ -56,7 +56,7 @@ export const defaultConfig: DefaultConfig = {
     appVisible: true,
     autoUpdates: true,
     alwaysOnTop: false,
-    hideMenu: false,
+    hideMenu: true,
     hideMenuWarned: false,
     startAtLogin: false,
     disableHardwareAcceleration: false,

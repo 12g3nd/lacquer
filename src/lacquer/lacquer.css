@@ -1,0 +1,60 @@
+@import './tokens.css';
+@import './fonts.css';
+
+/* 1. Typography */
+body, * {
+  font-family: var(--lacquer-font-sans) !important;
+}
+
+/* 2. Fallback Orbit Noir (when album color is not active) */
+:root {
+  --lacquer-bg: var(--lacquer-orbit-bg);
+  --lacquer-surface: var(--lacquer-orbit-surface);
+  --lacquer-text: var(--lacquer-orbit-text);
+  --lacquer-text-muted: var(--lacquer-orbit-text-muted);
+}
+
+body {
+  background-color: var(--lacquer-bg) !important;
+  color: var(--lacquer-text) !important;
+}
+
+ytmusic-app {
+  background: var(--lacquer-bg) !important;
+}
+
+/* Connect Album Color Theme */
+/* If album-color-theme provides variables, we can blend them here */
+/* For now, just rely on album-color-theme's existing style.css which works automatically */
+
+/* 3. Branding replacement */
+ytmusic-logo {
+  visibility: hidden;
+  position: relative;
+}
+
+ytmusic-logo::after {
+  content: 'Lacquer';
+  visibility: visible;
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--lacquer-font-serif) !important;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ytmusic-text-primary, #fff);
+  letter-spacing: -0.5px;
+}
+
+/* 4. Sidebar navigation clipping fix */
+ytmusic-guide-renderer {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+#items.ytmusic-guide-section-renderer {
+  overflow: visible !important;
+}
+
+/* Remove YTM watermark/wordmark anywhere else obvious if needed */

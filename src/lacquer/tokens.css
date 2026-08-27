@@ -1,0 +1,31 @@
+:root {
+  /* Orbit Noir Fallback Palette (colorful retrofuturist) */
+  --lacquer-orbit-bg: #130a1f; /* Deep violet dark */
+  --lacquer-orbit-surface: #241038; /* Lighter violet surface */
+  --lacquer-orbit-primary: #ff2a6d; /* Neon pink */
+  --lacquer-orbit-secondary: #05d9e8; /* Cyan */
+  --lacquer-orbit-text: #f1e9fb; /* Light violet text */
+  --lacquer-orbit-text-muted: #a491ba;
+
+  /* Typography */
+  --lacquer-font-sans: 'Inter', sans-serif;
+  --lacquer-font-serif: 'Newsreader', serif;
+  --lacquer-font-mono: 'IBM Plex Mono', monospace;
+
+  /* Spacing */
+  --lacquer-space-1: 4px;
+  --lacquer-space-2: 8px;
+  --lacquer-space-3: 16px;
+  --lacquer-space-4: 24px;
+  --lacquer-space-5: 32px;
+
+  /* Radii */
+  --lacquer-radius-sm: 4px;
+  --lacquer-radius-md: 8px;
+  --lacquer-radius-lg: 16px;
+  --lacquer-radius-full: 9999px;
+
+  /* Motion */
+  --lacquer-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --lacquer-transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}

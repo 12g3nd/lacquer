@@ -31,12 +31,14 @@ import { allPlugins, mainPlugins } from 'virtual:plugins';
 
 import * as config from '@/config';
 import { APPLICATION_NAME, loadI18n, setLanguage, t } from '@/i18n';
+import lacquerCss from '@/lacquer/lacquer.css?inline';
 import {
   forceLoadMainPlugin,
   forceUnloadMainPlugin,
   getAllLoadedMainPlugins,
   loadAllMainPlugins,
 } from '@/loader/main';
+import { refreshMenu, setApplicationMenu } from '@/menu';
 import { refreshMenu, setApplicationMenu } from '@/menu';
 import musicPlayerCss from '@/music-player.css?inline';
 import { defaultAuthProxyConfig } from '@/plugins/auth-proxy-adapter/config';
@@ -302,6 +304,7 @@ const showNeedToRestartDialog = async (id: string) => {
 
 function initTheme(win: BrowserWindow) {
   injectCSS(win.webContents, musicPlayerCss);
+  injectCSS(win.webContents, lacquerCss);
   // Load user CSS
   const themes: string[] = config.get('options.themes');
   if (Array.isArray(themes)) {
