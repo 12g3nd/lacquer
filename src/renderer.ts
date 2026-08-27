@@ -9,8 +9,12 @@ import {
   registerWindowDefaultTrustedTypePolicy,
 } from '@/utils/trusted-types';
 
+import { initContextMenu } from './lacquer/context-menu';
 import { initFXRack } from './lacquer/fx-rack';
+import { initSettingsPanel } from './lacquer/settings-panel';
 import { signalChain } from './lacquer/signal-chain';
+
+import type { SignalChainPreset } from './lacquer/signal-chain-types';
 import {
   createContext,
   forceLoadRendererPlugin,
@@ -131,6 +135,22 @@ async function onApiLoaded() {
         )
         ?.onRepeatButtonClick();
     }
+  });
+
+  window.ipcRenderer.on('peard:fx-rack-toggle', () => {
+    const container = document.getElementById('lacquer-fx-rack-container');
+    if (container) {
+      const isShowing = container.style.display === 'flex';
+      container.style.display = isShowing ? 'none' : 'flex';
+    }
+  });
+
+  window.ipcRenderer.on('peard:fx-set-preset', (_, preset: string) => {
+    signalChain.setPreset(preset as SignalChainPreset);
+    window.localStorage.setItem('lacquer.fxPreset', preset);
+    document.dispatchEvent(
+      new CustomEvent('lacquer:preset-changed', { detail: { preset } }),
+    );
   });
   window.ipcRenderer.on('peard:update-volume', (_, volume: number) => {
     document
@@ -317,6 +337,8 @@ async function onApiLoaded() {
 
   signalChain.init(audioSource, audioContext, video);
   initFXRack();
+  initSettingsPanel();
+  initContextMenu();
 
   for (const [id, plugin] of Object.entries(getAllLoadedRendererPlugins())) {
     if (typeof plugin.renderer !== 'function') {

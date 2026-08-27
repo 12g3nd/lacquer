@@ -83,9 +83,9 @@ class SignalChain {
     this.videoElement = video;
 
     // Load IRs
-    this.loadIR('small-room', smallRoomIrPath as string);
-    this.loadIR('medium-hall', mediumHallIrPath as string);
-    this.loadIR('large-cathedral', largeCathedralIrPath as string);
+    this.loadIR('small-room', smallRoomIrPath);
+    this.loadIR('medium-hall', mediumHallIrPath);
+    this.loadIR('large-cathedral', largeCathedralIrPath);
 
     this.inputGain = ctx.createGain();
 

@@ -13,6 +13,7 @@
   --lacquer-font-mono: 'IBM Plex Mono', monospace;
 
   /* Spacing */
+  --lacquer-space-compact: 2px;
   --lacquer-space-1: 4px;
   --lacquer-space-2: 8px;
   --lacquer-space-3: 16px;

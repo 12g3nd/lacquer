@@ -46,6 +46,15 @@ export const initFXRack = () => {
     signalChain.setPreset(activePreset);
   }
 
+  // Allow context menu to apply preset without opening rack
+  document.addEventListener('lacquer:preset-changed', ((e: CustomEvent<{ preset: string }>) => {
+    const preset = e.detail.preset;
+    if (preset && PRESETS.includes(preset as SignalChainPreset)) {
+      activePreset = preset as SignalChainPreset;
+      buttons.forEach((b) => b.updateState());
+    }
+  }) as EventListener);
+
   const buttons: (HTMLButtonElement & { updateState: () => void })[] = [];
 
   PRESETS.forEach((preset) => {
@@ -79,6 +88,7 @@ export const initFXRack = () => {
       signalChain.setPreset(preset);
       buttons.forEach((b) => b.updateState());
       window.localStorage.setItem('lacquer.fxPreset', preset);
+      document.dispatchEvent(new CustomEvent('lacquer:preset-changed', { detail: { preset } }));
     };
 
     (btn as HTMLButtonElement & { updateState: () => void }).updateState =
@@ -122,13 +132,27 @@ export const initFXRack = () => {
       }
     });
 
+    const updateIndicator = () => {
+      if (activePreset === 'Original') {
+        fxButton.removeAttribute('data-lacquer-fx-active');
+      } else {
+        fxButton.setAttribute('data-lacquer-fx-active', 'true');
+      }
+    };
+    
+    document.addEventListener('lacquer:preset-changed', updateIndicator);
+    updateIndicator();
+
     fxButton.appendChild(container);
     rightControls.prepend(fxButton);
+    return true;
   };
 
   const observer = new MutationObserver(() => {
     if (document.querySelector('ytmusic-player-bar .right-controls-buttons')) {
-      injectFXButton();
+      if (injectFXButton()) {
+        observer.disconnect();
+      }
     }
   });
 

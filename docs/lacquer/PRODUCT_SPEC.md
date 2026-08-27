@@ -13,4 +13,9 @@ Lacquer is a public, installable Windows-first fork of Pear. It aims to function
 ## Key Features & Foundations
 - **Seamless Library & Playback**: Preserves all core YouTube Music functionality through Pear's existing solid abstractions.
 - **Cleaned Interface**: The native app menu is hidden by default (accessible via keyboard) for a cleaner shell. The stock YTM logo is replaced with a minimal Lacquer identity.
+- **Extensive Plugin Support**: Built upon Pear's robust plugin architecture for modular features (e.g., Discord Rich Presence, lyrics, scrobbling).
+- **Audio FX**: Integrated dynamic audio effects (Sped + Reverb, Slowed + Reverb, Night, Dream, etc.) via a unified Signal Chain directly accessible from the transport.
+- **Editorial Visuals**: Dynamic, album-reactive visual presentation replacing standard Material Design elements with glassmorphism, precise typography, and restrained spacing.
+- **Tiered Interaction**: An overhauled context menu prioritizing immediate musical actions (queueing, playlisting, FX), moving secondary actions out of sight to reduce clutter.
+- **Minimalist Chrome**: Complete removal of unnecessary banners, duplicated metadata, and top-bar branding, with essential settings seamlessly tucked into a recoverability menu in the transport deck.
 - **Robust Styling Architecture**: Core overrides and UI adjustments (e.g., sidebar clipping fixes) are done in a centralized `src/lacquer/` boundary, reducing hacks and ensuring maintainability.
