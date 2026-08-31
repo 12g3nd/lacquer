@@ -167,6 +167,81 @@ export const isSignedIn = (page: Page): Promise<boolean> =>
   );
 
 /* -------------------------------------------------------------------------- */
+/* Player-page overlay — captures toggle it, they never navigate               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The player page is an **overlay, not a route**. With a track playing, YouTube
+ * Music sits on `/watch` with the browse feed already rendered underneath, and
+ * `ytmusic-app.navigate('/')` produces the malformed route `/browse//` which
+ * renders nothing. So the captures toggle the overlay and reveal the correct
+ * view underneath — they never navigate to change between browse and player.
+ * (Shared by every stage's capture spec; first written for Stage A.)
+ */
+const setPlayerPage = async (page: Page, open: boolean): Promise<boolean> => {
+  const isOpen = () =>
+    page.evaluate(
+      () =>
+        !!document
+          .querySelector('ytmusic-app-layout')
+          ?.hasAttribute('player-page-open'),
+    );
+  if ((await isOpen()) === open) return true;
+
+  // A freshly started track sometimes needs a couple of tries before the
+  // toggle registers; retry with a short wait rather than one long one.
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await page
+      .evaluate(() => {
+        document
+          .querySelector<HTMLElement>(
+            'ytmusic-player-bar .toggle-player-page-button',
+          )
+          ?.click();
+      })
+      .catch(() => undefined);
+    const settled = await page
+      .waitForFunction(
+        (wantOpen: boolean) =>
+          !!document
+            .querySelector('ytmusic-app-layout')
+            ?.hasAttribute('player-page-open') === wantOpen,
+        open,
+        { timeout: 3_500 },
+      )
+      .then(() => true)
+      .catch(() => false);
+    if (settled) return true;
+  }
+  return false;
+};
+
+/** Reveal the browse feed (close the player-page overlay). */
+export const showBrowse = async (page: Page) => {
+  await setPlayerPage(page, false);
+
+  // Wait on rendered cards. `ytmusic-browse-response` measures 0px tall even
+  // when fully populated — its content sits in a scrolled child — so height is
+  // never a usable readiness signal here.
+  await page
+    .waitForFunction(
+      () =>
+        document.querySelectorAll('ytmusic-two-row-item-renderer').length > 0,
+      undefined,
+      { timeout: 20_000 },
+    )
+    .catch(() => undefined);
+
+  await settle(page);
+};
+
+/** Reveal the player page (open the overlay). */
+export const showPlayer = async (page: Page, ms = 2000) => {
+  await setPlayerPage(page, true);
+  await settle(page, ms);
+};
+
+/* -------------------------------------------------------------------------- */
 /* Shared                                                                      */
 /* -------------------------------------------------------------------------- */
 

@@ -86,15 +86,9 @@ ytmusic-app {
   --yt-spec-call-to-action: var(--lq-ion) !important;
 }
 
-/* Progress bar fill — one of the two elements DESIGN.md §3.4 lets the album
-   drive. Until Stage B normalises album colour, `--lq-album-fill` is Ion.
-   `album-color-theme`'s seekbar theme is disabled in the D11 defaults; this
-   colours the stock slider directly. */
-tp-yt-paper-slider#progress-bar.ytmusic-player-bar {
-  --paper-slider-active-color: var(--lq-album-fill) !important;
-  --paper-slider-secondary-color: var(--lq-hairline) !important;
-  --paper-slider-knob-color: var(--lq-album-fill) !important;
-}
+/* The progress-bar fill and play/pause button — the two elements DESIGN.md
+   §3.4 lets the album drive — are authored in `transport.css` (B3), not here.
+   `album-color-theme`'s own seekbar theme stays disabled in the D11 defaults. */
 
 /* ── Stock wordmark ──────────────────────────────────────────────────
    Lacquer draws its own wordmark in `titlebar.ts` (Space Grotesk). */
@@ -152,27 +146,35 @@ ytmusic-guide-renderer,
   background: var(--lq-instrument) !important;
 }
 
-/* ── Transport surface ─────────────────────────────────────────────
-   The stock player bar defaults to the brand background. Give it the
-   Instrument material and a Chrome hairline. The *authored* transport deck —
-   the diluted album tint, the layout — is Stage B; this only stops it
-   reading as YouTube. */
-ytmusic-player-bar {
-  background: var(--lq-instrument) !important;
-  border-top: 1px solid var(--lq-hairline) !important;
-}
+/* The stock player bar defaults to the brand background. Stopping it reading
+   as YouTube used to live here; the authored deck — the diluted album tint,
+   the layout, the album-coloured play button — is now `transport.css` (B3),
+   which owns `ytmusic-player-bar`'s surface outright. */
 
-/* Back / forward move to the rail top (`titlebar.ts`). Hide the copies the
-   `navigation` plugin renders into the nav bar — the plugin stays enabled
-   (D11), it just no longer paints here. Account access stays: the stock
-   avatar is the de-branded account button at the right of the titlebar
-   until Stage B's authored rail gives it a footer. */
+/* Back / forward and account move into the rail (D8). Hide the copies the
+   `navigation` plugin renders into the nav bar (the plugin stays enabled per
+   D11, it just no longer paints here), and hide the stock account button —
+   the rail footer's account control (`rail.ts`) proxies to it, so it stays in
+   the DOM, just visually gone from the titlebar. */
 ytmusic-nav-bar #right-content > div:has(mdui-button-icon) {
   display: none !important;
 }
+ytmusic-nav-bar ytmusic-settings-button {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+}
 
 /* ── Premium / upgrade nag ──────────────────────────────────────────
-   Off-brand, and an ad-free surface is a design premise (D11). */
+   Off-brand, and an ad-free surface is a design premise (D11). The guide
+   entry carries no `href` to match, so Pear's own `removeUpgradeButton`
+   option (defaulted on in `config/defaults.ts`) hides it by icon path; these
+   selectors catch the other placements. */
 ytmusic-guide-entry-renderer:has(a[href*='music_premium']),
 ytmusic-guide-entry-renderer:has(a[href*='premium']),
 ytmusic-pivot-bar-item-renderer:has(a[href*='premium']),

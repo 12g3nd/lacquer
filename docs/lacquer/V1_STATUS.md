@@ -1,10 +1,10 @@
 # Lacquer — Status
 
-**Rewritten at the end of Stage A.** The previous version of this file recorded
-the commit as the literal string `HEAD`, claimed "6/6 Playwright tests
-successful" against a single test in a single file, said settings were "shared"
-with Pear when they are not, and listed as deferred several things that had
-already shipped. This is the accurate record.
+**Updated at the end of Stage B.** Originally rewritten at the end of Stage A
+because the prior version recorded the commit as the literal string `HEAD`,
+claimed "6/6 Playwright tests successful" against a single test, said settings
+were "shared" with Pear when they are not, and listed shipped work as deferred.
+This is the accurate record.
 
 ---
 
@@ -16,34 +16,30 @@ bounded stages (DECISIONS.md D1). The authority for how it should look is
 
 | Stage | Scope | State |
 |---|---|---|
-| **A** | Foundation & spine — tokens, fonts, window shell, config integrity, audio bug fixes, verification harness, housekeeping | **complete** (this commit) |
-| **B** | Authored left rail and transport deck; player-page atmosphere; album-colour normalisation and contrast safety | not started |
+| **A** | Foundation & spine — tokens, fonts, window shell, config integrity, audio bug fixes, verification harness, housekeeping | **complete** |
+| **B** | Album-colour engine (B1); authored left rail, transport deck, player stage, inspector | **complete** (this commit) |
 | **C** | FX rack rebuild; context-menu classifier; motion pass; SVG wordmark | not started |
 
-**Stage A deliberately makes the app look plainer than the shipped build.** The
-purple wash and magenta play button are gone and nothing decorative replaces
-them yet. That is the plan working: Orbit Noir's order is colour first, imagery
-second, effects third.
+**Stage B is where Lacquer stops looking like YouTube Music.** The rail is
+relabelled and re-materialised, the transport carries the album-coloured play
+button and progress line over a diluted tint, the player page has a composed
+atmosphere derived from the normalised `--lq-album-*` tokens, and the inspector
+is an Instrument panel with an Ion mode switch. Stage A's deliberately-plain
+baseline is gone.
 
 ---
 
 ## Build information
 
 - **Branch:** `lacquer/orbit-noir`
-- **Parent commit:** `539b53d9` (`fix(lacquer): make the capture gate actually work against a real session`)
-- **App version:** `3.12.0` (unchanged — Stage A is not a release)
+- **Parent commit:** `f977706f` (`docs(lacquer): mark B1 done, record the token contract and gate changes for B2-B5`)
+- **App version:** `3.12.0` (unchanged — Stage B is not a release)
 - **`pnpm build`:** succeeds (`electron-vite build`, Windows x64).
-- **`pnpm check`:** passes — `oxlint` (0 errors; 17 pre-existing `solid(reactivity)` warnings, unchanged from the parent), `oxfmt --check` clean, `tsc --noEmit` clean.
-- **`pnpm test`** (smoke, throwaway profile): **7 passed** —
-  - `tests/index.test.js` — app launches and is visible with default settings.
-  - `tests/lacquer/signal-chain-width.smoke.spec.ts` — proves the width stage cross-mixes (mid/side), the regression guard for A6.
-  - `tests/lacquer/plugin-defaults.smoke.spec.ts` (×4) — the D11 table is complete in `defaults.ts`, applies on a clean profile, survives a profile that already has a `plugins` key, and yields to an explicit user choice.
-  - `tests/lacquer/shell.smoke.spec.ts` — `in-app-menu` does not mount (the two-strips-to-one collapse) and the stock wordmark is suppressed.
-- **`pnpm test:capture`** (the gate, real authenticated profile over CDP): `tests/lacquer/stage-a.capture.spec.ts` passes and writes the eight named states from the Stage A screenshot-gate table into `test-results/capture/`, plus a resolved-plugin-state dump. On the owner's real profile that dump reads
+- **`pnpm check`:** passes — `oxlint` (0 errors; 17 pre-existing `solid(reactivity)` / `no-misused-spread` warnings in `src/plugins/*`, none in the Stage B files), `oxfmt --check` clean, `tsc --noEmit` clean.
+- **`pnpm test`** (smoke, throwaway profile): **17 passed** — `tests/index.test.js`, `signal-chain-width.smoke.spec.ts` (A6 guard), `plugin-defaults.smoke.spec.ts` ×4 (D11), `shell.smoke.spec.ts` (D8), `album-color.smoke.spec.ts` ×6 (B1: bands, monochrome fallback, hue survival, totality, `parseTriple`).
+- **`pnpm test:capture`** (the gate, real authenticated profile over CDP): **3 tests pass** — `stage-a.capture.spec.ts` (8 shots) plus `stage-b.capture.spec.ts` split into *player stage* and *operate surfaces* (12 shots). Each Stage B shot logs the resolved `--lq-album-*` tokens; the album-colour engine measures **~0.8ms median / <4ms max per track change** over a 30-sample sweep. Resolved plugin dump on the owner's real profile:
   `album-color-theme / do-not-track / sponsorblock / synced-lyrics: true`,
-  `in-app-menu / equalizer / visualizer / ambient-mode: false` — i.e. the D11
-  merge reaches the polluted config. See the stage report for the attached
-  images.
+  `in-app-menu / equalizer / visualizer / ambient-mode: false`.
   - **Harness fix:** `scripts/capture.mjs` set `NODE_ENV=test` purely to
     suppress the dev-mode DevTools auto-open (which deadlocks Playwright's CDP
     attach). That flag also left the preload sandboxed, so
@@ -75,6 +71,130 @@ file reported the checks as passing.
   rule meaningfully enforced without a dozen upstream-file rewrites or a
   per-file `overrides` exception for `in-app-menu/TitleBar.tsx` (which D8
   forbids editing). This was raised with the owner and is the agreed approach.
+
+---
+
+## What Stage B changed
+
+The four authored surfaces. CSS is delivered as **adopted stylesheets applied
+from the renderer** (`adoptLacquerRegionSheets` in `src/renderer.ts`), not
+`injectCSS` from main — `document.adoptedStyleSheets` always cascade *after*
+`insertCSS` sheets, and `album-color-theme` (on by default, D11) recolours stock
+`.time-info` / `.duration` / `#mini-guide-background` through one. Putting
+Lacquer's sheets last wins that cascade without a per-rule specificity fight
+(D4's "the plugin would fight the authored shell", resolved by ordering). Tokens
++ fonts + suppression stay in `initTheme`.
+
+### The left rail — B2 (`rail.css`, `rail.ts`)
+
+- **Relabelled** Home / Explore / Library → **Listen / Discover / Collection**
+  (D10) as real text nodes + `aria-label`s, by index so it survives locale, in
+  both `#guide-renderer` and the narrow-width `#mini-guide-renderer` (re-asserted
+  by a single `ResizeObserver`, not a persistent subtree observer). Routes and
+  click behaviour untouched.
+- **Re-materialised:** Instrument ground (Stage A) + a Chrome hairline on the
+  right edge and between the primary nav and the record list; Inter throughout,
+  no serif; primary rows 44px, playlist rows 34px and stripped of the repeated
+  owner-name subtitle; long names truncate with an ellipsis; hover is a quiet
+  raised fill, active is Ion text + icon + a 3px inset Ion bar + a 9% Ion wash —
+  not the stock full-width pill. Custom scrollbar in Chrome linework.
+- **Account footer** (`#lacquer-rail-account`, injected) pinned to the bottom of
+  the rail (D8), clear of the fixed transport (`padding-bottom` = transport
+  height), proxying clicks to the now-hidden stock `ytmusic-settings-button`.
+- **Upgrade nag** removed: `options.removeUpgradeButton` defaulted **on** in
+  `config/defaults.ts` (Pear's own mechanism) *and* `rail.ts` drops any primary
+  entry past the three real items, for profiles that already stored the option
+  off.
+- **Never** references an `--lq-album-*` token. The rail is the stable spine.
+
+### The transport deck — B3 (`transport.css`)
+
+- Surface: Instrument with a **diluted album tint** —
+  `color-mix(instrument 92%, atmosphere 8%)` — and a Chrome hairline on the top
+  edge.
+- **Progress line:** thin (`--paper-slider-height: 3px`) integrated line at the
+  top edge; fill and knob take `--lq-album-fill` (D6 exception); knob hidden
+  until hover/focus; track and buffer are Chrome hairlines.
+- **Play/pause:** a filled disc in `--lq-album-fill` with the glyph in
+  `--lq-album-ink` (D6 exception). B1 guarantees fill↔ink and fill↔surface
+  contrast for any artwork, verified across the dark / bright / saturated shots.
+- **Time:** IBM Plex Mono, `tabular-nums`, Moondust — `!important` to beat
+  `album-color-theme`'s 50%-white pin.
+- Everything else — skip, shuffle, repeat, volume, FX, the gear — stays Orbit
+  Noir (Milkglass glyphs, Ion toggle-on). The FX/gear buttons are re-themed from
+  their `fx-rack.ts` inline placeholder styling to bordered ghost buttons; the
+  FX active indicator is Solar (expressive "on", not Ion — not a selected state).
+  The rack itself is Stage C.
+- **Layout deviation:** B3 asks for identity-left / transport-centre. YouTube
+  Music positions the now-playing block *absolutely* at the bar centre and
+  arranges the bar with responsive JS; reordering it (`order` + flex was tried
+  and is inert against the absolute positioning) means fighting that every
+  layout tick, and the workspace constitution ranks transport reliability above
+  a layout tweak. Kept in YTM's arrangement — transport left, identity centre,
+  output right, a legitimate transport layout — and made unmistakably Lacquer
+  through the material, the album controls, the mono time and the hairline.
+  Flagged here for the owner rather than forced.
+
+### The player stage — B4 (`player-stage.css`, `player-stage.ts`)
+
+- **Atmosphere** from the normalised `--lq-album-*` tokens (never the raw plugin
+  output): a defined bloom behind the artwork reading as the record lighting the
+  room, an overhead wash, a low warm floor-bounce, a Signal counter-glow, on the
+  Orbit ground. Every layer is a `color-mix` toward transparent — it reads as
+  flat colour first (§7). The three colour tokens crossfade on `:root` at 900ms
+  (B1's `@property` registration); nothing here adds a second transition.
+- **Fallback sky** for near-monochrome art and ads (`[data-lq-album-fallback]`):
+  Ion bloom + Ultraviolet warmth + Signal counter-glow on Orbit. Colourful and
+  retrofuturist, not a grey wash.
+- **Artwork leads:** `min(52vh, 46vw, 560px)`, centred in `#main-panel` (turned
+  into a column), with a wide offset coloured bloom + honest dark elevation
+  shadow.
+- **The serif moment:** YouTube Music renders no title on the player page, so
+  `player-stage.ts` injects `#lacquer-now` — album/song title and artist in
+  Newsreader (D7), album·year in IBM Plex Mono — below the artwork on a soft
+  `--lq-album-veil` vignette (the veil token carries Milkglass at 7:1 for any
+  artwork). Two serif instances; zero elsewhere.
+- **Video and ads degrade:** `player-stage.ts` sets `[data-lq-video]` /
+  `[data-lq-ad]` on `:root` from one observer scoped to the transport's info
+  block (fires on track/ad transitions only — no polling). Both hide
+  `#lacquer-now`; the ad path also drops the artwork bloom. Verified: an ad's
+  `0, 0, 0` triple already routes B1 to the fallback sky, so no raw YouTube
+  chrome shows. (A real ad can't be forced with `do-not-track` on; shot 5 sets
+  the state the plugin would emit.)
+
+### The inspector — B5 (`inspector.css`)
+
+- `#side-panel` becomes an opaque **Instrument** card (rounded, hairline, inset
+  from the stage) so text never sits on the album atmosphere (§3.4).
+- **One mode switch:** `tp-yt-paper-tabs` restyled — active tab is **Ion** (§3.2,
+  functional, never album-derived) with the previously-invisible `#selectionBar`
+  given a 2px Ion underline; inactive tabs recede to Moondust.
+- **Queue:** compact Instrument rows, mono `tabular-nums` durations, the current
+  track marked unambiguously (Ion wash + inset Ion bar + Ion title).
+- **Lyrics:** the `synced-lyrics` container gets the Instrument surface and Inter
+  via `--lyrics-font-family`; the current line is full-strength Milkglass, other
+  lines Moondust. Legibility is carried by the **surface, not a `text-shadow`**
+  (§3.4 — the shipped build's approach). The plugin's glow animation is left as
+  the decorative flourish it is.
+- No view is hidden; Comments / Related get a light legible pass (Ion links).
+
+### Verification
+
+`pnpm test:capture` → `tests/lacquer/stage-b.capture.spec.ts`. The overlay
+helpers (`showBrowse` / `showPlayer`) moved to `harness.ts` and are shared with
+the Stage A spec. The colour-class shots (1–5) drive `--ytmusic-album-color`
+directly, over real IGOR artwork, because `album-color-theme` averages the
+smallest thumbnail toward grey for most covers and every music video — B1's job
+is *normalisation of whatever it gets*, and this exercises every band; shot 2b
+is IGOR played end-to-end with nothing driven (→ pink, non-fallback), proving
+the plugin → engine → atmosphere path is live. Every shot's log confirms
+`--lq-focus` and the inspector's active tab stay Ion (`#4f7dff`) in all five
+colour states — **no functional element takes album colour (D6)**.
+
+`shell.smoke.spec.ts`'s wordmark check now polls rather than sampling once —
+`insertCSS` flushes on `did-finish-load`, which can land just after
+`ytmusic-nav-bar` mounts (a pre-existing race, made visible under Stage B's
+timing).
 
 ---
 

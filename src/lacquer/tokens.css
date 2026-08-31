@@ -118,4 +118,17 @@
 
   /* ── Shell geometry ──────────────────────────────────────────────── */
   --lq-titlebar-height: 44px;
+  --lq-rail-width: 240px;
+  --lq-rail-row: 44px; /* primary nav row height */
+  --lq-rail-row-dense: 34px; /* playlist row height */
+  --lq-transport-height: 72px;
+  --lq-progress-track: 3px; /* visible thickness of the transport progress line */
+
+  /* ── Album-tint mix strengths ────────────────────────────────────────
+     How far each authored surface is allowed to drift toward the album.
+     The transport is Operate structure with only a whisper of tint (§2);
+     the player stage is Experience and leans in. Consumers `color-mix`
+     against these so the ceiling is stated in one place. */
+  --lq-tint-transport: 8%;
+  --lq-tint-stage: 100%;
 }

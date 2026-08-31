@@ -33,18 +33,25 @@ test('shell: in-app-menu does not mount, stock wordmark is suppressed', async ()
     await expect(window.locator('#ytmd-title-bar-main-panel')).toHaveCount(0);
 
     // A1 / A5: suppress.css removes the stock YouTube Music wordmark — every
-    // `ytmusic-logo` on the page renders with no box.
-    const logoVisible = await window.evaluate(() =>
-      [...document.querySelectorAll('ytmusic-logo')].some((el) => {
-        const s = getComputedStyle(el);
-        return (
-          s.display !== 'none' &&
-          s.visibility !== 'hidden' &&
-          (el as HTMLElement).offsetWidth > 0
-        );
-      }),
-    );
-    expect(logoVisible).toBe(false);
+    // `ytmusic-logo` on the page renders with no box. `insertCSS` flushes on
+    // `did-finish-load`, which can land just after `ytmusic-nav-bar` mounts, so
+    // poll rather than sampling once.
+    await expect
+      .poll(
+        () =>
+          window.evaluate(() =>
+            [...document.querySelectorAll('ytmusic-logo')].some((el) => {
+              const s = getComputedStyle(el);
+              return (
+                s.display !== 'none' &&
+                s.visibility !== 'hidden' &&
+                (el as HTMLElement).offsetWidth > 0
+              );
+            }),
+          ),
+        { timeout: 15_000 },
+      )
+      .toBe(false);
   } finally {
     await dispose();
   }

@@ -38,10 +38,28 @@ sheet — the 364-line `lacquer.css` that did that is deleted.
 - `suppress.css` — removes/de-brands stock YouTube Music chrome (ground colour,
   red brand custom properties, the stock wordmark, the nav-bar material, the
   focus ring). It removes; it does not author.
+- `rail.css` + `rail.ts` — the authored left rail (B2). Relabel to
+  Listen/Discover/Collection (real text nodes, D10), Instrument + Chrome
+  hairlines, Ion active/hover, the injected account footer (D8), upgrade nag
+  off. Never references `--lq-album-*` — the stable spine.
+- `transport.css` — the transport deck (B3). Diluted album tint, the
+  album-coloured progress line and play/pause button (the D6 exceptions), mono
+  `tabular-nums` time, Orbit Noir everything else, Chrome hairline.
+- `player-stage.css` + `player-stage.ts` — the player stage (B4). Composed
+  atmosphere from the normalised `--lq-album-*` tokens with a colourful Orbit
+  Noir fallback; injected `#lacquer-now` (Newsreader album/artist title, D7);
+  `[data-lq-video]` / `[data-lq-ad]` flags on `:root` that stand the sleeve
+  treatment down.
+- `inspector.css` — the Queue/Lyrics/Comments/Related panel (B5). Opaque
+  Instrument card, Ion mode switch with a 2px `#selectionBar` underline, mono
+  durations, lyrics legible on the surface (not a `text-shadow`).
+- `album-color.ts` — the album-reactive engine (B1). OKLCH normalisation of the
+  plugin's raw triple into contrast-safe `--lq-album-{atmosphere,fill,veil,ink}`
+  with an Orbit Noir fallback for near-monochrome extraction.
 - `titlebar.ts` — draws the "Lacquer" wordmark and relocates back/forward to
   the rail top (Stage A slice of D8). One-shot injection.
 - `dom.ts` — `whenElement(selector)`, one shared `MutationObserver` for
-  "inject once this mounts", used by `titlebar.ts`, `fx-rack.ts`,
+  "inject once this mounts", used by `titlebar.ts`, `rail.ts`, `fx-rack.ts`,
   `settings-panel.ts`.
 - `settings-panel.ts` — the transport gear menu (Plugins & Options → opens
   `config.json`; Reload; Developer Tools).
@@ -54,8 +72,14 @@ sheet — the 364-line `lacquer.css` that did that is deleted.
 - `session-migration.ts` — one-time Pear session/cookie carry-over (D9).
 
 *Injection*: `tokens.css`, `fonts.css` and `suppress.css` are injected in that
-order during `initTheme` in `src/index.ts`. Renderer modules are initialised
-from `src/renderer.ts` once the player API is ready.
+order during `initTheme` in `src/index.ts` (via `webContents.insertCSS`). The
+four Stage B region sheets (`rail`, `transport`, `player-stage`, `inspector`)
+are **adopted stylesheets** appended from the renderer *after* the plugins
+(`adoptLacquerRegionSheets` in `src/renderer.ts`): `document.adoptedStyleSheets`
+always cascade after `insertCSS` sheets, and `album-color-theme` recolours stock
+surfaces through one, so Lacquer's authored layer has to sit last (D4).
+Renderer modules are initialised from `src/renderer.ts` once the player API is
+ready.
 
 ## Configuration
 

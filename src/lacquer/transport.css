@@ -1,0 +1,195 @@
+/*
+ * Lacquer — the transport deck (Stage B, B3).
+ *
+ * DESIGN.md §2: the deck straddles both surfaces. It is Operate in structure —
+ * always present, always legible, always in the same place — and takes a
+ * *diluted* album tint plus the two album-coloured controls (§3.4 / D6):
+ *
+ *   - the progress-bar fill
+ *   - the play / pause button
+ *
+ * Everything else — skip, shuffle, repeat, volume, FX, the gear — stays Orbit
+ * Noir on every screen, because it carries functional meaning. That split is
+ * what makes contrast safety structural: the controls that must never become
+ * unreadable never leave the fixed palette.
+ *
+ * The tint strength is `--lq-tint-transport` (a whisper, ~8%). `--lq-album-*`
+ * is published and crossfaded by `album-color.ts`; nothing here adds a second
+ * transition.
+ */
+
+/* ── The deck surface ──────────────────────────────────────────────── */
+ytmusic-player-bar {
+  background: color-mix(
+    in srgb,
+    var(--lq-instrument) calc(100% - var(--lq-tint-transport)),
+    var(--lq-album-atmosphere) var(--lq-tint-transport)
+  ) !important;
+  border-top: 1px solid var(--lq-hairline-strong) !important;
+  height: var(--lq-transport-height) !important;
+}
+#player-bar-background.ytmusic-app-layout {
+  background: transparent !important;
+}
+
+/* B3 asks for identity-left / transport-centre. YouTube Music positions the
+   now-playing block *absolutely* at the bar's centre and manages the arrangement
+   with responsive JS; reordering it means fighting that every layout tick, and
+   the workspace constitution ranks transport reliability above a layout tweak.
+   Kept in YTM's structure — transport left, identity centre, output right, a
+   legitimate transport arrangement — and made unmistakably Lacquer through the
+   material, the album-coloured play button and progress line, the mono time and
+   the Chrome hairline below. Flagged for the owner rather than forced. */
+
+/* ── Progress line — thin and integrated, not a chunky slider ───────── */
+tp-yt-paper-slider#progress-bar.ytmusic-player-bar {
+  --paper-slider-active-color: var(--lq-album-fill);
+  --paper-slider-secondary-color: var(--lq-hairline-strong);
+  --paper-slider-container-color: var(--lq-hairline);
+  --paper-slider-knob-color: var(--lq-album-fill);
+  --paper-slider-knob-start-color: var(--lq-album-fill);
+  --paper-slider-knob-start-border-color: var(--lq-album-fill);
+  --paper-slider-height: var(--lq-progress-track);
+}
+tp-yt-paper-slider#progress-bar .slider-knob.tp-yt-paper-slider,
+tp-yt-paper-slider#progress-bar #sliderKnob {
+  transform: scale(0);
+  transition: transform var(--lq-motion-fast);
+}
+tp-yt-paper-slider#progress-bar:hover .slider-knob.tp-yt-paper-slider,
+tp-yt-paper-slider#progress-bar:focus-within .slider-knob.tp-yt-paper-slider,
+tp-yt-paper-slider#progress-bar:hover #sliderKnob,
+tp-yt-paper-slider#progress-bar:focus-within #sliderKnob {
+  transform: scale(1);
+}
+
+/* ── Play / pause — takes album colour (D6 exception) ──────────────────
+   A filled disc in `--lq-album-fill` with the glyph in `--lq-album-ink`.
+   `album-color.ts` guarantees fill↔ink and fill↔surface contrast for any
+   artwork, so this reads on dark, bright and saturated covers alike. */
+ytmusic-player-bar #play-pause-button.ytmusic-player-bar {
+  background: var(--lq-album-fill);
+  border-radius: var(--lq-radius-pill);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0 var(--lq-space-2);
+  color: var(--lq-album-ink);
+  transition: filter var(--lq-motion-fast);
+}
+ytmusic-player-bar #play-pause-button.ytmusic-player-bar:hover {
+  filter: brightness(1.08);
+}
+ytmusic-player-bar #play-pause-button.ytmusic-player-bar yt-icon,
+ytmusic-player-bar #play-pause-button.ytmusic-player-bar #button {
+  color: var(--lq-album-ink);
+  fill: var(--lq-album-ink);
+}
+/* The stock ripple draws its own competing circle inside the disc. */
+ytmusic-player-bar #play-pause-button.ytmusic-player-bar yt-interaction,
+ytmusic-player-bar #play-pause-button.ytmusic-player-bar .stroke,
+ytmusic-player-bar #play-pause-button.ytmusic-player-bar .fill {
+  display: none !important;
+}
+
+/* ── Time — Instrument voice, tabular so digits do not jitter ─────────
+   Stock sets the family and a 50%-white colour at equal specificity; win it. */
+.time-info.ytmusic-player-bar {
+  font-family: var(--lq-font-instrument) !important;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  color: var(--lq-moondust) !important;
+}
+
+/* ── Everything else stays Orbit Noir ──────────────────────────────────
+   `album-color-theme`'s style.css dims these to 50% white; Lacquer loads
+   after it now, but that rule is `!important`, so match it. */
+ytmusic-player-bar yt-icon-button,
+ytmusic-player-bar tp-yt-paper-icon-button {
+  color: var(--lq-milkglass);
+}
+ytmusic-player-bar .menu.ytmusic-player-bar {
+  --iron-icon-fill-color: var(--lq-moondust) !important;
+}
+ytmusic-player-bar {
+  color: var(--lq-moondust) !important;
+}
+ytmusic-player-bar .left-controls-buttons yt-icon-button:hover,
+ytmusic-player-bar .right-controls-buttons yt-icon-button:hover {
+  color: #fff;
+}
+/* Toggle-on states (shuffle, repeat) → Ion, the functional accent (§3.2). */
+ytmusic-player-bar .shuffle[aria-pressed='true'],
+ytmusic-player-bar .repeat[aria-pressed='true'],
+ytmusic-player-bar yt-icon-button[aria-pressed='true'] {
+  color: var(--lq-ion);
+}
+
+/* Song identity in the deck — Interface, not editorial. The serif belongs to
+   the player *page* only (D7). */
+ytmusic-player-bar .title.ytmusic-player-bar {
+  font-family: var(--lq-font-interface);
+  font-weight: 600;
+  color: var(--lq-milkglass);
+}
+ytmusic-player-bar .byline.ytmusic-player-bar,
+ytmusic-player-bar .subtitle.ytmusic-player-bar {
+  font-family: var(--lq-font-interface);
+  color: var(--lq-moondust);
+}
+
+/* ── Volume slider — Orbit Noir, functional ────────────────────────── */
+ytmusic-player-bar #volume-slider.ytmusic-player-bar,
+ytmusic-player-bar #expand-volume-slider.ytmusic-player-bar {
+  --paper-slider-active-color: var(--lq-milkglass) !important;
+  --paper-slider-knob-color: var(--lq-milkglass) !important;
+  --paper-slider-container-color: var(--lq-hairline) !important;
+}
+
+/* ── FX + gear affordances — de-brand the Stage A stopgap styling ─────
+   The buttons are injected by `fx-rack.ts` / `settings-panel.ts` with inline
+   placeholder styling. Re-theme them here to the Orbit Noir language. The rack
+   rebuild is Stage C; this only stops the current one reading as a black box. */
+#lacquer-fx-button,
+#lacquer-gear-button {
+  background: transparent !important;
+  border: 1px solid var(--lq-hairline) !important;
+  border-radius: var(--lq-radius-md) !important;
+  color: var(--lq-moondust) !important;
+  font-family: var(--lq-font-interface) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  transition:
+    border-color var(--lq-motion-fast),
+    color var(--lq-motion-fast) !important;
+}
+#lacquer-fx-button:hover,
+#lacquer-gear-button:hover {
+  border-color: var(--lq-ion) !important;
+  color: var(--lq-milkglass) !important;
+}
+/* Active FX preset indicator — Solar, an expressive "something is on" cue that
+   is not Ion (so it is not confused with a functional/selected state). */
+#lacquer-fx-button[data-lacquer-fx-active='true'] {
+  border-color: var(--lq-solar) !important;
+  color: var(--lq-solar) !important;
+}
+
+/* The rack + settings menu float — Blueglass, per §4. Light touch only. */
+#lacquer-fx-rack-container,
+#lacquer-settings-menu-container {
+  background: var(--lq-blueglass) !important;
+  backdrop-filter: var(--lq-blueglass-blur);
+  border: 1px solid var(--lq-blueglass-border) !important;
+  border-radius: var(--lq-radius-md) !important;
+}
+#lacquer-fx-rack-container > div:first-child {
+  font-family: var(--lq-font-graphic) !important;
+  color: var(--lq-moondust) !important;
+}
+#lacquer-fx-rack-container button {
+  font-family: var(--lq-font-interface) !important;
+  border-radius: var(--lq-radius-sm) !important;
+}

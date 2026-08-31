@@ -111,9 +111,14 @@ try {
   const version = await waitForCdp(port);
   console.log(`[capture] attached to ${version.Browser}`);
 
-  exitCode = await run('npx', ['playwright', 'test', '--project=capture'], {
-    LACQUER_CDP_ENDPOINT: `http://127.0.0.1:${port}`,
-  });
+  // `pnpm test:capture -- <grep>` narrows the run to matching test titles.
+  const grep = process.argv.slice(2).filter((a) => !a.startsWith('-'));
+  const grepArgs = grep.length ? ['--grep', grep.join(' ')] : [];
+  exitCode = await run(
+    'npx',
+    ['playwright', 'test', '--project=capture', ...grepArgs],
+    { LACQUER_CDP_ENDPOINT: `http://127.0.0.1:${port}` },
+  );
 
   console.log(
     exitCode === 0

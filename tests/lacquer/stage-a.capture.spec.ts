@@ -1,6 +1,13 @@
 import { test, expect, type Locator } from '@playwright/test';
 
-import { attachToLacquer, capture, isSignedIn, settle } from './harness';
+import {
+  attachToLacquer,
+  capture,
+  isSignedIn,
+  settle,
+  showBrowse,
+  showPlayer,
+} from './harness';
 
 /**
  * Stage A's screenshot gate.
@@ -22,73 +29,11 @@ import { attachToLacquer, capture, isSignedIn, settle } from './harness';
 
 test.describe.configure({ mode: 'serial' });
 
-type CapturePage = Awaited<ReturnType<typeof attachToLacquer>>['page'];
-
 /**
- * The player page is an **overlay, not a route**.
- *
- * With a track playing, YouTube Music sits on `/watch` with the browse feed
- * already rendered underneath. Calling `ytmusic-app.navigate('/')` to "go home"
- * does not help — it produces the malformed route `/browse//`, which renders
- * nothing at all. That is what made every browse capture come back empty, and
- * it was misread first as "the feed isn't loading" and then (by me) as an
- * element covering the content. `document.elementFromPoint` at the viewport
- * centre returned `html`: nothing was covering it, the page was genuinely
- * blank because the route was broken.
- *
- * So captures never navigate. They toggle the overlay, and the correct feed is
- * revealed underneath.
+ * The player page is an overlay, not a route: captures toggle it and never
+ * navigate. `showBrowse` / `showPlayer` (shared, in `harness.ts`) are the only
+ * way this spec switches views.
  */
-const setPlayerPage = async (page: CapturePage, open: boolean) => {
-  await page
-    .evaluate((wantOpen: boolean) => {
-      const layout = document.querySelector('ytmusic-app-layout');
-      if (!layout) return;
-      if (layout.hasAttribute('player-page-open') === wantOpen) return;
-      document
-        .querySelector<HTMLElement>(
-          'ytmusic-player-bar .toggle-player-page-button',
-        )
-        ?.click();
-    }, open)
-    .catch(() => undefined);
-
-  await page
-    .waitForFunction(
-      (wantOpen: boolean) =>
-        document
-          .querySelector('ytmusic-app-layout')
-          ?.hasAttribute('player-page-open') === wantOpen,
-      open,
-      { timeout: 10_000 },
-    )
-    .catch(() => undefined);
-};
-
-/** Reveal the browse feed. */
-const showBrowse = async (page: CapturePage) => {
-  await setPlayerPage(page, false);
-
-  // Wait on rendered cards. `ytmusic-browse-response` measures 0px tall even
-  // when fully populated — its content sits in a scrolled child — so height is
-  // never a usable readiness signal here.
-  await page
-    .waitForFunction(
-      () => document.querySelectorAll('ytmusic-two-row-item-renderer').length > 0,
-      undefined,
-      { timeout: 20_000 },
-    )
-    .catch(() => undefined);
-
-  await settle(page);
-};
-
-/** Reveal the player page. */
-const showPlayer = async (page: CapturePage) => {
-  await setPlayerPage(page, true);
-  await settle(page, 2000);
-};
-
 test('Stage A — shell captures', async () => {
   const { page, dispose } = await attachToLacquer();
   // The running app restores a playing track; navigating away from it can raise

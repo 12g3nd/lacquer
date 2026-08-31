@@ -36,6 +36,10 @@ export default defineConfig({
     {
       name: 'capture',
       testMatch: ['**/*.capture.spec.ts'],
+      // Captures drive a real signed-in app over CDP — searching, opening an
+      // album, playing a track, toggling the overlay, resizing. That is minutes
+      // of genuine UI settling, not the seconds a headless assertion takes.
+      timeout: 360_000,
     },
   ],
 });

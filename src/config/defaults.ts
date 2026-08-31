@@ -103,7 +103,11 @@ export const defaultConfig: DefaultConfig = {
     hideMenuWarned: false,
     startAtLogin: false,
     disableHardwareAcceleration: false,
-    removeUpgradeButton: false,
+    // Orbit Noir has no upgrade nag — an ad-free, un-monetised surface is a
+    // design premise (D11). Pear's own mechanism hides the guide entry by icon
+    // path; `rail.ts` also drops any primary entry past Listen/Discover/
+    // Collection for profiles that already stored `false` here.
+    removeUpgradeButton: true,
     restartOnConfigChanges: false,
     trayClickPlayPause: false,
     autoResetAppCache: false,

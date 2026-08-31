@@ -22,17 +22,25 @@ The menu dynamically hides irrelevant items (e.g., "Go to album" is hidden if al
 
 ## Settings & Recoverability
 To maintain a clean, immersive interface, the native menu bar is hidden by default. A gear icon is injected into the bottom transport deck (next to the FX button). Clicking this button provides a quick-access menu for:
-- Plugins & Options (toggles the in-app menu)
+- Plugins & Options (opens `config.json` via `lacquer:edit-config` — works with `in-app-menu` off, D8)
 - Reload
-- Developer Tools
+- Developer Tools (`lacquer:toggle-dev-tools`)
 
-Pressing `Alt` on Windows continues to reveal the native system menu.
+Pressing `Alt` on Windows continues to reveal the native system menu. Account
+access moved from the titlebar to the rail footer in Stage B (D8).
 
 ## Album-Color Contrast Strategy
-Lacquer heavily utilizes `ytmusic-album-color` and `ytmusic-album-color-dark` provided by the Pear backend. To prevent unreadable interfaces:
-- The ambient background (`--lacquer-album-tint`) has a baseline opacity.
-- Critical text overlays, such as lyrics, receive a `text-shadow` to ensure legibility against extremely bright or saturated artwork.
-- Focus rings for accessibility use the primary accent color (`--lacquer-album-accent`) with a high-contrast offset.
+**Superseded by `DESIGN.md` §3.4 and the Stage B implementation.** Lacquer does
+**not** consume `--ytmusic-album-color*` directly. `src/lacquer/album-color.ts`
+(B1) reads the plugin's raw triple, normalises it in OKLCH into contrast-safe
+bands, and publishes its own `--lq-album-*` set (`atmosphere`, `fill`, `veil`,
+`ink`), falling back to Orbit Noir for near-monochrome extraction.
+- Only the player-page atmosphere, the transport tint, the progress fill and the
+  play/pause button take album colour (D6). Focus rings, keyboard selection,
+  active nav, toggles and every text colour stay Ion/Signal on every screen.
+- Text laid over artwork sits on an Instrument surface or a `--lq-album-veil`
+  scrim — **never a `text-shadow`** (the shipped build's approach, now removed).
+  Lyrics render on an opaque Instrument panel.
 
 ## Shortcuts
 Lacquer introduces new configurable shortcuts in the standard Options > Shortcuts menu:

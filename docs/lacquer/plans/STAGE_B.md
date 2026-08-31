@@ -15,10 +15,14 @@ authored surfaces remain.
 | Task | Owner | Status |
 |---|---|---|
 | B1 Album-colour engine | done | Complete — `src/lacquer/album-color.ts` |
-| B2 Authored left rail | Sonnet | **TODO** |
-| B3 Authored transport deck | Sonnet | **TODO** |
-| B4 Player stage (Experience) | Sonnet | **TODO** |
-| B5 Inspector | Sonnet | **TODO** |
+| B2 Authored left rail | Sonnet | **Done** — `rail.css` + `rail.ts` |
+| B3 Authored transport deck | Sonnet | **Done** — `transport.css` (layout-order deviation, see report) |
+| B4 Player stage (Experience) | Sonnet | **Done** — `player-stage.css` + `player-stage.ts` |
+| B5 Inspector | Sonnet | **Done** — `inspector.css` |
+
+**Completion report:** `docs/lacquer/V1_STATUS.md` (Stage B section) and the commit
+message. Screenshot gate: `pnpm test:capture` writes the twelve shots to
+`test-results/capture/`; `tests/lacquer/stage-b.capture.spec.ts`.
 
 **B1 publishes the tokens the rest of the stage consumes.** Do not recompute
 album colour, do not read `--ytmusic-album-color` directly, and do not widen the

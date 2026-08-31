@@ -314,11 +314,17 @@ const showNeedToRestartDialog = async (id: string) => {
 function initTheme(win: BrowserWindow) {
   injectCSS(win.webContents, musicPlayerCss);
   // Order matters: tokens define the `--lq-*` custom properties, fonts load the
-  // four faces, suppression de-brands stock chrome using both.
+  // four faces, suppression de-brands stock chrome using both. The Stage B
+  // authored region sheets (rail / transport / player-stage / inspector) are
+  // NOT here — they are adopted stylesheets applied from the renderer *after*
+  // the plugins, because `adoptedStyleSheets` always cascade after
+  // `insertCSS`-injected sheets and `album-color-theme` (on by default, D11)
+  // recolours stock surfaces through one. See `adoptLacquerRegionSheets`.
   injectCSS(win.webContents, lacquerTokensCss);
   injectCSS(win.webContents, lacquerFontsCss);
   injectCSS(win.webContents, lacquerSuppressCss);
-  // Load user CSS
+
+  // Load user CSS — last, so a user theme still wins.
   const themes: string[] = config.get('options.themes');
   if (Array.isArray(themes)) {
     for (const cssFile of themes) {
