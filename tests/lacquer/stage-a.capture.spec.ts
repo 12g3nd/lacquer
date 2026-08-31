@@ -22,63 +22,71 @@ import { attachToLacquer, capture, isSignedIn, settle } from './harness';
 
 test.describe.configure({ mode: 'serial' });
 
-const MUSIC = 'https://music.youtube.com';
+type CapturePage = Awaited<ReturnType<typeof attachToLacquer>>['page'];
 
-/** SPA-navigates without a full reload, so nothing fires `beforeunload`. */
-const navigate = async (
-  page: Awaited<ReturnType<typeof attachToLacquer>>['page'],
-  path: string,
-) => {
+/**
+ * The player page is an **overlay, not a route**.
+ *
+ * With a track playing, YouTube Music sits on `/watch` with the browse feed
+ * already rendered underneath. Calling `ytmusic-app.navigate('/')` to "go home"
+ * does not help — it produces the malformed route `/browse//`, which renders
+ * nothing at all. That is what made every browse capture come back empty, and
+ * it was misread first as "the feed isn't loading" and then (by me) as an
+ * element covering the content. `document.elementFromPoint` at the viewport
+ * centre returned `html`: nothing was covering it, the page was genuinely
+ * blank because the route was broken.
+ *
+ * So captures never navigate. They toggle the overlay, and the correct feed is
+ * revealed underneath.
+ */
+const setPlayerPage = async (page: CapturePage, open: boolean) => {
   await page
-    .evaluate((p: string) => {
-      const app = document.querySelector('ytmusic-app') as
-        | (Element & { navigate?: (path: string) => void })
-        | null;
-      if (app?.navigate) app.navigate(p);
-      else location.assign(p);
-    }, path)
+    .evaluate((wantOpen: boolean) => {
+      const layout = document.querySelector('ytmusic-app-layout');
+      if (!layout) return;
+      if (layout.hasAttribute('player-page-open') === wantOpen) return;
+      document
+        .querySelector<HTMLElement>(
+          'ytmusic-player-bar .toggle-player-page-button',
+        )
+        ?.click();
+    }, open)
     .catch(() => undefined);
 
-  // Wait for rendered content, not a fixed delay. YouTube Music's feed can take
-  // ~8s to paint on a cold navigation, and the previous fixed 1200ms settle
-  // captured the shell with an empty centre — which then got reported as "the
-  // feed isn't loading in the capture window". It was loading; the capture was
-  // early. Misleading evidence is exactly what this gate exists to prevent, so
-  // wait on the DOM and only fall back to a delay when a route genuinely has no
-  // cards (an empty library, say).
-  // The player page is an overlay, not a route: with a track playing it stays
-  // open across navigation and covers the browse content entirely. That is what
-  // produced the "empty centre" captures — the feed was rendered underneath the
-  // whole time. Collapse it before capturing anything that is not the player.
-  if (!path.startsWith('/watch')) {
-    await page
-      .evaluate(() => {
-        const layout = document.querySelector('ytmusic-app-layout');
-        if (!layout?.hasAttribute('player-page-open')) return;
-        document
-          .querySelector<HTMLElement>(
-            'ytmusic-player-bar .toggle-player-page-button',
-          )
-          ?.click();
-      })
-      .catch(() => undefined);
-  }
-
-  // Wait on rendered cards. Note `ytmusic-browse-response` itself measures 0px
-  // tall even when fully populated — its content sits in a scrolled child — so
-  // height is not a usable readiness signal here.
   await page
     .waitForFunction(
-      () =>
-        document.querySelectorAll(
-          'ytmusic-two-row-item-renderer, ytmusic-responsive-list-item-renderer, ytmusic-player-queue-item',
-        ).length > 0,
+      (wantOpen: boolean) =>
+        document
+          .querySelector('ytmusic-app-layout')
+          ?.hasAttribute('player-page-open') === wantOpen,
+      open,
+      { timeout: 10_000 },
+    )
+    .catch(() => undefined);
+};
+
+/** Reveal the browse feed. */
+const showBrowse = async (page: CapturePage) => {
+  await setPlayerPage(page, false);
+
+  // Wait on rendered cards. `ytmusic-browse-response` measures 0px tall even
+  // when fully populated — its content sits in a scrolled child — so height is
+  // never a usable readiness signal here.
+  await page
+    .waitForFunction(
+      () => document.querySelectorAll('ytmusic-two-row-item-renderer').length > 0,
       undefined,
       { timeout: 20_000 },
     )
     .catch(() => undefined);
 
   await settle(page);
+};
+
+/** Reveal the player page. */
+const showPlayer = async (page: CapturePage) => {
+  await setPlayerPage(page, true);
+  await settle(page, 2000);
 };
 
 test('Stage A — shell captures', async () => {
@@ -104,7 +112,7 @@ test('Stage A — shell captures', async () => {
       written.push(file);
     };
 
-    await navigate(page, '/');
+    await showBrowse(page);
 
     /* 1 — Home, maximised (current window size). One header row, not two; no
        stock YouTube Music wordmark. */
@@ -130,14 +138,14 @@ test('Stage A — shell captures', async () => {
     await shotOf(page.locator('ytmusic-nav-bar'), '04-account-access');
 
     /* 5 — Player page, playing. Stock chrome suppressed; plain is fine. */
-    await navigate(page, '/watch');
+    await showPlayer(page);
     await settle(page, 2500);
     await shot('05-player-page');
 
     /* 6 — Titlebar. Window snap / drag can't be driven over CDP; this captures
        the frameless titlebar + native Windows control overlay so a human can
        confirm the region and the drag affordance. */
-    await navigate(page, '/');
+    await showBrowse(page);
     await shotOf(page.locator('ytmusic-nav-bar'), '06-titlebar');
 
     /* 7 — Search focused. Focus ring must be Ion cobalt and clearly visible. */
@@ -178,7 +186,7 @@ test('Stage A — shell captures', async () => {
       return out;
     });
     console.log('  resolved plugin state:', JSON.stringify(plugins, null, 2));
-    await navigate(page, '/');
+    await showBrowse(page);
     await shot('08-settings-context');
 
     for (const file of written) console.log(`  captured ${file}`);

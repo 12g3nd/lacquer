@@ -120,6 +120,21 @@ ytmusic-nav-bar #right-content {
   margin-right: 140px !important; /* native min / max / close overlay */
 }
 
+/* ── Collapsed player must not float over the feed ─────────────────
+   YouTube collapses the player page by translating it off-screen and setting
+   `visibility: hidden` on it. But its own stylesheet gives `ytmusic-player`
+   `position: fixed` *and* an explicit `visibility: visible`, and an explicit
+   value on a child overrides a hidden parent — so the artwork escapes and
+   floats over the browse feed at roughly 190px square.
+
+   Not introduced by Lacquer: verified as not inline, not `video-toggle`
+   (its body class is absent), and absent from Pear's `music-player.css`.
+   Hide the player along with the page it belongs to. Audio is unaffected —
+   `visibility` does not stop the underlying <video> element. */
+ytmusic-app-layout:not([player-page-open]) ytmusic-player {
+  visibility: hidden !important;
+}
+
 /* ── Rail surface ──────────────────────────────────────────────────
    The stock guide wrapper keeps YouTube's near-black (#030303), which
    DESIGN.md 3.3 rules out outright: the darkest surface in Orbit Noir is
