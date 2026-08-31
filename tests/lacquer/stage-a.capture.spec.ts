@@ -38,6 +38,46 @@ const navigate = async (
       else location.assign(p);
     }, path)
     .catch(() => undefined);
+
+  // Wait for rendered content, not a fixed delay. YouTube Music's feed can take
+  // ~8s to paint on a cold navigation, and the previous fixed 1200ms settle
+  // captured the shell with an empty centre — which then got reported as "the
+  // feed isn't loading in the capture window". It was loading; the capture was
+  // early. Misleading evidence is exactly what this gate exists to prevent, so
+  // wait on the DOM and only fall back to a delay when a route genuinely has no
+  // cards (an empty library, say).
+  // The player page is an overlay, not a route: with a track playing it stays
+  // open across navigation and covers the browse content entirely. That is what
+  // produced the "empty centre" captures — the feed was rendered underneath the
+  // whole time. Collapse it before capturing anything that is not the player.
+  if (!path.startsWith('/watch')) {
+    await page
+      .evaluate(() => {
+        const layout = document.querySelector('ytmusic-app-layout');
+        if (!layout?.hasAttribute('player-page-open')) return;
+        document
+          .querySelector<HTMLElement>(
+            'ytmusic-player-bar .toggle-player-page-button',
+          )
+          ?.click();
+      })
+      .catch(() => undefined);
+  }
+
+  // Wait on rendered cards. Note `ytmusic-browse-response` itself measures 0px
+  // tall even when fully populated — its content sits in a scrolled child — so
+  // height is not a usable readiness signal here.
+  await page
+    .waitForFunction(
+      () =>
+        document.querySelectorAll(
+          'ytmusic-two-row-item-renderer, ytmusic-responsive-list-item-renderer, ytmusic-player-queue-item',
+        ).length > 0,
+      undefined,
+      { timeout: 20_000 },
+    )
+    .catch(() => undefined);
+
   await settle(page);
 };
 

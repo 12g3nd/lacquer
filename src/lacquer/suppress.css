@@ -120,6 +120,23 @@ ytmusic-nav-bar #right-content {
   margin-right: 140px !important; /* native min / max / close overlay */
 }
 
+/* ── Rail surface ──────────────────────────────────────────────────
+   The stock guide wrapper keeps YouTube's near-black (#030303), which
+   DESIGN.md 3.3 rules out outright: the darkest surface in Orbit Noir is
+   Orbit itself, and pure black is not in the palette. Left alone it reads
+   as a black slab bolted to a navy shell, because the titlebar and
+   transport above and below it are already Instrument.
+
+   Give it the same Instrument material they carry. The *authored* rail —
+   labels, density, Ion active and hover states, the account footer — is
+   Stage B (B2); this is only the ground. */
+#guide-wrapper,
+tp-yt-app-drawer#guide,
+ytmusic-guide-renderer,
+#mini-guide.ytmusic-app-layout {
+  background: var(--lq-instrument) !important;
+}
+
 /* ── Transport surface ─────────────────────────────────────────────
    The stock player bar defaults to the brand background. Give it the
    Instrument material and a Chrome hairline. The *authored* transport deck —
