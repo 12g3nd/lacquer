@@ -9,6 +9,7 @@ import {
   registerWindowDefaultTrustedTypePolicy,
 } from '@/utils/trusted-types';
 
+import { initAlbumColor } from './lacquer/album-color';
 import { initContextMenu } from './lacquer/context-menu';
 import { initFXRack } from './lacquer/fx-rack';
 import { initSettingsPanel } from './lacquer/settings-panel';
@@ -338,6 +339,10 @@ async function onApiLoaded() {
   initTitleBar();
   initSettingsPanel();
   initContextMenu();
+  // Reads the album-colour plugin's output and republishes Lacquer's own
+  // `--lq-album-*` tokens. DOM-only, and safe before playback: with no artwork
+  // yet it simply publishes the Orbit Noir fallback.
+  initAlbumColor();
 
   const video = document.querySelector('video')!;
   const audioContext = new AudioContext();

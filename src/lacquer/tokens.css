@@ -8,6 +8,29 @@
  * and §6 and does not deviate from it.
  */
 
+/*
+ * Album tokens are registered so they can be *transitioned*. An unregistered
+ * custom property is an untyped token and animates as a discrete swap; typed
+ * as `<color>`, the browser interpolates it, which is what lets a track change
+ * read as the light in the room changing rather than a theme switching
+ * (DESIGN.md §6, Atmosphere).
+ */
+@property --lq-album-atmosphere {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2c4272;
+}
+@property --lq-album-fill {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #4f7dff;
+}
+@property --lq-album-veil {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #16233f;
+}
+
 :root {
   /* ── Orbit Noir palette · DESIGN.md §3.1 ──────────────────────────── */
   --lq-orbit: #0b1731; /* deepest surface, app ground */
@@ -47,13 +70,22 @@
 
   /* ── Album-reactive tokens · DESIGN.md §3.4 ───────────────────────── */
   /* Lacquer publishes its OWN album tokens; it does not consume the plugin's
-     `--ytmusic-album-color*` directly. Stage A only declares the fallbacks —
-     normalisation that fills these on track change is Stage B. Until then the
-     Experience surface is Orbit Noir, which is the correct plain baseline. */
-  --lq-album-atmosphere: var(
-    --lq-orbit
-  ); /* player-page gradient / bloom base */
+     `--ytmusic-album-color*` directly. `album-color.ts` normalises the raw
+     extraction in OKLCH and writes these on track change; the values below are
+     the Orbit Noir fallback, used before the first track and whenever artwork
+     normalises to near-monochrome. */
+  --lq-album-atmosphere: #2c4272; /* player-page gradient / bloom base */
   --lq-album-fill: var(--lq-ion); /* progress-bar fill + play/pause button */
+  --lq-album-veil: #16233f; /* scrim under text laid over artwork */
+  --lq-album-ink: var(--lq-orbit); /* reads on top of --lq-album-fill */
+
+  /* Atmosphere duration · DESIGN.md §6. Slow enough to read as light changing.
+     Only the album tokens transition; nothing else on :root inherits a
+     transition from here, because only these three are registered types. */
+  transition:
+    --lq-album-atmosphere 900ms ease-out,
+    --lq-album-fill 900ms ease-out,
+    --lq-album-veil 900ms ease-out;
 
   /* ── Typography roles · DESIGN.md §5 ──────────────────────────────── */
   /* Faces are declared in `fonts.css`; these bind a role to a stack. Never set
