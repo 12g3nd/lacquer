@@ -7,6 +7,56 @@
 
 ---
 
+## Split execution — read this first
+
+Same split as Stage A, by owner decision. **B1 is done and committed**; the four
+authored surfaces remain.
+
+| Task | Owner | Status |
+|---|---|---|
+| B1 Album-colour engine | done | Complete — `src/lacquer/album-color.ts` |
+| B2 Authored left rail | Sonnet | **TODO** |
+| B3 Authored transport deck | Sonnet | **TODO** |
+| B4 Player stage (Experience) | Sonnet | **TODO** |
+| B5 Inspector | Sonnet | **TODO** |
+
+**B1 publishes the tokens the rest of the stage consumes.** Do not recompute
+album colour, do not read `--ytmusic-album-color` directly, and do not widen the
+token set without checking DESIGN.md §3.4 first. What is available:
+
+| Token | Use |
+|---|---|
+| `--lq-album-atmosphere` | Player-page gradient and bloom |
+| `--lq-album-fill` | **Progress fill and play/pause button only** (the D6 exceptions) |
+| `--lq-album-veil` | Scrim under text laid over artwork — carries Milkglass at 7:1 |
+| `--lq-album-ink` | The glyph colour that reads on `--lq-album-fill` |
+
+`[data-lq-album-fallback]` is set on `:root` when artwork was unusable and Orbit
+Noir took over. All four tokens are contrast-guaranteed for *any* artwork by
+property tests over a 360-colour sweep — so if a surface looks unreadable, the
+consuming rule is wrong, not the token.
+
+The three colour tokens are registered with `@property` and crossfade over 900ms
+on `:root`. Do not add a second transition for them in a component.
+
+### The capture gate changed
+
+Two things that cost a lot of time to find, both now fixed in
+`tests/lacquer/stage-a.capture.spec.ts`:
+
+- **Captures never navigate.** The player page is an *overlay, not a route*:
+  with a track playing the browse feed is already rendered underneath it, and
+  `ytmusic-app.navigate('/')` produces the malformed route `/browse//`, which
+  renders nothing. Use the `showBrowse` / `showPlayer` helpers, which toggle the
+  overlay.
+- **`ytmusic-browse-response` measures 0px tall even when fully populated.**
+  Never gate readiness on its height; wait on rendered cards.
+
+Write Stage B's captures as a new `stage-b.capture.spec.ts` reusing those
+helpers. The twelve-shot table below is the gate.
+
+---
+
 ## Read first, in this order
 
 1. `.agents/rules/lacquer.md`
@@ -33,7 +83,7 @@ This is the stage that determines whether the project succeeded.
 
 ## Tasks
 
-### B1. The album-colour engine
+### B1. The album-colour engine  ·  DONE
 
 Build this **first**. Everything visual downstream depends on it.
 
