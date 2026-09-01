@@ -1,0 +1,98 @@
+/*
+ * Lacquer — titlebar & shell-nav styling (Stage C, C4 + C5).
+ *
+ * `titlebar.ts` injects the wordmark and the rail's back/forward buttons; this
+ * sheet owns their whole appearance so the module carries no inline colour or
+ * type. Operate surface — the stable spine, never album-reactive.
+ *
+ * The wordmark is a real inline SVG mark (C4): a lacquered record read against
+ * an orbit, with a spectral-diffraction arc off the disc edge — the CD-surface
+ * and orbital vocabulary from DESIGN.md §1. It sits beside "Lacquer" set in the
+ * Graphic voice (Space Grotesk), which ties it to the rest of Orbit Noir.
+ */
+
+/* ── Wordmark ─────────────────────────────────────────────────────── */
+#lacquer-wordmark {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--lq-space-2);
+  user-select: none;
+  -webkit-app-region: no-drag;
+}
+.lq-wordmark-svg {
+  height: 22px;
+  width: auto;
+  display: block;
+  overflow: visible;
+}
+
+.lq-mark-disc {
+  fill: var(--lq-atlantic);
+  stroke: var(--lq-milkglass);
+  stroke-opacity: 0.18;
+  stroke-width: 1;
+}
+.lq-mark-groove {
+  fill: none;
+  stroke: var(--lq-milkglass);
+  stroke-width: 1;
+  opacity: 0.24;
+}
+.lq-mark-spindle {
+  fill: var(--lq-orbit);
+  stroke: var(--lq-hairline-strong);
+  stroke-width: 1;
+}
+.lq-mark-orbit {
+  fill: none;
+  stroke: var(--lq-hairline-strong);
+  stroke-width: 1;
+}
+.lq-mark-orbit-body {
+  fill: var(--lq-solar);
+}
+/* The diffraction arc — Chrome linework catching the spectrum. */
+.lq-mark-spectrum {
+  fill: none;
+  stroke: url(#lq-mark-spectrum-grad);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+#lq-mark-spectrum-grad stop:nth-child(1) {
+  stop-color: var(--lq-ion);
+}
+#lq-mark-spectrum-grad stop:nth-child(2) {
+  stop-color: var(--lq-signal);
+}
+#lq-mark-spectrum-grad stop:nth-child(3) {
+  stop-color: var(--lq-ultraviolet);
+}
+#lq-mark-spectrum-grad stop:nth-child(4) {
+  stop-color: var(--lq-solar);
+}
+
+.lq-wordmark-text {
+  font-family: var(--lq-font-graphic);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  fill: var(--lq-milkglass);
+}
+
+/* ── Rail back / forward buttons ──────────────────────────────────── */
+.lq-shell-navbtn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--lq-radius-sm);
+  background: transparent;
+  color: var(--lq-text);
+  cursor: pointer;
+  transition: background-color var(--lq-motion-fast);
+}
+.lq-shell-navbtn:hover {
+  background: var(--lq-instrument-raised);
+}

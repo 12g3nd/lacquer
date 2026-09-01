@@ -13,13 +13,15 @@ Same split as Stages A and B. **C2 is done and committed**; the rest remain.
 
 | Task | Owner | Status |
 |---|---|---|
-| C1 FX rack as instrument panel | Sonnet | **TODO** |
+| C1 FX rack as instrument panel | Sonnet | **Done** — `fx-rack.ts` + `fx-rack.css` |
 | C2 Context-menu **classifier** | done | Complete — `src/lacquer/context-menu-classify.ts` |
-| C2 Context-menu **keyboard nav** | Sonnet | **TODO** — see below |
-| C2 **`closeMenu()`** | Sonnet | **TODO** — see below |
-| C3 Motion pass | Sonnet | **TODO** |
-| C4 Lacquer wordmark | Sonnet | **TODO** |
-| C5 Final consistency sweep | Sonnet | **TODO** |
+| C2 Context-menu **keyboard nav** | Sonnet | **Done** — roving-focus controller in `context-menu.ts` |
+| C2 **`closeMenu()`** | Sonnet | **Done** — calls the dropdown's `close()` |
+| C3 Motion pass | Sonnet | **Done** — token-driven; `prefers-reduced-motion` in `suppress.css` |
+| C4 Lacquer wordmark | Sonnet | **Done** — inline SVG mark + `assets/` icons via `pnpm make:icons` |
+| C5 Final consistency sweep | Sonnet | **Done** — inline styles routed to adopted sheets; docs updated |
+| Housekeeping: lyrics strip | Sonnet | **Done** — stray band removed (picker compacted) |
+| Housekeeping: browse immersive header | Sonnet | **Done** — `#background.immersive-background` suppressed |
 
 ### What C2 found, so it is not undone
 

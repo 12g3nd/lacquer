@@ -11,15 +11,19 @@ import {
 
 import { initAlbumColor } from './lacquer/album-color';
 import { initContextMenu } from './lacquer/context-menu';
-import { initFXRack } from './lacquer/fx-rack';
+import lacquerContextMenuCss from './lacquer/context-menu.css?inline';
+import { initFXRack, setFXRackOpen } from './lacquer/fx-rack';
+import lacquerFxRackCss from './lacquer/fx-rack.css?inline';
 import lacquerInspectorCss from './lacquer/inspector.css?inline';
 import { initPlayerStage } from './lacquer/player-stage';
 import lacquerPlayerStageCss from './lacquer/player-stage.css?inline';
 import { initRail } from './lacquer/rail';
 import lacquerRailCss from './lacquer/rail.css?inline';
 import { initSettingsPanel } from './lacquer/settings-panel';
+import lacquerSettingsPanelCss from './lacquer/settings-panel.css?inline';
 import { signalChain } from './lacquer/signal-chain';
 import { initTitleBar } from './lacquer/titlebar';
+import lacquerTitlebarCss from './lacquer/titlebar.css?inline';
 import lacquerTransportCss from './lacquer/transport.css?inline';
 import {
   createContext,
@@ -66,10 +70,14 @@ function adoptLacquerRegionSheets() {
   if (lacquerRegionSheetsAdopted) return;
   lacquerRegionSheetsAdopted = true;
   const sheets = [
+    lacquerTitlebarCss,
     lacquerRailCss,
     lacquerTransportCss,
     lacquerPlayerStageCss,
     lacquerInspectorCss,
+    lacquerFxRackCss,
+    lacquerContextMenuCss,
+    lacquerSettingsPanelCss,
   ].map((css) => {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(css);
@@ -163,11 +171,7 @@ async function onApiLoaded() {
   });
 
   window.ipcRenderer.on('peard:fx-rack-toggle', () => {
-    const container = document.getElementById('lacquer-fx-rack-container');
-    if (container) {
-      const isShowing = container.style.display === 'flex';
-      container.style.display = isShowing ? 'none' : 'flex';
-    }
+    setFXRackOpen();
   });
 
   window.ipcRenderer.on('peard:fx-set-preset', (_, preset: string) => {

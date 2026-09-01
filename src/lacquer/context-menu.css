@@ -1,0 +1,79 @@
+/*
+ * Lacquer — the track / item context menu (Stage C, C2).
+ *
+ * `context-menu.ts` reorganises the stock YouTube Music menu into Lacquer's two
+ * tiers and runs its own roving-focus keyboard navigation over the result. This
+ * sheet gives the popup the Blueglass material (§4 — a transient floating
+ * surface) and the Interface voice, and aligns Lacquer's own rows with the
+ * stock ones. No album token appears here: a menu is Operate structure.
+ */
+
+ytmusic-menu-popup-renderer,
+ytmusic-menu-popup-renderer tp-yt-paper-listbox {
+  background: var(--lq-blueglass) !important;
+  backdrop-filter: var(--lq-blueglass-blur);
+  border-radius: var(--lq-radius-md);
+  font-family: var(--lq-font-interface);
+}
+ytmusic-menu-popup-renderer tp-yt-paper-listbox {
+  border: 1px solid var(--lq-blueglass-border) !important;
+  padding: var(--lq-space-1);
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+}
+
+/* Menu rows — stock renderers and Lacquer's own, unified. */
+ytmusic-menu-popup-renderer [data-lacquer-menuitem] {
+  margin: 1px 0;
+  border-radius: var(--lq-radius-sm);
+  color: var(--lq-milkglass);
+  transition: background-color var(--lq-motion-fast);
+}
+ytmusic-menu-popup-renderer [data-lacquer-menuitem][hidden] {
+  display: none !important;
+}
+ytmusic-menu-popup-renderer [data-lacquer-menuitem]:hover,
+ytmusic-menu-popup-renderer [data-lacquer-menuitem]:focus-visible {
+  background: color-mix(in srgb, var(--lq-ion) 15%, transparent);
+}
+ytmusic-menu-popup-renderer [data-lacquer-menuitem] yt-formatted-string,
+ytmusic-menu-popup-renderer [data-lacquer-menuitem] .text {
+  color: var(--lq-milkglass);
+  font-family: var(--lq-font-interface);
+}
+
+/* Lacquer's own rows (FX presets, FX…, More…). The left inset matches the
+   stock rows' icon column so the two kinds of item line up. */
+.lacquer-menu-item {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--lq-space-4) 0 2.6rem;
+  font-size: 14px;
+  color: var(--lq-milkglass);
+  cursor: pointer;
+  user-select: none;
+}
+.lacquer-menu-item .lacquer-menu-label {
+  font-family: var(--lq-font-interface);
+}
+.lacquer-menu-item[data-lacquer-more] {
+  color: var(--lq-moondust);
+  font-size: 13px;
+}
+
+.lacquer-menu-separator {
+  height: 1px;
+  margin: var(--lq-space-1) var(--lq-space-3);
+  background: var(--lq-hairline);
+}
+
+ytmusic-menu-popup-renderer tp-yt-paper-listbox::-webkit-scrollbar {
+  width: 8px;
+}
+ytmusic-menu-popup-renderer tp-yt-paper-listbox::-webkit-scrollbar-thumb {
+  background: var(--lq-hairline-strong);
+  border-radius: var(--lq-radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}

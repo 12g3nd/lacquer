@@ -147,10 +147,12 @@ ytmusic-player-bar #expand-volume-slider.ytmusic-player-bar {
   --paper-slider-container-color: var(--lq-hairline) !important;
 }
 
-/* ── FX + gear affordances — de-brand the Stage A stopgap styling ─────
-   The buttons are injected by `fx-rack.ts` / `settings-panel.ts` with inline
-   placeholder styling. Re-theme them here to the Orbit Noir language. The rack
-   rebuild is Stage C; this only stops the current one reading as a black box. */
+/* ── FX + gear affordances ───────────────────────────────────────────
+   Both buttons are injected by renderer modules (`fx-rack.ts`,
+   `settings-panel.ts`). They carry no inline styling of their own any more —
+   this sheet owns their whole appearance, in the Orbit Noir language.
+   `!important` here beats `album-color-theme`'s equal-specificity dimming of
+   player-bar controls, the same reason the rest of this file needs it. */
 #lacquer-fx-button,
 #lacquer-gear-button {
   background: transparent !important;
@@ -170,26 +172,23 @@ ytmusic-player-bar #expand-volume-slider.ytmusic-player-bar {
   border-color: var(--lq-ion) !important;
   color: var(--lq-milkglass) !important;
 }
-/* Active FX preset indicator — Solar, an expressive "something is on" cue that
-   is not Ion (so it is not confused with a functional/selected state). */
-#lacquer-fx-button[data-lacquer-fx-active='true'] {
+/* Rack open — a quiet Chrome cue that the popover belongs to this button. */
+#lacquer-fx-button[aria-expanded='true'] {
+  border-color: var(--lq-hairline-strong) !important;
+  color: var(--lq-milkglass) !important;
+}
+/* Active FX preset / moved parameter — Solar, an expressive "something is on"
+   cue that is not Ion (so it is not confused with a functional/selected state). */
+#lacquer-fx-button[data-lacquer-fx-active] {
   border-color: var(--lq-solar) !important;
   color: var(--lq-solar) !important;
 }
 
-/* The rack + settings menu float — Blueglass, per §4. Light touch only. */
-#lacquer-fx-rack-container,
+/* The settings menu floats — Blueglass, per §4. The FX rack's own Blueglass
+   surface is authored in `fx-rack.css`. */
 #lacquer-settings-menu-container {
   background: var(--lq-blueglass) !important;
   backdrop-filter: var(--lq-blueglass-blur);
   border: 1px solid var(--lq-blueglass-border) !important;
   border-radius: var(--lq-radius-md) !important;
-}
-#lacquer-fx-rack-container > div:first-child {
-  font-family: var(--lq-font-graphic) !important;
-  color: var(--lq-moondust) !important;
-}
-#lacquer-fx-rack-container button {
-  font-family: var(--lq-font-interface) !important;
-  border-radius: var(--lq-radius-sm) !important;
 }

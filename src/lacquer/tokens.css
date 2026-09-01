@@ -81,11 +81,13 @@
 
   /* Atmosphere duration · DESIGN.md §6. Slow enough to read as light changing.
      Only the album tokens transition; nothing else on :root inherits a
-     transition from here, because only these three are registered types. */
+     transition from here, because only these three are registered types. This
+     colour interpolation is opacity-equivalent, so it is kept under
+     `prefers-reduced-motion` (see `suppress.css`). */
   transition:
-    --lq-album-atmosphere 900ms ease-out,
-    --lq-album-fill 900ms ease-out,
-    --lq-album-veil 900ms ease-out;
+    --lq-album-atmosphere var(--lq-motion-atmosphere),
+    --lq-album-fill var(--lq-motion-atmosphere),
+    --lq-album-veil var(--lq-motion-atmosphere);
 
   /* ── Typography roles · DESIGN.md §5 ──────────────────────────────── */
   /* Faces are declared in `fonts.css`; these bind a role to a stack. Never set
@@ -114,7 +116,7 @@
   /* ── Motion · DESIGN.md §6 ────────────────────────────────────────── */
   --lq-motion-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --lq-motion-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --lq-motion-atmosphere: 800ms ease-out;
+  --lq-motion-atmosphere: 900ms ease-out;
 
   /* ── Shell geometry ──────────────────────────────────────────────── */
   --lq-titlebar-height: 44px;

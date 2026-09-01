@@ -1,7 +1,7 @@
 # Known Issues
 
-Accurate as of the end of Stage B. See `docs/lacquer/V1_STATUS.md` for what
-Stages A and B changed and `docs/lacquer/plans/STAGE_C.md` for what remains.
+Accurate as of the end of Stage C. See `docs/lacquer/V1_STATUS.md` for what
+each stage changed.
 
 ## Current
 
@@ -19,16 +19,16 @@ Stages A and B changed and `docs/lacquer/plans/STAGE_C.md` for what remains.
   scrolling the rail, but it is not sticky-on-top-of-the-scroll. Revisit if it
   proves annoying.
 
-- **The browse "immersive header" is not Orbit Noir.** Some browse routes (album
-  and playlist detail pages) render YTM's own art-derived gradient hero behind
-  the content well. It is the browse *feed*, not the rail (which never reacts),
-  and it is outside B2–B5's scope, but D5 wants the browse shell permanently
-  Orbit Noir. A small suppression belongs in a later housekeeping pass.
+- **Lyrics provider strip is compact but tight.** Stage C collapsed the stock
+  ~80px picker (which hung a stray band below the tab strip) into a single
+  opaque row — chevrons plus the provider name, dot row removed. The stray band
+  is resolved. The provider-name carousel still clips the adjacent providers'
+  names mid-transition; a proper single-label picker would need touching the
+  plugin's Solid component, which is out of scope.
 
-- **Menus, popovers and the search-suggestions panel are still unstyled.** They
-  read as plain dark YouTube Music surfaces. The Blueglass material for
-  transient surfaces (§4) is applied to the FX rack and settings menu; the
-  YTM-native context menus and search suggestions are not yet themed.
+- **Search-suggestions panel is still unstyled.** It reads as a plain dark
+  YouTube Music surface. The context menu and the FX rack / settings menu carry
+  the Blueglass material now; the search dropdown does not.
 
 - **`@stylistic/no-mixed-operators` excludes the arithmetic operator family.**
   The rule and `oxfmt` make opposite demands about clarifying parentheses in
@@ -42,32 +42,39 @@ Stages A and B changed and `docs/lacquer/plans/STAGE_C.md` for what remains.
   D11 table underneath the stored map to compensate; a genuinely clean profile
   is covered by `defaults.ts` directly and by the smoke suite.
 
+- **Windows icon is a hand-assembled PNG-in-ICO.** `scripts/make-icons.mjs`
+  rasterises `assets/icon.svg` through an offscreen Electron window (no
+  ImageMagick / sharp in the toolchain) and writes a PNG-in-ICO, which Windows
+  10/11 read directly. `electron-builder` regenerates its own installer icon
+  from `assets/icon.png` at package time. macOS `.icns` is untouched (D12).
+
 - **SmartScreen warnings.** v1 is not code-signed with an EV certificate, so
   Windows SmartScreen flags the installer. Code signing is explicitly out of
   scope (D12).
 
-- **Upstream merge surface.** The suppression sheet, the four adopted region
-  sheets and the renderer injection modules target stock YouTube Music selectors
-  and may need adjustment if upstream Pear or YouTube Music refactors that DOM.
+- **Upstream merge surface.** The suppression sheet, the adopted region sheets
+  and the renderer injection modules target stock YouTube Music selectors and
+  may need adjustment if upstream Pear or YouTube Music refactors that DOM.
   Contained to `src/lacquer/`; no `!important` component sheet remains.
 
 - **`album-color-theme`'s extraction is grey-prone.** It averages the *smallest*
   thumbnail with `fast-average-color` and darkens hard; busy covers and every
   music-video thumbnail land near-neutral, so B1 falls back to Orbit Noir more
   often than the artwork would suggest. B1 is correct (normalise whatever it
-  gets, fall back rather than wash); a better extractor is a possible future
-  Stage C item, not a Stage B defect.
+  gets, fall back rather than wash); a better extractor is possible future work.
 
 - **Capture harness: opening the player-page overlay over CDP is state-sensitive.**
-  `stage-b.capture.spec.ts` hard-navigates to home (`page.goto`) as test setup
-  before playing, because a prior spec's route/focus can leave the overlay
-  toggle inert. This is a test-infra workaround, not app behaviour — the toggle
-  works normally in the running app.
+  `stage-b.capture.spec.ts` and `stage-c.capture.spec.ts` hard-navigate to home
+  (`page.goto`) as test setup before playing, because a prior spec's
+  route/focus can leave the overlay toggle inert. This is a test-infra
+  workaround, not app behaviour — the toggle works normally in the running app.
 
-## Deferred by plan
+## Resolved in Stage C
 
-- **Stage C** — FX rack rebuild; the context-menu classifier (it matches menu
-  items by SVG path-`d` prefix and the prefixes collide, so "Start radio" is
-  currently misclassified as "Go to album"); motion pass; the SVG wordmark.
-- **Out of scope entirely** (D12) — new features, processed-audio export,
-  macOS/Linux, code signing, a final logo.
+- FX rack rebuilt as an instrument panel using Lacquer tokens and Instrument
+  type; parameter surface exposed.
+- Context-menu classifier no longer depends on SVG path geometry (done in its
+  own commit); keyboard navigation and a proper `closeMenu()` added this stage.
+- Motion is token-driven and `prefers-reduced-motion` is respected.
+- The wordmark is a real inline SVG mark; Windows icon assets regenerated.
+- The browse immersive-header art gradient is suppressed on every route (D5).

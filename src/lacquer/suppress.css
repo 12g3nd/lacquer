@@ -170,6 +170,47 @@ ytmusic-nav-bar ytmusic-settings-button {
   clip-path: inset(50%) !important;
 }
 
+/* ── Browse immersive / detail-header art gradient ──────────────────
+   Album and playlist detail routes render YouTube Music's own art-derived
+   blurred hero behind the content well. D5: the browse shell is permanently
+   Orbit Noir — it is the constant environment that makes the player page's
+   changing one register. Drop the art backdrop and its gradient; the header's
+   own cover thumbnail, title and controls are untouched.
+
+   The one that actually shows on the owner's build is
+   `#background.immersive-background` inside `ytmusic-browse-response` — a
+   blurred full-bleed thumbnail that `album-color-theme`'s style.css un-hides
+   (`opacity: 0.6`). Stage A's `background-image: none` on `#background` did not
+   touch it because the art is an `<img>` child, not a CSS background. Remove
+   the whole layer. */
+ytmusic-browse-response #background.immersive-background,
+#background.immersive-background.ytmusic-browse-response,
+ytmusic-browse-response ytmusic-fullbleed-thumbnail-renderer,
+#immersive-background.ytmusic-app-layout,
+#background-container.ytmusic-app-layout,
+ytmusic-immersive-header-renderer #background,
+ytmusic-immersive-header-renderer #gradient,
+ytmusic-immersive-header-renderer .gradient,
+ytmusic-immersive-header-renderer tp-yt-iron-image,
+ytmusic-detail-header-renderer #gradient,
+ytmusic-responsive-header-renderer #background,
+ytmusic-responsive-header-renderer .background-gradient,
+ytmusic-responsive-header-renderer .blurred-background,
+ytmusic-responsive-header-renderer .image-wrapper::after,
+ytmusic-editable-playlist-detail-header-renderer #gradient {
+  display: none !important;
+}
+ytmusic-immersive-header-renderer,
+ytmusic-immersive-header-renderer .content-container,
+ytmusic-responsive-header-renderer,
+ytmusic-detail-header-renderer,
+ytmusic-editable-playlist-detail-header-renderer,
+ytmusic-browse-response .background-gradient,
+ytmusic-browse-response #background-gradient {
+  background: transparent !important;
+  background-image: none !important;
+}
+
 /* ── Premium / upgrade nag ──────────────────────────────────────────
    Off-brand, and an ad-free surface is a design premise (D11). The guide
    entry carries no `href` to match, so Pear's own `removeUpgradeButton`
@@ -203,4 +244,24 @@ ytmusic-search-box:focus-within {
   outline: 2px solid var(--lq-focus) !important;
   outline-offset: 1px !important;
   border-radius: var(--lq-radius-pill) !important;
+}
+
+/* ── Reduced motion · DESIGN.md §6 ──────────────────────────────────
+   "collapses everything except opacity." Zero out every transition and
+   animation duration across the app — Lacquer's own and stock YouTube
+   Music's ad-hoc ones alike. `:root` is exempt: its only transition is the
+   album-colour crossfade, which is opacity-equivalent colour interpolation
+   and is explicitly kept (tokens.css). Components that also translate or
+   scale pin those transforms in their own sheets. */
+@media (prefers-reduced-motion: reduce) {
+  *:not(:root),
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
 }

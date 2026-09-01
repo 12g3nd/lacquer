@@ -1,0 +1,309 @@
+/*
+ * Lacquer — the FX rack (Stage C, C1). Operate surface, high expression
+ * tolerance: it is an instrument panel, and instrument panels are allowed
+ * personality (DESIGN.md §1, reference vocabulary "analog hi-fi equipment —
+ * instrument faces, precise readouts, machined controls").
+ *
+ * Material: Blueglass — it genuinely floats above the transport, which is
+ * exactly what §4 reserves Blueglass for. Chrome linework carries the
+ * machined-panel character. Every numeric readout is the Instrument voice
+ * (IBM Plex Mono, `tabular-nums`) so values do not jitter while dragging.
+ *
+ * Colour discipline (§3.2): the selected preset is a *selection* state, so it
+ * is Ion. The parameter sliders and segmented readouts are *instrumentation* —
+ * Signal, the readout/data accent. Solar is the single "something is on"
+ * expressive cue (peak segment, modified dot). No album token appears here —
+ * the rack is Operate structure.
+ *
+ * Injected by `fx-rack.ts`; adopted after the plugin sheets in `renderer.ts`.
+ */
+
+#lacquer-fx-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── The panel ─────────────────────────────────────────────────────── */
+#lacquer-fx-rack {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--lq-space-2));
+  z-index: 2147483000;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lq-space-4);
+  padding: var(--lq-space-4);
+  color: var(--lq-milkglass);
+  font-family: var(--lq-font-interface);
+
+  background: var(--lq-blueglass);
+  backdrop-filter: var(--lq-blueglass-blur);
+  border: 1px solid var(--lq-blueglass-border);
+  border-radius: var(--lq-radius-lg);
+  /* Chrome: a 1px bright rule along the top edge, the diffraction/wireframe
+     motif. Plus honest elevation — an offset and a soft blur, not a halo. */
+  box-shadow:
+    inset 0 1px 0 var(--lq-hairline-strong),
+    0 24px 60px -12px rgba(6, 12, 26, 0.66),
+    0 6px 18px rgba(6, 12, 26, 0.5);
+
+  transform-origin: bottom right;
+  transition:
+    opacity var(--lq-motion-normal),
+    transform var(--lq-motion-normal);
+}
+/* The `hidden` attribute is the styling hook; an id selector keeps the panel
+   `display: flex` through it so the close can animate. `inert` (toggled in
+   `fx-rack.ts`) is what actually removes it from focus and the a11y tree. */
+#lacquer-fx-rack[hidden] {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+}
+
+/* ── Header — wordmark + output meter ──────────────────────────────── */
+.lq-fx-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lq-space-3);
+}
+.lq-fx-title {
+  margin: 0;
+  font-family: var(--lq-font-graphic);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lq-moondust);
+}
+.lq-fx-meter {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 12px;
+}
+.lq-fx-meter[hidden] {
+  display: none;
+}
+.lq-fx-meter-seg {
+  width: 3px;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--lq-hairline-strong);
+  transition: background-color var(--lq-motion-fast);
+}
+.lq-fx-meter-seg[data-lit] {
+  background: var(--lq-signal);
+}
+.lq-fx-meter-seg[data-peak] {
+  background: var(--lq-solar);
+}
+
+/* ── Presets ──────────────────────────────────────────────────────── */
+.lq-fx-presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--lq-space-2);
+}
+.lq-fx-preset {
+  position: relative;
+  min-height: 30px;
+  padding: var(--lq-space-2) var(--lq-space-1);
+  font-family: var(--lq-font-interface);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--lq-moondust);
+  text-align: center;
+  background: color-mix(in srgb, var(--lq-instrument-raised) 55%, transparent);
+  border: 1px solid var(--lq-hairline);
+  border-radius: var(--lq-radius-sm);
+  cursor: pointer;
+  transition:
+    color var(--lq-motion-fast),
+    border-color var(--lq-motion-fast),
+    box-shadow var(--lq-motion-fast),
+    background-color var(--lq-motion-fast);
+}
+.lq-fx-preset:hover {
+  color: var(--lq-milkglass);
+  border-color: var(--lq-hairline-strong);
+}
+/* Active preset — a filled Ion chip, unambiguous even when focus sits
+   elsewhere in the rack (§3.2, selection is functional Ion). */
+.lq-fx-preset[aria-pressed='true'] {
+  color: var(--lq-milkglass);
+  font-weight: 600;
+  border-color: var(--lq-ion);
+  background: color-mix(in srgb, var(--lq-ion) 30%, transparent);
+  box-shadow: inset 0 0 0 1px var(--lq-ion);
+}
+/* Solar dot: this preset is playing, but a parameter has been moved off its
+   stored value — an expressive "modified" cue, distinct from the Ion select. */
+.lq-fx-preset[data-modified]::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--lq-radius-pill);
+  background: var(--lq-solar);
+}
+
+/* ── Parameter rows ───────────────────────────────────────────────── */
+.lq-fx-params {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lq-space-3);
+}
+.lq-fx-row {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr auto;
+  align-items: center;
+  gap: var(--lq-space-3);
+}
+/* Segmented rows (pitch mode, room character) carry no right-hand readout. */
+.lq-fx-row--seg {
+  grid-template-columns: 3.5rem 1fr;
+}
+.lq-fx-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lq-moondust);
+}
+.lq-fx-readout {
+  min-width: 3.25rem;
+  font-family: var(--lq-font-instrument);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-align: right;
+  color: var(--lq-milkglass);
+}
+.lq-fx-readout[data-muted] {
+  color: var(--lq-moondust);
+}
+
+/* Machined slider — a Chrome-ringed knob riding a hairline track. */
+.lq-fx-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+.lq-fx-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: var(--lq-radius-pill);
+  background: linear-gradient(
+    to right,
+    var(--lq-signal) 0 var(--lq-fx-fill, 50%),
+    var(--lq-hairline-strong) var(--lq-fx-fill, 50%) 100%
+  );
+}
+.lq-fx-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--lq-radius-pill);
+  background: var(--lq-milkglass);
+  border: 1px solid var(--lq-hairline-strong);
+  box-shadow: 0 1px 3px rgba(6, 12, 26, 0.6);
+  transition: transform var(--lq-motion-fast);
+}
+.lq-fx-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+.lq-fx-slider:focus-visible {
+  outline: none;
+}
+.lq-fx-slider:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--lq-focus);
+  outline-offset: 2px;
+}
+
+/* Segmented readout — pitch mode, room character. */
+.lq-fx-segmented {
+  display: inline-flex;
+  border: 1px solid var(--lq-hairline);
+  border-radius: var(--lq-radius-sm);
+  overflow: hidden;
+}
+.lq-fx-seg {
+  padding: 3px 7px;
+  font-family: var(--lq-font-instrument);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--lq-moondust);
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--lq-hairline);
+  cursor: pointer;
+  transition:
+    color var(--lq-motion-fast),
+    background-color var(--lq-motion-fast);
+}
+.lq-fx-seg:first-child {
+  border-left: none;
+}
+.lq-fx-seg:hover {
+  color: var(--lq-milkglass);
+}
+.lq-fx-seg[aria-pressed='true'] {
+  color: var(--lq-milkglass);
+  background: color-mix(in srgb, var(--lq-signal) 22%, transparent);
+}
+
+/* ── Footer — master bypass ───────────────────────────────────────── */
+.lq-fx-foot {
+  display: flex;
+}
+.lq-fx-bypass {
+  flex: 1;
+  padding: var(--lq-space-2);
+  font-family: var(--lq-font-interface);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lq-moondust);
+  background: transparent;
+  border: 1px solid var(--lq-hairline);
+  border-radius: var(--lq-radius-sm);
+  cursor: pointer;
+  transition:
+    color var(--lq-motion-fast),
+    border-color var(--lq-motion-fast),
+    background-color var(--lq-motion-fast);
+}
+.lq-fx-bypass:hover {
+  color: var(--lq-milkglass);
+  border-color: var(--lq-hairline-strong);
+}
+.lq-fx-bypass[aria-pressed='true'] {
+  color: var(--lq-milkglass);
+  border-color: var(--lq-signal);
+  background: color-mix(in srgb, var(--lq-signal) 16%, transparent);
+}
+
+/* The FX button itself (open-state and active-effect cues) is themed in
+   `transport.css` alongside the gear button, where the stopgap inline styling
+   it used to carry is already overridden. */
+
+/* `suppress.css` zeroes the durations under `prefers-reduced-motion`; this
+   just drops the translate/scale so the open is a plain opacity flip. */
+@media (prefers-reduced-motion: reduce) {
+  #lacquer-fx-rack,
+  #lacquer-fx-rack[hidden] {
+    transform: none;
+  }
+}

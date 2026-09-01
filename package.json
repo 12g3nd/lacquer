@@ -41,6 +41,7 @@
     "release:win": "pnpm clean && pnpm build && pnpm electron-builder --win -p always",
     "typecheck": "pnpm tsc -p tsconfig.json --noEmit",
     "check": "pnpm lint && pnpm format:check && pnpm typecheck",
+    "make:icons": "electron scripts/make-icons.mjs",
     "test:capture": "pnpm build && node scripts/capture.mjs",
     "test:nobuild": "pnpm playwright test --project=smoke"
   },

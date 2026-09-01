@@ -1,6 +1,6 @@
 # Lacquer — Status
 
-**Updated at the end of Stage B.** Originally rewritten at the end of Stage A
+**Updated at the end of Stage C.** Originally rewritten at the end of Stage A
 because the prior version recorded the commit as the literal string `HEAD`,
 claimed "6/6 Playwright tests successful" against a single test, said settings
 were "shared" with Pear when they are not, and listed shipped work as deferred.
@@ -17,8 +17,8 @@ bounded stages (DECISIONS.md D1). The authority for how it should look is
 | Stage | Scope | State |
 |---|---|---|
 | **A** | Foundation & spine — tokens, fonts, window shell, config integrity, audio bug fixes, verification harness, housekeeping | **complete** |
-| **B** | Album-colour engine (B1); authored left rail, transport deck, player stage, inspector | **complete** (this commit) |
-| **C** | FX rack rebuild; context-menu classifier; motion pass; SVG wordmark | not started |
+| **B** | Album-colour engine (B1); authored left rail, transport deck, player stage, inspector | **complete** |
+| **C** | FX rack as an instrument panel; context-menu keyboard nav + proper close; motion pass; SVG wordmark + Windows icons; consistency sweep; carried-over housekeeping | **complete** (this commit) |
 
 **Stage B is where Lacquer stops looking like YouTube Music.** The rail is
 relabelled and re-materialised, the transport carries the album-coloured play
@@ -32,12 +32,23 @@ baseline is gone.
 ## Build information
 
 - **Branch:** `lacquer/orbit-noir`
-- **Parent commit:** `f977706f` (`docs(lacquer): mark B1 done, record the token contract and gate changes for B2-B5`)
-- **App version:** `3.12.0` (unchanged — Stage B is not a release)
+- **App version:** `3.12.0` (unchanged — no stage is a release)
 - **`pnpm build`:** succeeds (`electron-vite build`, Windows x64).
-- **`pnpm check`:** passes — `oxlint` (0 errors; 17 pre-existing `solid(reactivity)` / `no-misused-spread` warnings in `src/plugins/*`, none in the Stage B files), `oxfmt --check` clean, `tsc --noEmit` clean.
-- **`pnpm test`** (smoke, throwaway profile): **17 passed** — `tests/index.test.js`, `signal-chain-width.smoke.spec.ts` (A6 guard), `plugin-defaults.smoke.spec.ts` ×4 (D11), `shell.smoke.spec.ts` (D8), `album-color.smoke.spec.ts` ×6 (B1: bands, monochrome fallback, hue survival, totality, `parseTriple`).
-- **`pnpm test:capture`** (the gate, real authenticated profile over CDP): **3 tests pass** — `stage-a.capture.spec.ts` (8 shots) plus `stage-b.capture.spec.ts` split into *player stage* and *operate surfaces* (12 shots). Each Stage B shot logs the resolved `--lq-album-*` tokens; the album-colour engine measures **~0.8ms median / <4ms max per track change** over a 30-sample sweep. Resolved plugin dump on the owner's real profile:
+- **`pnpm check`:** passes — `oxlint` (0 errors; the same pre-existing
+  `solid(reactivity)` / `no-misused-spread` warnings in `src/plugins/*`, none
+  in Lacquer's files), `oxfmt --check` clean, `tsc --noEmit` clean.
+- **`pnpm test`** (smoke, throwaway profile): **23 passed** — the Stage B set
+  (17) plus `context-menu.smoke.spec.ts` ×6, which pins the classifier against
+  the real 14-item queue menu and asserts *Start mix ≠ Go to album*.
+- **`pnpm test:capture`** (the gate, real authenticated profile over CDP):
+  **5 tests pass** — `stage-a` (8 shots), `stage-b` ×2 (12 shots), and
+  `stage-c.capture.spec.ts` ×2 (10 gate shots + `03b`). Stage C's logs confirm
+  the FX rack surface (`rgba(16,42,76,0.72)` Blueglass, `blur(24px)`, IBM Plex
+  Mono readouts), context-menu keyboard nav (ArrowDown/Up, `End` reaching *Pin
+  to Listen again*, type-ahead, Escape-close), the SVG wordmark (22px, Ion
+  spectrum stop), and `#background.immersive-background` resolving to
+  `display: none` on an album detail route.
+- Resolved plugin dump on the owner's real profile:
   `album-color-theme / do-not-track / sponsorblock / synced-lyrics: true`,
   `in-app-menu / equalizer / visualizer / ambient-mode: false`.
   - **Harness fix:** `scripts/capture.mjs` set `NODE_ENV=test` purely to
@@ -71,6 +82,119 @@ file reported the checks as passing.
   rule meaningfully enforced without a dozen upstream-file rewrites or a
   per-file `overrides` exception for `in-app-menu/TitleBar.tsx` (which D8
   forbids editing). This was raised with the owner and is the agreed approach.
+
+---
+
+## What Stage C changed
+
+The details that separate "well themed" from "someone built this." All of it is
+`src/lacquer/` and the suppression sheet; no `!important` component sheet, and
+the classifier is unchanged from its own commit.
+
+### The FX rack — C1 (`fx-rack.ts`, `fx-rack.css`)
+
+Rebuilt from six preset buttons in a `#1a1a1a` box into an analog-hi-fi
+instrument panel: a Blueglass popover with a "Signal Chain" head, a 3×2 preset
+grid (active = a filled Ion chip + inset ring, unambiguous with focus
+elsewhere), machined Signal-filled sliders for **speed**, **reverb wet** and
+**stereo width**, segmented readouts for **pitch mode** (Varispeed / Lock) and
+**room character** (Off / Room / Hall / Cath), an **EQ** summary, a master
+**Bypass**, and a cheap output meter driven off the shared analyser tap **only
+while the rack is open** (`requestAnimationFrame` cancelled on close). Every
+numeric readout is IBM Plex Mono, `tabular-nums`.
+
+Preset switching stays immediate and authoritative — it calls
+`signalChain.setPreset` and clears overrides. Parameter controls ride on top of
+the active preset through the chain's existing public setters; a moved
+parameter shows a Solar dot on its preset and engages the limiter for clip
+safety. Preset + overrides persist in `localStorage` under `lacquer.fx` (the
+legacy `lacquer.fxPreset` key is still written and read for the context menu
+and the shortcut IPC). The popover has real focus management: focus enters on
+open, Tab is trapped, Escape closes and returns focus to the FX button,
+pointer-down outside dismisses, and `inert` removes it from the a11y tree when
+closed. `renderer.ts`'s `peard:fx-rack-toggle` and `context-menu.ts` now route
+through the exported `setFXRackOpen()` instead of poking `.style.display`.
+
+### The context menu — C2 keyboard nav + close (`context-menu.ts`, `.css`)
+
+The classifier itself was done in its own commit and is untouched (icon type
+first, endpoint/pageType as the fallback; a test asserts it cannot classify
+from path geometry). This stage fixed the two defects the classifier rewrite
+did not touch:
+
+- **Keyboard navigation.** The reorg no longer wraps items in `<div>`s or nests
+  tier 2 in a sub-container. The `tp-yt-paper-listbox` stays flat — tier 2
+  items are direct children, just `hidden` until More… is opened — and this
+  module runs its own roving-focus keyboard controller in the capture phase
+  (`stopImmediatePropagation` so `IronMenuBehavior` never double-moves):
+  ArrowUp/Down with wrap, Home/End, Escape, Enter/Space (activates via
+  `.click()`), and type-ahead. Verified in the gate: `End` reaches *Pin to
+  Listen again*, `s` jumps to *Save to playlist*, the focus ring is Ion.
+- **`closeMenu()`** calls the dropdown's own `close()` (which restores focus to
+  the trigger), with an Escape-key fallback — not the old `display:none` /
+  restore-next-frame flicker that left Polymer's model open.
+
+Only real item renderers are classified and moved; anything else in the listbox
+is left in place, and any item the classifier cannot place lands in tier 2,
+never dropped. The popup is Blueglass with the Interface voice, and Lacquer's
+own rows are inset to line up with the stock rows' icon column. The reorg
+re-runs when a fresh (untagged) stock menu repopulates the reused listbox, so
+plugin-injected items (the downloader's *Download*) self-heal into tier 2.
+
+### Motion — C3 (`tokens.css`, `suppress.css`, per-component sheets)
+
+Every Lacquer transition already referenced `--lq-motion-{fast,normal}`; the
+album crossfade on `:root` now references `--lq-motion-atmosphere` (raised to
+`900ms` to match what it always was). Nothing in Lacquer animates on scroll or
+on list-item entrance, and there are no keyframe animations. `suppress.css`
+adds a `prefers-reduced-motion` block that zeroes every transition/animation
+duration across the app — `:root` excepted, because its only transition is the
+opacity-equivalent album crossfade, which §6 keeps — and the FX rack and
+progress knob pin their transforms in their own sheets.
+
+### The wordmark + icons — C4 (`titlebar.ts`, `titlebar.css`, `assets/`)
+
+`ytmusic-logo::after { content: 'Lacquer' }` is gone. `titlebar.ts` injects a
+real inline SVG lockup: a lacquered record read against a tilted orbit with a
+small Solar body on it, and a spectral-diffraction arc off the disc edge
+(Ion → Signal → Ultraviolet → Solar), beside "Lacquer" set in Space Grotesk.
+All colour and geometry live in `titlebar.css` (the SVG string carries class
+names only; the gradient stops are coloured by CSS).
+
+`assets/icon.svg` is the standalone Orbit Noir glyph. `scripts/make-icons.mjs`
+(`pnpm make:icons`) rasterises it through an offscreen Electron window —
+there is no ImageMagick/sharp in the toolchain — and writes
+`assets/icon.png` (used by the dev window, `electron-builder`'s `win.icon`, and
+the notifications / touchbar plugins), the `assets/generated/icons/png/*` set,
+and a hand-assembled PNG-in-ICO at `assets/generated/icons/win/icon.ico` (the
+packaged Windows window icon). macOS `.icns` is untouched (out of scope, D12).
+
+### Consistency sweep — C5
+
+`titlebar.ts`, `settings-panel.ts` and `context-menu.ts` no longer carry inline
+`.style` colour or `font-family` — each has an adopted sheet
+(`titlebar.css`, `settings-panel.css`, `context-menu.css`) and sets classes.
+`fx-rack.ts` was rewritten class-first. The only inline `.style` left in
+`src/lacquer/*.ts` are computed, non-cosmetic: the album engine publishing
+`--lq-album-*`, the slider fill percentage (`--lq-fx-fill`), and a couple of
+`display` toggles. Elevation shadows in the CSS use the same
+`rgba(6, 12, 26, …)` cast Stage B's `player-stage.css` established. No Lacquer
+`TODO`/`FIXME` remains; no `!important` that is not suppressing stock or plugin
+chrome.
+
+### Carried-over housekeeping
+
+- **Lyrics provider strip.** The stock picker is item 0 of the virtualised
+  lyrics list — an ~80px sticky block whose lower half (a redundant dot row)
+  hung below the tab strip as a stray band. Lacquer collapses it to one compact
+  opaque row (chevrons + provider name) with a bottom hairline, flush under the
+  tabs; the dot row is removed and hide-on-scroll still works. The stray band
+  is gone; the provider-name carousel is a little tight mid-transition.
+- **Browse immersive header.** Album and playlist detail routes showed
+  `album-color-theme`'s un-hidden `#background.immersive-background` (a blurred
+  full-bleed `<img>`, not a CSS background — which is why Stage A's
+  `background-image: none` missed it). `suppress.css` now removes the layer, so
+  the browse shell is Orbit Noir on every route (D5).
 
 ---
 

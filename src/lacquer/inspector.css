@@ -141,22 +141,46 @@ ytmusic-player-queue
 #synced-lyrics-container .current .text-lyrics {
   color: var(--lq-milkglass) !important;
 }
-/* The provider picker floats — Blueglass, per §4.
-   Its wrapper is `position: sticky`, and the picker itself is pulled 30px
-   upward out of the scroll container: measured, the container starts at y=187
-   (immediately below the 49px tab strip) while the picker rendered at y=157 —
-   straddling the tabs, so "LRCLIB" was sliced in half by the tab row. Pin the
-   wrapper to the top of its own scroll container and clear the offset. */
+/* The provider picker. The plugin renders it as item 0 of the virtualised
+   lyrics list (`renderer.tsx`), `position: sticky` so it pins under the tab
+   strip while lyrics scroll; a `mousemove`/scroll handler slides it out of
+   view via `--lyrics-picker-top`. Stock, it is an ~80px block: a provider-name
+   carousel stacked over a redundant dot row, and that lower half read as a
+   stray band hanging below the tabs.
+   Lacquer collapses it to one compact opaque row — chevrons + the provider
+   name — flush under the tab strip, with the dot row removed. Hide-on-scroll
+   still works (it slides up by its own, now smaller, height). */
 #synced-lyrics-container div:has(> .lyrics-picker) {
-  position: sticky;
   top: 0;
   z-index: 2;
-  /* Opaque: lyrics scroll underneath it. */
   background: var(--lq-instrument);
+  border-bottom: 1px solid var(--lq-hairline);
 }
 #synced-lyrics-container div:has(> .lyrics-picker) > .lyrics-picker {
-  background: var(--lq-blueglass);
-  border-radius: var(--lq-radius-md);
+  height: auto;
+  min-height: 0;
+  padding-block: var(--lq-space-2);
+  backdrop-filter: none;
+}
+#synced-lyrics-container .lyrics-picker-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+#synced-lyrics-container .lyrics-picker-content-label {
+  width: 100%;
+  justify-content: center;
+}
+#synced-lyrics-container .lyrics-picker-item {
+  gap: var(--lq-space-2);
+}
+#synced-lyrics-container .lyrics-picker-content-dots {
+  display: none;
+}
+#synced-lyrics-container .lyrics-picker .description {
+  font-family: var(--lq-font-interface);
+  font-size: 13px !important;
+  color: var(--lq-milkglass) !important;
 }
 
 /* Stock lyrics size from `--lyrics-font-size`, which clamps up to 3rem — about

@@ -49,11 +49,13 @@ ytmusic-guide-renderer#guide-renderer > .guide-nav {
   display: none !important;
 }
 
-/* Injected back/forward bar — `titlebar.ts` sets its structural styles inline;
-   this only aligns it to the rail rhythm. */
+/* Injected back/forward bar (`titlebar.ts`) — owned entirely here now. */
 #lacquer-rail-nav {
-  padding: var(--lq-space-1) var(--lq-space-3) var(--lq-space-2) !important;
+  display: flex;
+  gap: var(--lq-space-1);
+  padding: var(--lq-space-1) var(--lq-space-3) var(--lq-space-2);
   margin-bottom: var(--lq-space-1);
+  border-bottom: 1px solid var(--lq-hairline);
 }
 
 /* ── Guide sections ─────────────────────────────────────────────────── */
