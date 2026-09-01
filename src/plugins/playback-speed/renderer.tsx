@@ -2,6 +2,7 @@ import { createSignal } from 'solid-js';
 import { render } from 'solid-js/web';
 
 import { t } from '@/i18n';
+import { signalChain } from '@/lacquer/signal-chain';
 import {
   isMusicOrVideoTrack,
   isPlayerMenu,
@@ -17,7 +18,7 @@ const forcePlaybackRate = (e: Event) => {
   if (e.target instanceof HTMLVideoElement) {
     const videoElement = e.target;
     if (videoElement.playbackRate !== speed()) {
-      videoElement.playbackRate = speed();
+      signalChain.setSpeed(speed(), true);
     }
   }
 };
@@ -32,7 +33,7 @@ export const onPlayerApiReady = () => {
     const updatePlayBackSpeed = () => {
       const videoElement = document.querySelector<HTMLVideoElement>('video');
       if (videoElement) {
-        videoElement.playbackRate = speed();
+        signalChain.setSpeed(speed(), true);
       }
 
       setSpeed(speed());

@@ -3,18 +3,34 @@ import { allPlugins } from 'virtual:plugins';
 
 import { restart } from '@/providers/app-controls';
 
+import { defaultConfig } from './defaults';
 import { store } from './store';
 
 import type { PluginConfig } from '@/types/plugins';
 
+/**
+ * The stored plugin map with Lacquer's D11 default set (`defaults.ts`) merged
+ * underneath.
+ *
+ * `electron-store` shallow-merges top-level keys, so the moment `config.json`
+ * carries *any* `plugins` entry — which a Pear-derived or dev-built profile
+ * always does — its own default for the whole `plugins` key is dropped, taking
+ * the D11 table with it. That is why the table is re-applied here as a real
+ * default *layer*: the user's stored choices still win on every key they have
+ * actually set.
+ */
 export function getPlugins() {
-  return store.get('plugins') as Record<string, PluginConfig>;
+  const stored = (store.get('plugins') ?? {}) as Record<string, PluginConfig>;
+  return deepmerge(defaultConfig.plugins, stored) as Record<
+    string,
+    PluginConfig
+  >;
 }
 
 export async function isEnabled(plugin: string) {
   const pluginConfig = deepmerge(
     (await allPlugins())[plugin]?.config ?? { enabled: false },
-    (store.get('plugins') as Record<string, PluginConfig>)[plugin] ?? {},
+    getPlugins()[plugin] ?? {},
   );
   return pluginConfig !== undefined && pluginConfig.enabled;
 }
@@ -58,7 +74,7 @@ export function setMenuOptions<T>(
 }
 
 export function getOptions<T>(plugin: string): T {
-  return (store.get('plugins') as Record<string, T>)[plugin];
+  return (getPlugins() as Record<string, T>)[plugin];
 }
 
 export function enable(plugin: string) {

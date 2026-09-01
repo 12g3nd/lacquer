@@ -1,0 +1,272 @@
+/*
+ * Lacquer — the left collection rail (Stage B, B2). Operate surface.
+ *
+ * DESIGN.md §2: the rail is the stable spine. It is *always* Orbit Noir and
+ * never reacts to the album — there is not one `--lq-album-*` token in this
+ * file, by design. Scanability and predictability outrank expression here;
+ * the brand lives in the hairline, the exact hover, the tabular density.
+ *
+ * This sheet themes the stock `ytmusic-guide-renderer`. The structural work —
+ * relabelling Home/Explore/Library to Listen/Discover/Collection as real text
+ * nodes (D10), and the account button in the footer (D8) — is in `rail.ts`,
+ * because a text node and a real control are not things a stylesheet can add.
+ */
+
+/* ── Rail container ──────────────────────────────────────────────────
+   Stage A gave `#guide-wrapper` the Instrument material. Add the Chrome
+   hairline that separates it from the content well, and make sure nothing
+   clips at the top edge — the shipped build cut off its first item. */
+#guide-wrapper,
+tp-yt-app-drawer#guide {
+  border-right: 1px solid var(--lq-hairline);
+}
+ytmusic-guide-renderer#guide-renderer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-top: var(--lq-space-2);
+  /* The transport deck is fixed over the bottom of the viewport; keep the
+     account footer clear of it. */
+  padding-bottom: var(--lq-transport-height);
+  box-sizing: border-box;
+}
+/* The scroller that holds the sections must not hide its own overflow at the
+   top — that is the clip. Let it scroll, not crop. It also takes the slack so
+   the account footer pins to the bottom edge. */
+ytmusic-guide-renderer#guide-renderer #sections {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: var(--lq-space-4);
+}
+
+/* The stock guide-nav row (hamburger + YTM logo) is redundant: the window has
+   its own one-row titlebar and the logo is already suppressed. Reclaim the
+   space. Back / forward (injected by `titlebar.ts` into `#sections`) become
+   the top of the rail. */
+ytmusic-guide-renderer#guide-renderer > .guide-nav {
+  display: none !important;
+}
+
+/* Injected back/forward bar (`titlebar.ts`) — owned entirely here now. */
+#lacquer-rail-nav {
+  display: flex;
+  gap: var(--lq-space-1);
+  padding: var(--lq-space-1) var(--lq-space-3) var(--lq-space-2);
+  margin-bottom: var(--lq-space-1);
+  border-bottom: 1px solid var(--lq-hairline);
+}
+
+/* ── Guide sections ─────────────────────────────────────────────────── */
+ytmusic-guide-section-renderer {
+  padding: var(--lq-space-2) var(--lq-space-2) 0;
+}
+/* Hairline between the primary nav and the list of records below it. */
+ytmusic-guide-section-renderer:first-of-type {
+  border-bottom: 1px solid var(--lq-hairline);
+  padding-bottom: var(--lq-space-2);
+  margin-bottom: var(--lq-space-2);
+}
+ytmusic-guide-section-renderer #guide-section-title {
+  font-family: var(--lq-font-graphic);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lq-text-secondary);
+  padding: var(--lq-space-2) var(--lq-space-2) var(--lq-space-1);
+}
+ytmusic-guide-section-renderer #divider.ytmusic-guide-section-renderer {
+  display: none;
+}
+
+/* ── Entry rows — the shared shape ──────────────────────────────────── */
+ytmusic-guide-entry-renderer {
+  margin: 1px 0;
+}
+ytmusic-guide-entry-renderer tp-yt-paper-item.ytmusic-guide-entry-renderer {
+  min-height: var(--lq-rail-row);
+  height: var(--lq-rail-row);
+  padding: 0 var(--lq-space-3);
+  border-radius: var(--lq-radius-md);
+  font-family: var(--lq-font-interface);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lq-text-secondary);
+  --paper-item-focused-before-bg: transparent;
+  transition:
+    background-color var(--lq-motion-fast),
+    color var(--lq-motion-fast);
+}
+ytmusic-guide-entry-renderer .guide-icon.ytmusic-guide-entry-renderer,
+ytmusic-guide-entry-renderer .guide-icon.ytmusic-guide-entry-renderer yt-icon {
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+  margin-right: var(--lq-space-3);
+}
+ytmusic-guide-entry-renderer .title.ytmusic-guide-entry-renderer {
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Stock paints a full-width grey slab on hover and a heavier one on active.
+   Replace both with the Orbit Noir language: a quiet raised fill on hover,
+   an Ion marker on active. */
+ytmusic-guide-entry-renderer:hover
+  tp-yt-paper-item.ytmusic-guide-entry-renderer {
+  background: var(--lq-instrument-raised);
+  color: var(--lq-text);
+}
+ytmusic-guide-entry-renderer[active]
+  tp-yt-paper-item.ytmusic-guide-entry-renderer {
+  background: color-mix(in srgb, var(--lq-ion) 9%, transparent);
+  color: var(--lq-ion);
+  box-shadow: inset 3px 0 0 var(--lq-ion);
+  font-weight: 600;
+}
+ytmusic-guide-entry-renderer[active] .guide-icon.ytmusic-guide-entry-renderer {
+  color: var(--lq-ion);
+}
+/* Kill the stock paper-ripple / iron-selected background. */
+ytmusic-guide-entry-renderer
+  tp-yt-paper-item.ytmusic-guide-entry-renderer::before,
+ytmusic-guide-entry-renderer
+  tp-yt-paper-item.ytmusic-guide-entry-renderer::after {
+  display: none !important;
+}
+
+/* ── Records list — denser than the nav above it ───────────────────── */
+ytmusic-guide-section-renderer:not(:first-of-type)
+  ytmusic-guide-entry-renderer
+  tp-yt-paper-item.ytmusic-guide-entry-renderer {
+  min-height: var(--lq-rail-row-dense);
+  height: var(--lq-rail-row-dense);
+  font-size: 13px;
+  font-weight: 450;
+}
+/* The owner-name subtitle repeats on every row — it is noise in a list of the
+   owner's own records. Keep the row to one line: the record's name. */
+ytmusic-guide-section-renderer:not(:first-of-type)
+  ytmusic-guide-entry-renderer
+  .subtitle.ytmusic-guide-entry-renderer {
+  display: none;
+}
+/* The now-playing speaker glyph on a playlist row → Signal (a readout, §3.2). */
+ytmusic-guide-entry-renderer #playing-indicator,
+ytmusic-guide-entry-renderer .play-status-icon {
+  color: var(--lq-signal) !important;
+}
+
+/* "New playlist" — a calm ghost affordance, not a loud pill. */
+ytmusic-guide-section-renderer #buttons yt-button-renderer {
+  --yt-button-padding: var(--lq-space-2) var(--lq-space-3);
+  --yt-button-text-color: var(--lq-text-secondary);
+  width: 100%;
+}
+ytmusic-guide-section-renderer
+  #buttons
+  yt-button-renderer
+  .yt-spec-button-shape-next {
+  background: transparent !important;
+  border: 1px solid var(--lq-hairline) !important;
+  border-radius: var(--lq-radius-md) !important;
+  color: var(--lq-text-secondary) !important;
+  font-family: var(--lq-font-interface) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition:
+    border-color var(--lq-motion-fast),
+    color var(--lq-motion-fast);
+}
+ytmusic-guide-section-renderer
+  #buttons
+  yt-button-renderer:hover
+  .yt-spec-button-shape-next {
+  border-color: var(--lq-ion) !important;
+  color: var(--lq-text) !important;
+}
+
+/* ── Account footer (injected by `rail.ts`) ────────────────────────── */
+#lacquer-rail-account {
+  display: flex;
+  align-items: center;
+  gap: var(--lq-space-3);
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--lq-space-3) var(--lq-space-4);
+  border: none;
+  border-top: 1px solid var(--lq-hairline);
+  background: var(--lq-instrument);
+  color: var(--lq-text-secondary);
+  font-family: var(--lq-font-interface);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--lq-motion-fast),
+    color var(--lq-motion-fast);
+}
+#lacquer-rail-account:hover {
+  background: var(--lq-instrument-raised);
+  color: var(--lq-text);
+}
+#lacquer-rail-account .lacquer-account-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--lq-radius-pill);
+  object-fit: cover;
+  background: var(--lq-instrument-raised);
+  flex: none;
+}
+#lacquer-rail-account .lacquer-account-avatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lq-moondust);
+}
+
+/* ── Mini guide (narrow width) — icon-only, same Orbit Noir language ── */
+#mini-guide,
+#mini-guide-background.ytmusic-app-layout {
+  background: var(--lq-instrument) !important;
+  border-right: 1px solid var(--lq-hairline) !important;
+}
+#mini-guide
+  ytmusic-guide-entry-renderer
+  tp-yt-paper-item.ytmusic-guide-entry-renderer {
+  height: auto;
+  min-height: 56px;
+  border-radius: var(--lq-radius-md);
+  color: var(--lq-text-secondary);
+}
+#mini-guide
+  ytmusic-guide-entry-renderer[active]
+  tp-yt-paper-item.ytmusic-guide-entry-renderer {
+  background: color-mix(in srgb, var(--lq-ion) 14%, transparent);
+  color: var(--lq-ion);
+  box-shadow: none;
+}
+#mini-guide ytmusic-guide-entry-renderer .title.ytmusic-guide-entry-renderer {
+  font-family: var(--lq-font-interface);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* ── Rail scrollbar — Chrome linework, not a browser default ────────── */
+ytmusic-guide-renderer#guide-renderer #sections::-webkit-scrollbar {
+  width: 8px;
+}
+ytmusic-guide-renderer#guide-renderer #sections::-webkit-scrollbar-thumb {
+  background: var(--lq-hairline-strong);
+  border-radius: var(--lq-radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+ytmusic-guide-renderer#guide-renderer #sections::-webkit-scrollbar-track {
+  background: transparent;
+}

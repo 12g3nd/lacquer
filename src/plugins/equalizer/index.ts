@@ -1,4 +1,5 @@
 import { t } from '@/i18n';
+import { signalChain } from '@/lacquer/signal-chain';
 import { createPlugin } from '@/utils';
 
 import {
@@ -17,7 +18,14 @@ export type EqualizerPluginConfig = {
   presets: { [preset in Preset]: boolean };
 };
 
-let appliedFilters: BiquadFilterNode[] = [];
+const applyFilters = (config: EqualizerPluginConfig) => {
+  const filtersToApply = config.filters.concat(
+    defaultPresets
+      .filter((preset) => config.presets[preset])
+      .map((preset) => presetConfigs[preset]),
+  );
+  signalChain.setEQ(filtersToApply);
+};
 
 export default createPlugin({
   name: () => t('plugins.equalizer.name'),
@@ -44,9 +52,10 @@ export default createPlugin({
           type: 'radio',
           checked: config.presets[preset],
           click() {
-            setConfig({
+            const newConfig = {
               presets: { ...config.presets, [preset]: !config.presets[preset] },
-            });
+            };
+            setConfig(newConfig);
           },
         })),
       },
@@ -55,34 +64,13 @@ export default createPlugin({
   renderer: {
     async start({ getConfig }) {
       const config = await getConfig();
-
-      document.addEventListener(
-        'peard:audio-can-play',
-        ({ detail: { audioSource, audioContext } }) => {
-          const filtersToApply = config.filters.concat(
-            defaultPresets
-              .filter((preset) => config.presets[preset])
-              .map((preset) => presetConfigs[preset]),
-          );
-          filtersToApply.forEach((filter) => {
-            const biquadFilter = audioContext.createBiquadFilter();
-            biquadFilter.type = filter.type;
-            biquadFilter.frequency.value = filter.frequency; // filter frequency in Hz
-            biquadFilter.Q.value = filter.Q;
-            biquadFilter.gain.value = filter.gain; // filter gain in dB
-
-            audioSource.connect(biquadFilter);
-            biquadFilter.connect(audioContext.destination);
-
-            appliedFilters.push(biquadFilter);
-          });
-        },
-        { once: true, passive: true },
-      );
+      applyFilters(config);
     },
     stop() {
-      appliedFilters.forEach((filter) => filter.disconnect());
-      appliedFilters = [];
+      signalChain.setEQ([]);
+    },
+    onConfigChange(config: EqualizerPluginConfig) {
+      applyFilters(config);
     },
   },
 });

@@ -1,22 +1,20 @@
 {
-
-  "name": "\u0079\u006f\u0075\u0074\u0075\u0062\u0065\u002d\u006d\u0075\u0073\u0069\u0063",
-  "desktopName": "com.github.th-ch.\u0079\u006f\u0075\u0074\u0075\u0062\u0065\u002d\u006d\u0075\u0073\u0069\u0063",
-  "productName": "\u0059\u006f\u0075\u0054\u0075\u0062\u0065\u0020\u004d\u0075\u0073\u0069\u0063",
+  "name": "lacquer",
+  "desktopName": "io.github.12g3nd.lacquer",
+  "productName": "Lacquer",
   "version": "3.12.0",
-  "description": "\u0059\u006f\u0075\u0054\u0075\u0062\u0065\u0020\u004d\u0075\u0073\u0069\u0063 Desktop App - including custom plugins",
+  "description": "Lacquer - Windows-first YouTube Music client",
   "main": "./dist/main/index.js",
   "type": "module",
   "license": "MIT",
-  "repository": "pear-devs/pear-desktop",
+  "repository": "12g3nd/lacquer",
   "author": {
-    "name": "th-ch",
-    "email": "th-ch@users.noreply.github.com",
-    "url": "https://github.com/pear-devs/pear-desktop"
+    "name": "12g3nd",
+    "url": "https://github.com/12g3nd/lacquer"
   },
   "scripts": {
     "postinstall": "pnpm install-electron",
-    "test": "pnpm playwright test",
+    "test": "pnpm build && pnpm playwright test --project=smoke",
     "test:debug": "pnpm cross-env DEBUG=pw:*,-pw:test:protocol playwright test",
     "build": "pnpm electron-vite build",
     "vite:inspect": "pnpm clean && electron-vite build --mode development && pnpm exec serve .vite-inspect",
@@ -42,7 +40,11 @@
     "release:mac": "pnpm clean && pnpm build && pnpm electron-builder --mac -p always",
     "release:win": "pnpm clean && pnpm build && pnpm electron-builder --win -p always",
     "typecheck": "pnpm tsc -p tsconfig.json --noEmit",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck",
+    "make:icons": "electron scripts/make-icons.mjs",
+    "test:capture": "pnpm build && node scripts/capture.mjs",
+    "test:nobuild": "pnpm playwright test --project=smoke",
+    "make:logo": "node scripts/make-logo.mjs && pnpm make:icons"
   },
   "engines": {
     "node": ">=22",
@@ -55,6 +57,10 @@
     "@ffmpeg.wasm/core-mt": "0.12.0",
     "@ffmpeg.wasm/main": "0.12.0",
     "@floating-ui/dom": "1.7.6",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/newsreader": "^5.3.0",
+    "@fontsource/space-grotesk": "^5.3.0",
     "@foobar404/wave": "2.0.5",
     "@ghostery/adblocker-electron": "2.18.0",
     "@ghostery/adblocker-electron-preload": "2.18.0",

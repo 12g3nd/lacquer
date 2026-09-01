@@ -1,0 +1,227 @@
+/*
+ * Lacquer — the inspector (Stage B, B5). Queue · Lyrics · Comments · Related.
+ *
+ * The inspector sits on the player-stage atmosphere, so it must be an opaque
+ * Instrument surface: DESIGN.md §3.4 — text never sits on raw album colour, it
+ * sits on a surface or a scrim. The mode switch is *functional* colour: active
+ * state is Ion, never album-derived (§3.2 / D6).
+ *
+ * Lyrics legibility is carried by the surface, not a `text-shadow` (which is
+ * what shipped and what §3.4 rules out).
+ */
+
+/* ── The panel ─────────────────────────────────────────────────────── */
+ytmusic-player-page#player-page #side-panel.ytmusic-player-page {
+  background: var(--lq-instrument);
+  border: 1px solid var(--lq-hairline);
+  border-radius: var(--lq-radius-lg);
+  margin: var(--lq-space-4) 0 var(--lq-space-4) var(--lq-space-6);
+  overflow: hidden;
+}
+
+/* ── Mode switch — one clear switch, not four equally loud tabs ─────── */
+ytmusic-player-page tp-yt-paper-tabs.tab-header-container {
+  border-bottom: 1px solid var(--lq-hairline) !important;
+  padding: 0 var(--lq-space-3);
+  /* The tab strip is chrome and must paint above the panel's scrolling
+     content. The synced-lyrics provider row renders 30px above its own
+     scroller and escapes it, which sliced the "LRCLIB" label across the tabs.
+     Rather than chase why it escapes, give the chrome an opaque surface and a
+     stacking order — the strip owns that band of the panel. */
+  position: relative;
+  z-index: 3;
+  background: var(--lq-instrument);
+}
+ytmusic-player-page tp-yt-paper-tab.ytmusic-player-page {
+  font-family: var(--lq-font-interface);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--lq-moondust);
+  opacity: 1;
+  transition: color var(--lq-motion-fast);
+}
+ytmusic-player-page tp-yt-paper-tab.ytmusic-player-page:hover {
+  color: var(--lq-milkglass);
+}
+ytmusic-player-page tp-yt-paper-tab.ytmusic-player-page.iron-selected {
+  color: var(--lq-ion);
+  font-weight: 600;
+}
+/* The selection bar ships 0px tall and transparent — invisible. Make it the
+   2px Ion underline that carries the active state. */
+ytmusic-player-page tp-yt-paper-tabs #selectionBar.tp-yt-paper-tabs {
+  height: 2px !important;
+  background-color: var(--lq-ion) !important;
+  border-radius: var(--lq-radius-pill);
+}
+
+/* ── Tab body ──────────────────────────────────────────────────────── */
+ytmusic-player-page ytmusic-tab-renderer#tab-renderer {
+  background: transparent;
+  font-family: var(--lq-font-interface);
+}
+
+/* ── Queue ─────────────────────────────────────────────────────────── */
+ytmusic-queue-header-renderer {
+  padding: var(--lq-space-4) var(--lq-space-4) var(--lq-space-2);
+}
+ytmusic-queue-header-renderer .container-name yt-formatted-string:first-child,
+ytmusic-queue-header-renderer .subtitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lq-moondust);
+}
+ytmusic-queue-header-renderer .container-name .title {
+  font-family: var(--lq-font-interface);
+  font-weight: 600;
+  color: var(--lq-milkglass);
+}
+
+ytmusic-player-queue #contents.ytmusic-player-queue {
+  padding: var(--lq-space-2);
+}
+ytmusic-player-queue ytmusic-player-queue-item {
+  border-radius: var(--lq-radius-md);
+  padding: var(--lq-space-1) var(--lq-space-2);
+  transition: background-color var(--lq-motion-fast);
+}
+ytmusic-player-queue ytmusic-player-queue-item:hover {
+  background: var(--lq-instrument-raised);
+}
+ytmusic-player-queue ytmusic-player-queue-item .song-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lq-milkglass);
+}
+/* `album-color-theme`'s style.css pins `.byline` / `.duration` to 50% white
+   with `!important`; match it. */
+ytmusic-player-queue
+  ytmusic-player-queue-item
+  .byline.ytmusic-player-queue-item {
+  font-size: 12px;
+  color: var(--lq-moondust) !important;
+}
+ytmusic-player-queue
+  ytmusic-player-queue-item
+  .duration.ytmusic-player-queue-item {
+  font-family: var(--lq-font-instrument);
+  font-variant-numeric: tabular-nums;
+  color: var(--lq-moondust) !important;
+}
+/* The current track — unambiguous: Ion tint + an Ion edge marker. */
+ytmusic-player-queue ytmusic-player-queue-item[selected],
+ytmusic-player-queue ytmusic-player-queue-item[play-button-state='playing'] {
+  background: color-mix(in srgb, var(--lq-ion) 14%, transparent) !important;
+  box-shadow: inset 3px 0 0 var(--lq-ion);
+}
+ytmusic-player-queue ytmusic-player-queue-item[selected] .song-title,
+ytmusic-player-queue
+  ytmusic-player-queue-item[play-button-state='playing']
+  .song-title {
+  color: var(--lq-ion);
+}
+
+/* ── Lyrics — a surface carries legibility, not a shadow ───────────── */
+#tab-renderer[page-type='MUSIC_PAGE_TYPE_TRACK_LYRICS'],
+#synced-lyrics-container {
+  background: var(--lq-instrument);
+}
+#synced-lyrics-container {
+  --lyrics-font-family: var(--lq-font-interface);
+  --lyrics-inactive-opacity: 0.5;
+  padding: 0 var(--lq-space-4);
+}
+#synced-lyrics-container .text-lyrics {
+  color: var(--lq-moondust) !important;
+}
+#synced-lyrics-container .current .text-lyrics {
+  color: var(--lq-milkglass) !important;
+}
+/* The provider picker. The plugin renders it as item 0 of the virtualised
+   lyrics list (`renderer.tsx`), `position: sticky` so it pins under the tab
+   strip while lyrics scroll; a `mousemove`/scroll handler slides it out of
+   view via `--lyrics-picker-top`. Stock, it is an ~80px block: a provider-name
+   carousel stacked over a redundant dot row, and that lower half read as a
+   stray band hanging below the tabs.
+   Lacquer collapses it to one compact opaque row — chevrons + the provider
+   name — flush under the tab strip, with the dot row removed. Hide-on-scroll
+   still works (it slides up by its own, now smaller, height). */
+#synced-lyrics-container div:has(> .lyrics-picker) {
+  top: 0;
+  z-index: 2;
+  background: var(--lq-instrument);
+  border-bottom: 1px solid var(--lq-hairline);
+}
+#synced-lyrics-container div:has(> .lyrics-picker) > .lyrics-picker {
+  height: auto;
+  min-height: 0;
+  padding-block: var(--lq-space-2);
+  backdrop-filter: none;
+}
+#synced-lyrics-container .lyrics-picker-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+#synced-lyrics-container .lyrics-picker-content-label {
+  width: 100%;
+  justify-content: center;
+}
+#synced-lyrics-container .lyrics-picker-item {
+  gap: var(--lq-space-2);
+}
+#synced-lyrics-container .lyrics-picker-content-dots {
+  display: none;
+}
+#synced-lyrics-container .lyrics-picker .description {
+  font-family: var(--lq-font-interface);
+  font-size: 13px !important;
+  color: var(--lq-milkglass) !important;
+}
+
+/* Stock lyrics size from `--lyrics-font-size`, which clamps up to 3rem — about
+   six words per line in this panel, reading as a placeholder rather than a
+   lyric sheet. Set the variable the plugin actually consumes; a `font-size` on
+   `.text-lyrics` is overridden by it. */
+#synced-lyrics-container {
+  --lyrics-font-size: 19px;
+  --lyrics-line-height: 1.45;
+}
+
+/* The last line ran off the card's bottom edge mid-glyph. Give the scroller
+   room to finish, and let the final lines fade rather than being guillotined. */
+#synced-lyrics-container .synced-lyrics-vlist {
+  padding-bottom: var(--lq-space-6);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--lq-space-5),
+    #000 calc(100% - var(--lq-space-6)),
+    transparent 100%
+  );
+}
+
+/* ── Related / Comments — light touch: legible on Instrument, Ion links ── */
+ytmusic-tab-renderer#tab-renderer a {
+  color: var(--lq-ion);
+}
+ytmusic-tab-renderer#tab-renderer yt-formatted-string {
+  color: var(--lq-milkglass);
+}
+
+/* ── Inspector scrollbar ──────────────────────────────────────────── */
+ytmusic-tab-renderer#tab-renderer::-webkit-scrollbar,
+ytmusic-player-queue::-webkit-scrollbar {
+  width: 8px;
+}
+ytmusic-tab-renderer#tab-renderer::-webkit-scrollbar-thumb,
+ytmusic-player-queue::-webkit-scrollbar-thumb {
+  background: var(--lq-hairline-strong);
+  border-radius: var(--lq-radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}

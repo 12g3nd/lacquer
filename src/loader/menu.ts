@@ -18,7 +18,7 @@ const createContext = (
   getConfig: async () =>
     deepmerge(
       (await allPlugins())[id].config ?? { enabled: false },
-      config.get(`plugins.${id}`) ?? {},
+      config.plugins.getPlugins()[id] ?? {},
     ) as PluginConfig,
   setConfig: async (newConfig) => {
     config.setPartial(

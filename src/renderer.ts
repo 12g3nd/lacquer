@@ -9,6 +9,22 @@ import {
   registerWindowDefaultTrustedTypePolicy,
 } from '@/utils/trusted-types';
 
+import { initAlbumColor } from './lacquer/album-color';
+import { initContextMenu } from './lacquer/context-menu';
+import lacquerContextMenuCss from './lacquer/context-menu.css?inline';
+import { initFXRack, setFXRackOpen } from './lacquer/fx-rack';
+import lacquerFxRackCss from './lacquer/fx-rack.css?inline';
+import lacquerInspectorCss from './lacquer/inspector.css?inline';
+import { initPlayerStage } from './lacquer/player-stage';
+import lacquerPlayerStageCss from './lacquer/player-stage.css?inline';
+import { initRail } from './lacquer/rail';
+import lacquerRailCss from './lacquer/rail.css?inline';
+import { initSettingsPanel } from './lacquer/settings-panel';
+import lacquerSettingsPanelCss from './lacquer/settings-panel.css?inline';
+import { signalChain } from './lacquer/signal-chain';
+import { initTitleBar } from './lacquer/titlebar';
+import lacquerTitlebarCss from './lacquer/titlebar.css?inline';
+import lacquerTransportCss from './lacquer/transport.css?inline';
 import {
   createContext,
   forceLoadRendererPlugin,
@@ -20,6 +36,7 @@ import {
 import { startingPages } from './providers/extracted-data';
 import { setupSongInfo } from './providers/song-info-front';
 
+import type { SignalChainPreset } from './lacquer/signal-chain-types';
 import type { MusicPlayer } from '@/types/music-player';
 import type { MusicPlayerAppElement } from '@/types/music-player-app-element';
 import type { QueueResponse } from '@/types/music-player-desktop-internal';
@@ -45,6 +62,28 @@ async function listenForApiLoad() {
       return;
     }
   }
+}
+
+let lacquerRegionSheetsAdopted = false;
+/** Append the Stage B authored region sheets after every plugin stylesheet. */
+function adoptLacquerRegionSheets() {
+  if (lacquerRegionSheetsAdopted) return;
+  lacquerRegionSheetsAdopted = true;
+  const sheets = [
+    lacquerTitlebarCss,
+    lacquerRailCss,
+    lacquerTransportCss,
+    lacquerPlayerStageCss,
+    lacquerInspectorCss,
+    lacquerFxRackCss,
+    lacquerContextMenuCss,
+    lacquerSettingsPanelCss,
+  ].map((css) => {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(css);
+    return sheet;
+  });
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, ...sheets];
 }
 
 async function onApiLoaded() {
@@ -129,6 +168,18 @@ async function onApiLoaded() {
         )
         ?.onRepeatButtonClick();
     }
+  });
+
+  window.ipcRenderer.on('peard:fx-rack-toggle', () => {
+    setFXRackOpen();
+  });
+
+  window.ipcRenderer.on('peard:fx-set-preset', (_, preset: string) => {
+    signalChain.setPreset(preset as SignalChainPreset);
+    window.localStorage.setItem('lacquer.fxPreset', preset);
+    document.dispatchEvent(
+      new CustomEvent('lacquer:preset-changed', { detail: { preset } }),
+    );
   });
   window.ipcRenderer.on('peard:update-volume', (_, volume: number) => {
     document
@@ -309,10 +360,35 @@ async function onApiLoaded() {
     },
   );
 
+  // The Stage B authored region sheets are adopted stylesheets, applied here
+  // rather than injected in the main process. `main()` awaits
+  // `loadAllRendererPlugins()` before this runs, so every plugin stylesheet is
+  // already in `document.adoptedStyleSheets`; appending Lacquer's after them —
+  // and adopted sheets always cascade after `insertCSS`-injected ones — is what
+  // lets the authored shell win over `album-color-theme`'s stock-surface
+  // recolour (D4) without a per-rule specificity arms race.
+  adoptLacquerRegionSheets();
+
+  // Shell injection is DOM-only and must not depend on playback: if nothing
+  // has played yet there is no <video> element, and the audio setup below
+  // throws — which previously took the titlebar, settings menu and context
+  // menu down with it. These use `whenElement`, so they are safe to run early.
+  initTitleBar();
+  initRail();
+  initPlayerStage();
+  initSettingsPanel();
+  initContextMenu();
+  // Reads the album-colour plugin's output and republishes Lacquer's own
+  // `--lq-album-*` tokens. DOM-only, and safe before playback: with no artwork
+  // yet it simply publishes the Orbit Noir fallback.
+  initAlbumColor();
+
   const video = document.querySelector('video')!;
   const audioContext = new AudioContext();
   const audioSource = audioContext.createMediaElementSource(video);
-  audioSource.connect(audioContext.destination);
+
+  signalChain.init(audioSource, audioContext, video);
+  initFXRack();
 
   for (const [id, plugin] of Object.entries(getAllLoadedRendererPlugins())) {
     if (typeof plugin.renderer !== 'function') {

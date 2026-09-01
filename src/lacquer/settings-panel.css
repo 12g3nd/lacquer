@@ -1,0 +1,53 @@
+/*
+ * Lacquer — the transport settings menu (Stage C, C5).
+ *
+ * `settings-panel.ts` injects the gear button and its quick menu (Plugins &
+ * Options, Reload, Developer Tools). This sheet owns their layout and type; the
+ * gear button's Orbit Noir colour/border is shared with the FX button in
+ * `transport.css`, and the menu's Blueglass surface is there too.
+ */
+
+#lacquer-settings-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+#lacquer-gear-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 var(--lq-space-2);
+  padding: var(--lq-space-1) var(--lq-space-2);
+}
+
+#lacquer-settings-menu-container {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--lq-space-2));
+  z-index: 2147483000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lq-space-1);
+  min-width: 172px;
+  padding: var(--lq-space-2);
+}
+#lacquer-settings-menu-container[hidden] {
+  display: none;
+}
+
+.lacquer-settings-item {
+  padding: var(--lq-space-2) var(--lq-space-3);
+  border: none;
+  border-radius: var(--lq-radius-sm);
+  background: transparent;
+  color: var(--lq-text);
+  font-family: var(--lq-font-interface);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--lq-motion-fast);
+}
+.lacquer-settings-item:hover {
+  background: color-mix(in srgb, var(--lq-milkglass) 10%, transparent);
+}

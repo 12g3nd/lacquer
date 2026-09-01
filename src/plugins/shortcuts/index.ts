@@ -8,6 +8,10 @@ export type ShortcutMappingType = {
   previous: string;
   playPause: string;
   next: string;
+  fxRackToggle: string;
+  fxOriginal: string;
+  fxSpedReverb: string;
+  fxSlowedReverb: string;
 };
 export type ShortcutsPluginConfig = {
   enabled: boolean;
@@ -27,11 +31,19 @@ export default createPlugin({
       previous: '',
       playPause: '',
       next: '',
+      fxRackToggle: '',
+      fxOriginal: '',
+      fxSpedReverb: '',
+      fxSlowedReverb: '',
     },
     local: {
       previous: '',
       playPause: '',
       next: '',
+      fxRackToggle: '',
+      fxOriginal: '',
+      fxSpedReverb: '',
+      fxSlowedReverb: '',
     },
   } as ShortcutsPluginConfig,
   menu: onMenu,
