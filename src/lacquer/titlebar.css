@@ -26,36 +26,13 @@
   overflow: visible;
 }
 
-.lq-mark-disc {
-  fill: var(--lq-atlantic);
-  stroke: var(--lq-milkglass);
-  stroke-opacity: 0.18;
-  stroke-width: 1;
+.lq-mark-l {
+  fill: var(--lq-milkglass);
 }
-.lq-mark-groove {
-  fill: none;
-  stroke: var(--lq-milkglass);
-  stroke-width: 1;
-  opacity: 0.24;
-}
-.lq-mark-spindle {
-  fill: var(--lq-orbit);
-  stroke: var(--lq-hairline-strong);
-  stroke-width: 1;
-}
-.lq-mark-orbit {
-  fill: none;
-  stroke: var(--lq-hairline-strong);
-  stroke-width: 1;
-}
-.lq-mark-orbit-body {
-  fill: var(--lq-solar);
-}
-/* The diffraction arc — Chrome linework catching the spectrum. */
 .lq-mark-spectrum {
   fill: none;
   stroke: url(#lq-mark-spectrum-grad);
-  stroke-width: 2.4;
+  stroke-width: 2.9;
   stroke-linecap: round;
 }
 #lq-mark-spectrum-grad stop:nth-child(1) {
@@ -71,11 +48,16 @@
   stop-color: var(--lq-solar);
 }
 
+/* Crest capitals. The mark is a laurel monogram, so the word is set the way a
+   crest sets a name — small, spaced, upright — rather than as a product
+   logotype. Graphic voice (Space Grotesk), which is what ties Lacquer to the
+   rest of Orbit Noir (DESIGN.md §5). */
 .lq-wordmark-text {
   font-family: var(--lq-font-graphic);
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
   fill: var(--lq-milkglass);
 }
 

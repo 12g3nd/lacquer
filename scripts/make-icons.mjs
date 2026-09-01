@@ -57,6 +57,8 @@ const run = async () => {
     'svg{display:block;width:1024px;height:1024px}</style>' +
     svg;
 
+  // One window, loaded twice. Creating and destroying a second offscreen
+  // window mid-run races its own teardown and the load fails with ERR_FAILED.
   const win = new BrowserWindow({
     width: 1024,
     height: 1024,
@@ -66,30 +68,49 @@ const run = async () => {
     frame: false,
     webPreferences: { offscreen: true },
   });
-  await win.loadURL(
-    'data:text/html;charset=utf-8,' + encodeURIComponent(html),
-  );
-  await new Promise((resolve) => setTimeout(resolve, 500));
 
-  const captured = await win.webContents.capturePage();
-  // Offscreen capture comes back at the display's scale factor (e.g. 2048² on a
-  // 2× display). Normalise the whole frame to 1024² before slicing sizes.
-  const { width } = captured.getSize();
-  const full =
-    width === 1024
-      ? captured
-      : captured.resize({ width: 1024, height: 1024, quality: 'best' });
-  if (full.isEmpty()) throw new Error('capturePage returned an empty image');
+  const render = async (svgSource) => {
+    const page =
+      '<!doctype html><meta charset="utf-8">' +
+      '<style>html,body{margin:0;padding:0;background:transparent}' +
+      'svg{display:block;width:1024px;height:1024px}</style>' +
+      svgSource;
+    await win.loadURL(
+      'data:text/html;charset=utf-8,' + encodeURIComponent(page),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const captured = await win.webContents.capturePage();
+    const { width } = captured.getSize();
+    const image =
+      width === 1024
+        ? captured
+        : captured.resize({ width: 1024, height: 1024, quality: 'best' });
+    if (image.isEmpty()) throw new Error('capturePage returned an empty image');
+    return image;
+  };
+
+  const full = await render(svg);
+  // A wreath turns to mush below ~32px, so the small icon sizes get the
+  // de-wreathed glyph. Windows picks the nearest size out of the .ico, so the
+  // taskbar and title bar get the legible one without any extra plumbing.
+  const smallSvg = readFileSync(
+    path.join(ROOT, 'assets/icon-small.svg'),
+    'utf8',
+  );
+  const fullSmall = await render(smallSvg);
+  const SMALL_AT_OR_BELOW = 32;
+  const sourceFor = (size) => (size <= SMALL_AT_OR_BELOW ? fullSmall : full);
 
   mkdirSync(PNG_DIR, { recursive: true });
   mkdirSync(WIN_DIR, { recursive: true });
 
   const pngs = new Map();
   for (const size of PNG_SIZES) {
+    const source = sourceFor(size);
     const image =
       size === 1024
-        ? full
-        : full.resize({ width: size, height: size, quality: 'best' });
+        ? source
+        : source.resize({ width: size, height: size, quality: 'best' });
     const data = image.toPNG();
     pngs.set(size, data);
     writeFileSync(path.join(PNG_DIR, `${size}x${size}.png`), data);
@@ -101,7 +122,10 @@ const run = async () => {
     buildIco(ICO_SIZES.map((size) => ({ size, data: pngs.get(size) }))),
   );
 
-  console.log(`[icons] wrote ${PNG_SIZES.length} PNGs, assets/icon.png, icon.ico`);
+  console.log(
+    `[icons] wrote ${PNG_SIZES.length} PNGs, assets/icon.png, icon.ico ` +
+      `(<=${SMALL_AT_OR_BELOW}px use the de-wreathed glyph)`,
+  );
   win.destroy();
   app.quit();
 };

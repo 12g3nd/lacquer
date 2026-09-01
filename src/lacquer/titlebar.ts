@@ -23,12 +23,16 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const WORDMARK_ID = 'lacquer-wordmark';
 const RAIL_NAV_ID = 'lacquer-rail-nav';
 
-/** The record-and-orbit mark plus the wordmark, as one lockup. The `<g>` with
- *  class `lq-mark` is re-used standalone as the app icon (`assets/icon.svg`). */
+/** The mark plus the wordmark, as one lockup.
+ *
+ *  The titlebar renders this at 22px, where the laurel wreath from
+ *  `assets/icon.svg` turns to mush — so the UI carries the monogram alone and
+ *  the wreath is reserved for the app icon at 48px and up. Same system, two
+ *  scales; `scripts/make-logo.mjs` generates both from one geometry. */
 const WORDMARK_SVG = `
-<svg class="lq-wordmark-svg" viewBox="0 0 116 32" role="img" aria-label="Lacquer">
+<svg class="lq-wordmark-svg" viewBox="0 0 132 32" role="img" aria-label="Lacquer">
   <defs>
-    <linearGradient id="lq-mark-spectrum-grad" x1="0" y1="0" x2="1" y2="0.35">
+    <linearGradient id="lq-mark-spectrum-grad" x1="0" y1="1" x2="1" y2="0">
       <stop offset="0"></stop>
       <stop offset="0.4"></stop>
       <stop offset="0.72"></stop>
@@ -36,15 +40,10 @@ const WORDMARK_SVG = `
     </linearGradient>
   </defs>
   <g class="lq-mark">
-    <ellipse class="lq-mark-orbit" cx="16" cy="16" rx="14.5" ry="10.5"
-      transform="rotate(-22 16 16)"></ellipse>
-    <circle class="lq-mark-orbit-body" cx="28" cy="6.4" r="2.3"></circle>
-    <circle class="lq-mark-disc" cx="16" cy="16" r="11.5"></circle>
-    <circle class="lq-mark-groove" cx="16" cy="16" r="7.6"></circle>
-    <path class="lq-mark-spectrum" d="M7.3 8.7 A11.5 11.5 0 0 1 24.7 8.7"></path>
-    <circle class="lq-mark-spindle" cx="16" cy="16" r="2.6"></circle>
+    <path class="lq-mark-l" d="M9.96 4.68 h2.88 v15.84 h10.08 v2.88 h-12.96 Z"></path>
+    <path class="lq-mark-spectrum" d="M11.40 27.48 A 11.04 11.04 0 0 0 25.80 13.80"></path>
   </g>
-  <text class="lq-wordmark-text" x="37" y="22">Lacquer</text>
+  <text class="lq-wordmark-text" x="36" y="21">Lacquer</text>
 </svg>`;
 
 /** Re-runs `inject` whenever `host`'s direct children change and the marker
