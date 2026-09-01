@@ -7,6 +7,54 @@
 
 ---
 
+## Split execution — read this first
+
+Same split as Stages A and B. **C2 is done and committed**; the rest remain.
+
+| Task | Owner | Status |
+|---|---|---|
+| C1 FX rack as instrument panel | Sonnet | **TODO** |
+| C2 Context-menu classifier | done | Complete — `src/lacquer/context-menu-classify.ts` |
+| C3 Motion pass | Sonnet | **TODO** |
+| C4 Lacquer wordmark | Sonnet | **TODO** |
+| C5 Final consistency sweep | Sonnet | **TODO** |
+
+### What C2 found, so it is not undone
+
+The reported bug understated the problem. The old path-prefix table matched
+almost nothing against current YouTube Music, so **every stock action fell into
+"More…"** and tier 1 held only Lacquer's FX entries.
+
+Menu items carry two real signals on their Polymer data — `iconType`
+(`ALBUM`, `ARTIST`, `MIX`, `QUEUE_PLAY_NEXT`, …) and the navigation/service
+endpoint, with a `pageType` on browse endpoints. **Icon type leads**, because
+"Play next" and "Add to queue" share `queueAddEndpoint` and are separable only
+by icon. Never reintroduce path geometry; a test asserts it cannot classify.
+
+`context-menu-classify.ts` is deliberately **import-free**. Reaching it through
+`context-menu.ts` pulls in the signal chain and its binary `.wav` impulse
+responses, which the Playwright transform cannot parse. Keep it that way.
+
+Also removed: `isContextRelevant`. It gated "Remove from queue" on a tab
+labelled "queue" — the tab says **"Up next"**, so the action was unreachable
+from anywhere in the app. YouTube Music composes each menu for its own context;
+do not second-guess it.
+
+### Housekeeping carried in from Stages A and B
+
+Two known defects, both outside B2–B5's scope and neither yet fixed:
+
+1. **Lyrics provider strip.** Its lower ~40px (arrows and dot row) shows below
+   the inspector tabs as a stray band. The tab strip now paints above it, so the
+   label is no longer sliced, but it is not clean. Dead ends already ruled out,
+   do not repeat them: `--lyrics-picker-top` and the computed `top` are both
+   already `0`; setting that variable, resetting the wrapper's box, and pinning
+   the sticky wrapper to `top: 0` each measurably changed nothing.
+2. **Browse immersive-header gradient** on album and playlist detail pages is
+   still YouTube's art-derived hero rather than Orbit Noir.
+
+---
+
 ## Read first, in this order
 
 1. `.agents/rules/lacquer.md`
@@ -63,7 +111,7 @@ management, Escape to close, and click-outside to dismiss.
 
 Persist state. Preset switching stays immediate.
 
-### C2. Context menu — replace the classifier
+### C2. Context menu — replace the classifier  ·  DONE
 
 **D12** deferred this to here. It is now due.
 
