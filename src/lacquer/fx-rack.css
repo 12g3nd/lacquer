@@ -38,8 +38,22 @@
   color: var(--lq-milkglass);
   font-family: var(--lq-font-interface);
 
-  background: var(--lq-blueglass);
-  backdrop-filter: var(--lq-blueglass-blur);
+  /* Blueglass would be the right material here — the rack floats and is
+     transient (DESIGN.md §4) — but its blur cannot work at this position. The
+     rack is parented inside `ytmusic-player-bar`, which carries `transform`
+     and `will-change: transform`; either one makes an element a *backdrop
+     root*, so `backdrop-filter` samples only what is inside the player bar
+     rather than the inspector behind the rack. The blur is computed and has
+     nothing to blur, leaving only the 0.72 alpha — and the queue read straight
+     through the panel, with track titles colliding with the EQ and reverb rows.
+
+     So this surface is opaque. Legibility outranks the material (§4: Instrument
+     is what gets used wherever legibility matters), and an unreadable control
+     panel is not a trade worth making for a blur nobody can see. The Blueglass
+     border, Chrome top rule and elevation stay, so it still reads as a floating
+     object. Reparenting the rack out of the player bar would let the real
+     material work; that is a larger change than this defect justifies. */
+  background: var(--lq-instrument);
   border: 1px solid var(--lq-blueglass-border);
   border-radius: var(--lq-radius-lg);
   /* Chrome: a 1px bright rule along the top edge, the diffraction/wireframe
