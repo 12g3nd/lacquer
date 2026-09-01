@@ -14,7 +14,9 @@ Same split as Stages A and B. **C2 is done and committed**; the rest remain.
 | Task | Owner | Status |
 |---|---|---|
 | C1 FX rack as instrument panel | Sonnet | **TODO** |
-| C2 Context-menu classifier | done | Complete — `src/lacquer/context-menu-classify.ts` |
+| C2 Context-menu **classifier** | done | Complete — `src/lacquer/context-menu-classify.ts` |
+| C2 Context-menu **keyboard nav** | Sonnet | **TODO** — see below |
+| C2 **`closeMenu()`** | Sonnet | **TODO** — see below |
 | C3 Motion pass | Sonnet | **TODO** |
 | C4 Lacquer wordmark | Sonnet | **TODO** |
 | C5 Final consistency sweep | Sonnet | **TODO** |
@@ -111,7 +113,7 @@ management, Escape to close, and click-outside to dismiss.
 
 Persist state. Preset switching stays immediate.
 
-### C2. Context menu — replace the classifier  ·  DONE
+### C2. Context menu — classifier DONE, two defects REMAIN
 
 **D12** deferred this to here. It is now due.
 
@@ -141,11 +143,11 @@ Preserve the **D12**-era tier structure (it is good):
 - **Tier 2 (More…):** remove from library/liked, remove from queue, download, credits, share,
   report, start radio, shuffle, play
 
-Two further defects to fix:
+**Still outstanding — the classifier rewrite did not touch either of these:**
 
 - The menu is destroyed and rebuilt, and items are wrapped in plain `<div>`s. This breaks
   `tp-yt-paper-listbox` keyboard navigation. Arrow keys, Home/End, Escape and type-ahead must
-  work.
+  work. This is an acceptance criterion for the stage.
 - `closeMenu()` sets `display: none` then restores it on the next frame. That is a flicker, not
   a close — the dropdown remains open in Polymer's model. Close it properly.
 
