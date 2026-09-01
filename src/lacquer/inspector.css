@@ -23,6 +23,14 @@ ytmusic-player-page#player-page #side-panel.ytmusic-player-page {
 ytmusic-player-page tp-yt-paper-tabs.tab-header-container {
   border-bottom: 1px solid var(--lq-hairline) !important;
   padding: 0 var(--lq-space-3);
+  /* The tab strip is chrome and must paint above the panel's scrolling
+     content. The synced-lyrics provider row renders 30px above its own
+     scroller and escapes it, which sliced the "LRCLIB" label across the tabs.
+     Rather than chase why it escapes, give the chrome an opaque surface and a
+     stacking order — the strip owns that band of the panel. */
+  position: relative;
+  z-index: 3;
+  background: var(--lq-instrument);
 }
 ytmusic-player-page tp-yt-paper-tab.ytmusic-player-page {
   font-family: var(--lq-font-interface);
@@ -133,10 +141,44 @@ ytmusic-player-queue
 #synced-lyrics-container .current .text-lyrics {
   color: var(--lq-milkglass) !important;
 }
-/* The provider picker floats — Blueglass, per §4. */
+/* The provider picker floats — Blueglass, per §4.
+   Its wrapper is `position: sticky`, and the picker itself is pulled 30px
+   upward out of the scroll container: measured, the container starts at y=187
+   (immediately below the 49px tab strip) while the picker rendered at y=157 —
+   straddling the tabs, so "LRCLIB" was sliced in half by the tab row. Pin the
+   wrapper to the top of its own scroll container and clear the offset. */
+#synced-lyrics-container div:has(> .lyrics-picker) {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  /* Opaque: lyrics scroll underneath it. */
+  background: var(--lq-instrument);
+}
 #synced-lyrics-container div:has(> .lyrics-picker) > .lyrics-picker {
   background: var(--lq-blueglass);
   border-radius: var(--lq-radius-md);
+}
+
+/* Stock lyrics size from `--lyrics-font-size`, which clamps up to 3rem — about
+   six words per line in this panel, reading as a placeholder rather than a
+   lyric sheet. Set the variable the plugin actually consumes; a `font-size` on
+   `.text-lyrics` is overridden by it. */
+#synced-lyrics-container {
+  --lyrics-font-size: 19px;
+  --lyrics-line-height: 1.45;
+}
+
+/* The last line ran off the card's bottom edge mid-glyph. Give the scroller
+   room to finish, and let the final lines fade rather than being guillotined. */
+#synced-lyrics-container .synced-lyrics-vlist {
+  padding-bottom: var(--lq-space-6);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--lq-space-5),
+    #000 calc(100% - var(--lq-space-6)),
+    transparent 100%
+  );
 }
 
 /* ── Related / Comments — light touch: legible on Instrument, Ion links ── */
