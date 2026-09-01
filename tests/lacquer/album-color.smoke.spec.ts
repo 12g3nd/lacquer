@@ -140,10 +140,7 @@ test('hue survives normalisation', () => {
     const source = oklchToRgb({ l: 0.5, c: 0.2, h });
     const { fill } = normaliseAlbumColor(source);
     const out = rgbToOklch(parseRgb(fill));
-    const drift = Math.min(
-      Math.abs(out.h - h),
-      360 - Math.abs(out.h - h),
-    );
+    const drift = Math.min(Math.abs(out.h - h), 360 - Math.abs(out.h - h));
     expect(drift, `hue ${h} drifted to ${out.h}`).toBeLessThan(12);
   }
 });

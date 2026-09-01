@@ -1,44 +1,7 @@
+import { classifyMenuItem } from './context-menu-classify';
 import { signalChain } from './signal-chain';
 
 import type { SignalChainPreset } from './signal-chain-types';
-
-/**
- * Maps known YTM menu-item icon SVG path prefixes to a classification key.
- * These prefixes are taken from the icon paths that YTM injects into
- * menu items — they're stable across versions because the icons are
- * baked into the iron-iconset-svg bundle.
- */
-const ICON_CLASSIFIERS: Record<string, string> = {
-  // "Play next" — queue_play_next icon
-  'M21,16H': 'play-next',
-  // "Add to queue"
-  'M22,7H': 'add-to-queue',
-  // "Save to playlist" / "Add to playlist"
-  'M22,13h': 'save-to-playlist',
-  'M14,10H': 'save-to-playlist',
-  // "Go to album"
-  'M12,2C6': 'go-to-album',
-  // "Go to artist"
-  'M12,12c2': 'go-to-artist',
-  // "Remove from library" / "Unlike"
-  'M4.45,': 'remove-from-library',
-  // "Remove from queue"
-  'M15,6H': 'remove-from-queue',
-  // "Share"
-  'M15,5.63': 'share',
-  // "Credits"
-  'M12,3.5': 'credits',
-  // "Report"
-  'M13.18,4': 'report',
-  // "Download" / handled by downloader plugin, but classify stock one too
-  'M17,18v': 'download',
-  // "Start radio"
-  'M12,2C6.48': 'start-radio',
-  // "Shuffle play"
-  'M10.59,9': 'shuffle',
-  // "Play"
-  'M8,5v14': 'play',
-};
 
 /** Lacquer tier-1 menu order by classification key. */
 const TIER_1_ORDER = [
@@ -64,38 +27,10 @@ const TIER_2_KEYS = new Set([
   'share',
   'report',
   'start-radio',
+  'dismiss-queue',
   'shuffle',
   'play',
 ]);
-
-function classifyMenuItem(el: HTMLElement): string | null {
-  const iconPath = el.querySelector<SVGPathElement>('path[d]');
-  if (!iconPath) return null;
-  const d = iconPath.getAttribute('d') || '';
-  for (const [prefix, key] of Object.entries(ICON_CLASSIFIERS)) {
-    if (d.startsWith(prefix)) return key;
-  }
-  return null;
-}
-
-function isContextRelevant(key: string): boolean {
-  const url = window.location.href;
-
-  if (key === 'go-to-album') {
-    // Skip on album pages
-    return !url.includes('browse/') || !url.includes('OLAK');
-  }
-  if (key === 'remove-from-queue') {
-    // Only in queue context (player page with queue visible)
-    const queuePanel = document.querySelector(
-      'ytmusic-player-page tp-yt-paper-tab[aria-selected="true"]',
-    );
-    return (
-      queuePanel?.textContent?.trim()?.toLowerCase()?.includes('queue') ?? false
-    );
-  }
-  return true;
-}
 
 function createSeparator(): HTMLElement {
   const sep = document.createElement('div');
@@ -233,13 +168,20 @@ function reorganizeMenu(listbox: HTMLElement) {
     }
   }
 
-  // Collect tier-2 items
+  /* Collect tier-2 items.
+   *
+   * Nothing is filtered for "relevance". YouTube Music composes each menu for
+   * its own context — it does not offer "Go to album" on an album page, and it
+   * only includes "Remove from queue" for an item actually in the queue.
+   * Lacquer reorders that menu; it has no better information than the source
+   * did, and the previous second-guessing removed working actions: "Remove
+   * from queue" was gated on the selected inspector tab containing the word
+   * "queue", but the tab is labelled "Up next", so the check never passed and
+   * the action was unreachable from anywhere in the application. */
   const tier2Items: HTMLElement[] = [];
   for (const [key, el] of classified.entries()) {
     if (TIER_2_KEYS.has(key)) {
-      if (isContextRelevant(key)) {
-        tier2Items.push(el);
-      }
+      tier2Items.push(el);
     }
   }
   for (const el of unclassified) {
@@ -324,7 +266,7 @@ function reorganizeMenu(listbox: HTMLElement) {
 
     // Stock YTM items from tier-1
     const existing = classified.get(key);
-    if (existing && isContextRelevant(key)) {
+    if (existing) {
       listbox.appendChild(existing);
     }
   }
