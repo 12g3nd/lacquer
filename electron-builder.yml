@@ -14,16 +14,26 @@ files:
 asarUnpack:
   - assets
 win:
-  icon: assets/icon.png
+  # The generated multi-size .ico rather than the 1024 PNG: its 16/24/32 entries
+  # carry the de-wreathed glyph, which is what Windows shows in the taskbar.
+  icon: assets/generated/icons/win/icon.ico
   target:
-    - target: nsis-web
+    - target: nsis
       arch:
         - x64
     - target: portable
       arch:
         - x64
   compression: maximum
-nsisWeb:
-  runAfterFinish: false
+# `nsis-web` downloads its payload from a published release. There is no release
+# feed for a personal fork, so that installer would have nothing to fetch — this
+# is a self-contained one.
+nsis:
+  oneClick: true
+  perMachine: false # per-user install, so no UAC prompt
+  runAfterFinish: true
+  createStartMenuShortcut: true
+  createDesktopShortcut: false # the desktop is deliberately kept empty
+  shortcutName: Lacquer
 directories:
   output: ./pack/
