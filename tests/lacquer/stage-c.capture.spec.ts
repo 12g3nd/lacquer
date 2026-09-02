@@ -340,11 +340,17 @@ test('Stage C — context menu, wordmark, window', async () => {
     await shotOf(page, page.locator('#lacquer-wordmark'), '08-wordmark');
     const wordmark = await page.evaluate(() => {
       const svg = document.querySelector('#lacquer-wordmark .lq-wordmark-svg');
-      const stop = document.querySelector('#lq-mark-spectrum-grad stop');
+      const champagne = document.querySelector(
+        '#lacquer-wordmark .lq-mark-script-champagne',
+      );
+      const bronze = document.querySelector(
+        '#lacquer-wordmark .lq-mark-script-bronze',
+      );
       return {
         svgPresent: !!svg,
         svgHeight: svg ? getComputedStyle(svg).height : null,
-        stopColor: stop ? getComputedStyle(stop).stopColor : null,
+        champagne: champagne ? getComputedStyle(champagne).stroke : null,
+        bronze: bronze ? getComputedStyle(bronze).stroke : null,
       };
     });
     console.log('  [wordmark]', JSON.stringify(wordmark));

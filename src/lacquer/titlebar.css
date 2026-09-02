@@ -5,10 +5,9 @@
  * sheet owns their whole appearance so the module carries no inline colour or
  * type. Operate surface — the stable spine, never album-reactive.
  *
- * The wordmark is a real inline SVG mark (C4): a lacquered record read against
- * an orbit, with a spectral-diffraction arc off the disc edge — the CD-surface
- * and orbital vocabulary from DESIGN.md §1. It sits beside "Lacquer" set in the
- * Graphic voice (Space Grotesk), which ties it to the rest of Orbit Noir.
+ * The wordmark is the weighted script-L from Lacquer's crest on its Orbit Noir
+ * plate. The laurel is intentionally reserved for 32px and above; at this size
+ * the de-wreathed glyph carries the identity cleanly beside the crest capitals.
  */
 
 /* ── Wordmark ─────────────────────────────────────────────────────── */
@@ -26,26 +25,16 @@
   overflow: visible;
 }
 
-.lq-mark-l {
-  fill: var(--lq-milkglass);
+.lq-mark-plate {
+  fill: var(--lq-orbit);
+  stroke: var(--lq-hairline-strong);
+  stroke-width: 1.5;
 }
-.lq-mark-spectrum {
-  fill: none;
-  stroke: url(#lq-mark-spectrum-grad);
-  stroke-width: 2.9;
-  stroke-linecap: round;
+.lq-mark-script-bronze {
+  stroke: var(--lq-bronze);
 }
-#lq-mark-spectrum-grad stop:nth-child(1) {
-  stop-color: var(--lq-ion);
-}
-#lq-mark-spectrum-grad stop:nth-child(2) {
-  stop-color: var(--lq-signal);
-}
-#lq-mark-spectrum-grad stop:nth-child(3) {
-  stop-color: var(--lq-ultraviolet);
-}
-#lq-mark-spectrum-grad stop:nth-child(4) {
-  stop-color: var(--lq-solar);
+.lq-mark-script-champagne {
+  stroke: var(--lq-champagne);
 }
 
 /* Crest capitals. The mark is a laurel monogram, so the word is set the way a

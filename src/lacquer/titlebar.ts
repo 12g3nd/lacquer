@@ -7,8 +7,8 @@
  *
  *   - draws the Lacquer wordmark where the stock YouTube Music logo was (the
  *     logo itself is hidden in `suppress.css`). Stage A shipped a plain Space
- *     Grotesk text node; this is a real inline SVG mark — a lacquered record
- *     against an orbit, with a spectral-diffraction arc — beside the word;
+ *     Grotesk text node; this is the approved champagne-and-bronze script L
+ *     on its Orbit Noir plate beside the word;
  *   - relocates back / forward to the top of the rail.
  *
  * All colour and type live in `titlebar.css`; this module only builds
@@ -18,33 +18,11 @@
  */
 
 import { whenElement } from './dom';
+import { WORDMARK_SVG } from './logo.generated';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const WORDMARK_ID = 'lacquer-wordmark';
 const RAIL_NAV_ID = 'lacquer-rail-nav';
-
-/** The mark plus the wordmark, as one lockup.
- *
- *  The titlebar renders this at 22px, where the laurel wreath from
- *  `assets/icon.svg` turns to mush — so the UI carries the monogram alone and
- *  the wreath is reserved for the app icon at 48px and up. Same system, two
- *  scales; `scripts/make-logo.mjs` generates both from one geometry. */
-const WORDMARK_SVG = `
-<svg class="lq-wordmark-svg" viewBox="0 0 132 32" role="img" aria-label="Lacquer">
-  <defs>
-    <linearGradient id="lq-mark-spectrum-grad" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0"></stop>
-      <stop offset="0.4"></stop>
-      <stop offset="0.72"></stop>
-      <stop offset="1"></stop>
-    </linearGradient>
-  </defs>
-  <g class="lq-mark">
-    <path class="lq-mark-l" d="M9.96 4.68 h2.88 v15.84 h10.08 v2.88 h-12.96 Z"></path>
-    <path class="lq-mark-spectrum" d="M11.40 27.48 A 11.04 11.04 0 0 0 25.80 13.80"></path>
-  </g>
-  <text class="lq-wordmark-text" x="36" y="21">Lacquer</text>
-</svg>`;
 
 /** Re-runs `inject` whenever `host`'s direct children change and the marker
  *  element is missing. One observer per host, `childList` only. */

@@ -15,7 +15,7 @@ asarUnpack:
   - assets
 win:
   # The generated multi-size .ico rather than the 1024 PNG: its 16/24/32 entries
-  # carry the de-wreathed glyph, which is what Windows shows in the taskbar.
+  # carry the de-wreathed glyph; the 32px entry begins the full crest.
   icon: assets/generated/icons/win/icon.ico
   target:
     - target: nsis

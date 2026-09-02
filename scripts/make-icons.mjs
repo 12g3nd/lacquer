@@ -17,6 +17,8 @@ import { fileURLToPath } from 'node:url';
 
 import { app, BrowserWindow } from 'electron';
 
+import { iconVariantForSize, renderTraySources } from './make-logo.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PNG_DIR = path.join(ROOT, 'assets/generated/icons/png');
 const WIN_DIR = path.join(ROOT, 'assets/generated/icons/win');
@@ -51,12 +53,6 @@ const run = async () => {
   await app.whenReady();
 
   const svg = readFileSync(path.join(ROOT, 'assets/icon.svg'), 'utf8');
-  const html =
-    '<!doctype html><meta charset="utf-8">' +
-    '<style>html,body{margin:0;padding:0;background:transparent}' +
-    'svg{display:block;width:1024px;height:1024px}</style>' +
-    svg;
-
   // One window, loaded twice. Creating and destroying a second offscreen
   // window mid-run races its own teardown and the load fails with ERR_FAILED.
   const win = new BrowserWindow({
@@ -72,14 +68,23 @@ const run = async () => {
   const render = async (svgSource) => {
     const page =
       '<!doctype html><meta charset="utf-8">' +
-      '<style>html,body{margin:0;padding:0;background:transparent}' +
-      'svg{display:block;width:1024px;height:1024px}</style>' +
+      '<style>html,body{width:100%;height:100%;margin:0;overflow:hidden;' +
+      'background:transparent}' +
+      'svg{display:block;width:100vmin;height:100vmin}</style>' +
       svgSource;
     await win.loadURL(
       'data:text/html;charset=utf-8,' + encodeURIComponent(page),
     );
     await new Promise((resolve) => setTimeout(resolve, 500));
-    const captured = await win.webContents.capturePage();
+    const side = await win.webContents.executeJavaScript(
+      'Math.floor(Math.min(innerWidth, innerHeight))',
+    );
+    const captured = await win.webContents.capturePage({
+      x: 0,
+      y: 0,
+      width: side,
+      height: side,
+    });
     const { width } = captured.getSize();
     const image =
       width === 1024
@@ -98,8 +103,8 @@ const run = async () => {
     'utf8',
   );
   const fullSmall = await render(smallSvg);
-  const SMALL_AT_OR_BELOW = 32;
-  const sourceFor = (size) => (size <= SMALL_AT_OR_BELOW ? fullSmall : full);
+  const sourceFor = (size) =>
+    iconVariantForSize(size) === 'small' ? fullSmall : full;
 
   mkdirSync(PNG_DIR, { recursive: true });
   mkdirSync(WIN_DIR, { recursive: true });
@@ -122,9 +127,24 @@ const run = async () => {
     buildIco(ICO_SIZES.map((size) => ({ size, data: pngs.get(size) }))),
   );
 
+  const traySources = renderTraySources();
+  const trayFiles = {
+    playing: 'tray.png',
+    paused: 'tray-paused.png',
+    playingWhite: 'tray-white.png',
+    pausedWhite: 'tray-paused-white.png',
+  };
+  for (const [variant, filename] of Object.entries(trayFiles)) {
+    const tray = await render(traySources[variant]);
+    writeFileSync(
+      path.join(ROOT, 'assets', filename),
+      tray.resize({ width: 144, height: 144, quality: 'best' }).toPNG(),
+    );
+  }
+
   console.log(
-    `[icons] wrote ${PNG_SIZES.length} PNGs, assets/icon.png, icon.ico ` +
-      `(<=${SMALL_AT_OR_BELOW}px use the de-wreathed glyph)`,
+    `[icons] wrote ${PNG_SIZES.length} PNGs, icon.png, icon.ico, and four tray variants ` +
+      '(sizes below 32px use the de-wreathed glyph)',
   );
   win.destroy();
   app.quit();
