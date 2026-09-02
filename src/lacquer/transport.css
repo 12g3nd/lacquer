@@ -20,6 +20,12 @@
 
 /* ── The deck surface ──────────────────────────────────────────────── */
 ytmusic-player-bar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: 1fr;
+  align-items: center;
+  padding-inline: var(--lq-space-4);
+  box-sizing: border-box;
   background: color-mix(
     in srgb,
     var(--lq-instrument) calc(100% - var(--lq-tint-transport)),
@@ -32,14 +38,63 @@ ytmusic-player-bar {
   background: transparent !important;
 }
 
-/* B3 asks for identity-left / transport-centre. YouTube Music positions the
-   now-playing block *absolutely* at the bar's centre and manages the arrangement
-   with responsive JS; reordering it means fighting that every layout tick, and
-   the workspace constitution ranks transport reliability above a layout tweak.
-   Kept in YTM's structure — transport left, identity centre, output right, a
-   legitimate transport arrangement — and made unmistakably Lacquer through the
-   material, the album-coloured play button and progress line, the mono time and
-   the Chrome hairline below. Flagged for the owner rather than forced. */
+/* ── Deck structure — identity left / transport centre / output right ───────
+   The owner accepted the reorder previously flagged here. YTM absolutely
+   centres `.content-info-wrapper` and re-applies responsive classes as the
+   window changes size. Grid columns plus a positioning reset make the order a
+   property of the bar instead of competing offsets: YTM still owns every
+   control and can hide optional controls at its normal breakpoints. */
+ytmusic-player-bar > .middle-controls.ytmusic-player-bar {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  min-width: 0;
+  width: min(420px, 100%) !important;
+  max-width: 100% !important;
+}
+
+ytmusic-player-bar > .middle-controls > .content-info-wrapper {
+  position: static !important;
+  inset: auto !important;
+  min-width: 0;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+ytmusic-player-bar > .left-controls.ytmusic-player-bar {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  min-width: 0;
+  width: auto !important;
+}
+
+ytmusic-player-bar > .right-controls.ytmusic-player-bar {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  min-width: 0;
+  width: auto !important;
+}
+
+ytmusic-player-bar
+  > .middle-controls
+  > .content-info-wrapper
+  :is(.song-info, .title, .byline, .subtitle) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The progress line is a deck-edge instrument, not a fourth grid item. */
+ytmusic-player-bar > tp-yt-paper-slider#progress-bar.ytmusic-player-bar {
+  position: absolute !important;
+  inset: 0 0 auto !important;
+  width: 100% !important;
+}
 
 /* ── Progress line — thin and integrated, not a chunky slider ───────── */
 tp-yt-paper-slider#progress-bar.ytmusic-player-bar {
@@ -147,13 +202,13 @@ ytmusic-player-bar #expand-volume-slider.ytmusic-player-bar {
   --paper-slider-container-color: var(--lq-hairline) !important;
 }
 
-/* ── FX + gear affordances ───────────────────────────────────────────
-   Both buttons are injected by renderer modules (`fx-rack.ts`,
-   `settings-panel.ts`). They carry no inline styling of their own any more —
+/* ── FX + VIZ + gear affordances ─────────────────────────────────────
+   These buttons are injected by renderer modules. They carry no inline styling of their own —
    this sheet owns their whole appearance, in the Orbit Noir language.
    `!important` here beats `album-color-theme`'s equal-specificity dimming of
    player-bar controls, the same reason the rest of this file needs it. */
 #lacquer-fx-button,
+#lacquer-viz-button,
 #lacquer-gear-button {
   background: transparent !important;
   border: 1px solid var(--lq-hairline) !important;
@@ -168,9 +223,17 @@ ytmusic-player-bar #expand-volume-slider.ytmusic-player-bar {
     color var(--lq-motion-fast) !important;
 }
 #lacquer-fx-button:hover,
+#lacquer-viz-button:hover,
 #lacquer-gear-button:hover {
   border-color: var(--lq-ion) !important;
   color: var(--lq-milkglass) !important;
+}
+/* Visualizer Mode armed — Ion is the shell's functional/selected signal.
+   The state remains visible while browse temporarily suspends the canvas. */
+#lacquer-viz-button[aria-pressed='true'] {
+  border-color: var(--lq-ion) !important;
+  color: var(--lq-ion) !important;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--lq-ion) 30%, transparent);
 }
 /* Rack open — a quiet Chrome cue that the popover belongs to this button. */
 #lacquer-fx-button[aria-expanded='true'] {
