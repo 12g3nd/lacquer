@@ -1,0 +1,127 @@
+/*
+ * Visualizer Mode chrome choreography. Opacity keeps every control in the
+ * accessibility tree; focus and input are what wake it, never DOM removal.
+ */
+
+/* The authored renderer interpolates its album palette on the canvas. Stop
+   registered root colors repainting the hidden app on every transition frame;
+   Normal Mode keeps the 900ms token transition from tokens.css. */
+:root[data-lq-viz] {
+  transition: none;
+}
+
+:root[data-lq-viz]
+  :is(
+    ytmusic-nav-bar,
+    #nav-bar-background,
+    #guide-wrapper,
+    #guide,
+    #mini-guide,
+    #mini-guide-background,
+    ytmusic-player-bar,
+    #player-bar-background,
+    ytmusic-player-page#player-page #side-panel
+  ) {
+  opacity: 1;
+  transition: opacity 280ms ease-out;
+}
+
+:root[data-lq-viz][data-lq-viz-chrome-hidden]
+  :is(
+    ytmusic-nav-bar,
+    #nav-bar-background,
+    #guide-wrapper,
+    #guide,
+    #mini-guide,
+    #mini-guide-background,
+    ytmusic-player-bar,
+    #player-bar-background,
+    ytmusic-player-page#player-page #side-panel
+  ) {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+:root[data-lq-viz][data-lq-viz-chrome-hidden],
+:root[data-lq-viz][data-lq-viz-chrome-hidden] body {
+  cursor: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-lq-viz]
+    :is(
+      ytmusic-nav-bar,
+      #nav-bar-background,
+      #guide-wrapper,
+      #guide,
+      #mini-guide,
+      #mini-guide-background,
+      ytmusic-player-bar,
+      #player-bar-background,
+      ytmusic-player-page#player-page #side-panel
+    ) {
+    transition: none;
+  }
+}
+
+/* The canvas owns geometry. Interactive chrome only changes light. */
+:root[data-lq-viz]
+  :is(
+    #nav-bar-background,
+    #guide-wrapper,
+    #guide,
+    #mini-guide-background,
+    #player-bar-background
+  ) {
+  background: color-mix(in srgb, var(--lq-orbit) 68%, transparent) !important;
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+:root[data-lq-viz] :is(ytmusic-nav-bar, ytmusic-player-bar) {
+  background: transparent !important;
+}
+
+:root[data-lq-viz]
+  :is(
+    ytmusic-nav-bar,
+    #guide-wrapper,
+    #mini-guide,
+    ytmusic-player-bar,
+    ytmusic-player-page#player-page #side-panel
+  ) {
+  filter: saturate(calc(1 + var(--lq-viz-high, 0) * 0.8));
+  box-shadow:
+    0 0 calc(18px + var(--lq-viz-kick, 0) * 42px)
+      color-mix(in srgb, var(--lq-album-fill) 34%, transparent),
+    inset 0 0 calc(10px + var(--lq-viz-mid, 0) * 24px)
+      color-mix(in srgb, var(--lq-album-atmosphere) 22%, transparent);
+}
+
+:root[data-lq-viz][data-lq-viz-treatment='orbital']
+  ytmusic-player-page#player-page
+  #player.ytmusic-player-page {
+  transform: scale(var(--lq-viz-art-scale, 1));
+  filter: saturate(calc(1 + var(--lq-viz-high, 0) * 1.4))
+    drop-shadow(
+      0 0 calc(28px + var(--lq-viz-kick, 0) * 74px)
+        color-mix(in srgb, var(--lq-album-fill) 72%, transparent)
+    );
+  transition: filter 80ms linear;
+  will-change: transform, filter;
+}
+
+:root[data-lq-viz][data-lq-viz-treatment='rave']
+  ytmusic-player-page#player-page
+  :is(#player.ytmusic-player-page, #lacquer-now) {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-lq-viz][data-lq-viz-treatment='orbital']
+    ytmusic-player-page#player-page
+    #player.ytmusic-player-page {
+    transform: none;
+    transition: none;
+  }
+}

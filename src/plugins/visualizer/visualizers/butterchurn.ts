@@ -12,13 +12,12 @@ class ButterchurnVisualizer extends Visualizer {
 
   constructor(
     audioContext: AudioContext,
-    audioSource: MediaElementAudioSourceNode,
+    upstreamNode: AudioNode,
     canvas: HTMLCanvasElement,
     audioNode: GainNode,
-    _stream: MediaStream,
     config: VisualizerPluginConfig,
   ) {
-    super(audioSource, audioNode);
+    super(upstreamNode, audioNode);
 
     const preset = ButterchurnPresets[config.butterchurn.preset];
     const renderVisualizer = () => {
@@ -42,11 +41,17 @@ class ButterchurnVisualizer extends Visualizer {
     this.visualizer.setRendererSize(width, height);
   }
 
-  destroy() {
-    if (this.animFrameHandle) cancelAnimationFrame(this.animFrameHandle);
+  protected destroyVisualizer() {
+    if (this.animFrameHandle !== null) {
+      cancelAnimationFrame(this.animFrameHandle);
+      this.animFrameHandle = null;
+    }
     this.destroyed = true;
     try {
-      this.audioSource.disconnect(this.audioNode);
+      this.visualizer.disconnectAudio(this.audioNode);
+    } catch {}
+    try {
+      this.visualizer.loseGLContext();
     } catch {}
   }
 }

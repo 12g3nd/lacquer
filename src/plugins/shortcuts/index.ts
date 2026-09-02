@@ -12,6 +12,7 @@ export type ShortcutMappingType = {
   fxOriginal: string;
   fxSpedReverb: string;
   fxSlowedReverb: string;
+  visualizerModeToggle: string;
 };
 export type ShortcutsPluginConfig = {
   enabled: boolean;
@@ -35,6 +36,7 @@ export default createPlugin({
       fxOriginal: '',
       fxSpedReverb: '',
       fxSlowedReverb: '',
+      visualizerModeToggle: '',
     },
     local: {
       previous: '',
@@ -44,6 +46,7 @@ export default createPlugin({
       fxOriginal: '',
       fxSpedReverb: '',
       fxSlowedReverb: '',
+      visualizerModeToggle: '',
     },
   } as ShortcutsPluginConfig,
   menu: onMenu,

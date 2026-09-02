@@ -35,11 +35,8 @@ class WaveVisualizer extends Visualizer {
 
   resize(_: number, __: number) {}
 
-  destroy() {
+  protected destroyVisualizer() {
     this.visualizer.clearAnimations();
-    try {
-      this.audioSource.disconnect(this.audioNode);
-    } catch {}
   }
 }
 

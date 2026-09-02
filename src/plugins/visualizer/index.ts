@@ -3,11 +3,8 @@ import { signalChain } from '@/lacquer/signal-chain';
 import { createPlugin } from '@/utils';
 
 import emptyStyle from './empty-player.css?inline';
-import {
-  ButterchurnVisualizer as butterchurn,
-  VudioVisualizer as vudio,
-  WaveVisualizer as wave,
-} from './visualizers';
+import { ButterchurnVisualizer, LacquerVisualizer } from './visualizers';
+import { resolveVisualizerType } from './visualizers/lacquer-state';
 import { type Visualizer } from './visualizers/visualizer';
 
 type WaveColor = {
@@ -17,7 +14,7 @@ type WaveColor = {
 
 export type VisualizerPluginConfig = {
   enabled: boolean;
-  type: 'butterchurn' | 'vudio' | 'wave';
+  type: 'lacquer-orbital' | 'lacquer-rave' | 'butterchurn' | 'vudio' | 'wave';
   butterchurn: {
     preset: string;
     blendTimeInSeconds: number;
@@ -61,8 +58,14 @@ export type VisualizerPluginConfig = {
 type RenderProps = {
   visualizerInstance: Visualizer | null;
   audioContext: AudioContext | null;
-  audioSource: MediaElementAudioSourceNode | null;
   observer: ResizeObserver | null;
+  audioCanPlayHandler: ((event: CustomEvent<Compressor>) => void) | null;
+};
+
+type VisualizerRenderer = {
+  props: RenderProps;
+  destroyVisualizer(): void;
+  createVisualizer(config: VisualizerPluginConfig): void;
 };
 
 export default createPlugin({
@@ -71,7 +74,7 @@ export default createPlugin({
   restartNeeded: false,
   config: {
     enabled: false,
-    type: 'butterchurn',
+    type: 'lacquer-orbital',
     // Config per visualizer
     butterchurn: {
       preset: 'martin [shadow harlequins shape code] - fata morgana',
@@ -137,15 +140,19 @@ export default createPlugin({
   stylesheets: [emptyStyle],
   menu: async ({ getConfig, setConfig }) => {
     const config = await getConfig();
-    const visualizerTypes = ['butterchurn', 'vudio', 'wave'] as const; // For bundling
+    const visualizerTypes = [
+      ['lacquer-orbital', 'Orbital Shockwave'],
+      ['lacquer-rave', 'Laser Basilica (Rave)'],
+      ['butterchurn', 'Butterchurn (Chaos)'],
+    ] as const;
 
     return [
       {
         label: t('plugins.visualizer.menu.visualizer-type'),
-        submenu: visualizerTypes.map((visualizerType) => ({
-          label: visualizerType,
+        submenu: visualizerTypes.map(([visualizerType, label]) => ({
+          label,
           type: 'radio',
-          checked: config.type === visualizerType,
+          checked: resolveVisualizerType(config.type) === visualizerType,
           click() {
             setConfig({ type: visualizerType });
           },
@@ -158,69 +165,75 @@ export default createPlugin({
     props: {
       visualizerInstance: null,
       audioContext: null,
-      audioSource: null,
       observer: null,
+      audioCanPlayHandler: null,
     } as RenderProps,
 
-    createVisualizer(
-      this: { props: RenderProps },
-      config: VisualizerPluginConfig,
-    ) {
+    destroyVisualizer(this: VisualizerRenderer) {
+      this.props.observer?.disconnect();
+      this.props.observer = null;
       this.props.visualizerInstance?.destroy();
       this.props.visualizerInstance = null;
+      document.querySelector<HTMLCanvasElement>('#visualizer')?.remove();
+    },
 
-      if (!this.props.audioContext || !this.props.audioSource) return;
+    createVisualizer(this: VisualizerRenderer, config: VisualizerPluginConfig) {
+      this.destroyVisualizer();
+
+      if (!this.props.audioContext) return;
       if (!config.enabled) return;
 
-      const video = document.querySelector<
-        HTMLVideoElement & { captureStream(): MediaStream }
-      >('video');
-      if (!video) {
-        return;
-      }
-
-      const visualizerContainer =
-        document.querySelector<HTMLElement>('#player');
+      const takeover = document.documentElement.hasAttribute('data-lq-viz');
+      const visualizerContainer = takeover
+        ? document.documentElement
+        : document.querySelector<HTMLElement>('#player');
       if (!visualizerContainer) {
         return;
       }
 
-      let canvas = document.querySelector<HTMLCanvasElement>('#visualizer');
-      if (!canvas) {
-        canvas = document.createElement('canvas');
-        canvas.id = 'visualizer';
-        visualizerContainer?.prepend(canvas);
-      }
+      const canvas = document.createElement('canvas');
+      canvas.id = 'visualizer';
+      canvas.toggleAttribute('data-lq-viz-takeover', takeover);
+      visualizerContainer.prepend(canvas);
 
+      const analyserNode = signalChain.getAnalyserNode();
       const gainNode = this.props.audioContext.createGain();
       gainNode.gain.value = 1.0;
-      signalChain.getAnalyserNode().connect(gainNode);
+      analyserNode.connect(gainNode);
 
-      let visualizerType: {
-        new (...args: ConstructorParameters<typeof vudio>): Visualizer;
-      } = vudio;
-      if (config.type === 'wave') {
-        visualizerType = wave;
-      } else if (config.type === 'butterchurn') {
-        visualizerType = butterchurn;
+      const visualizerType = resolveVisualizerType(config.type);
+      try {
+        this.props.visualizerInstance =
+          visualizerType === 'butterchurn'
+            ? new ButterchurnVisualizer(
+                this.props.audioContext,
+                analyserNode,
+                canvas,
+                gainNode,
+                config,
+              )
+            : new LacquerVisualizer(
+                this.props.audioContext,
+                analyserNode,
+                canvas,
+                gainNode,
+                visualizerType === 'lacquer-rave' ? 'rave' : 'orbital',
+                takeover,
+              );
+      } catch (error) {
+        analyserNode.disconnect(gainNode);
+        gainNode.disconnect();
+        canvas.remove();
+        throw error;
       }
-      this.props.visualizerInstance = new visualizerType(
-        this.props.audioContext,
-        this.props.audioSource,
-        canvas,
-        gainNode,
-        video.captureStream(),
-        config,
-      );
 
       const resizeVisualizer = () => {
         if (canvas && visualizerContainer) {
-          const { width, height } =
-            window.getComputedStyle(visualizerContainer);
-          canvas.width = Math.ceil(parseFloat(width));
-          canvas.height = Math.ceil(parseFloat(height));
+          const { width, height } = takeover
+            ? { width: window.innerWidth, height: window.innerHeight }
+            : visualizerContainer.getBoundingClientRect();
+          this.props.visualizerInstance?.resize(width, height);
         }
-        this.props.visualizerInstance?.resize(canvas.width, canvas.height);
       };
       resizeVisualizer();
 
@@ -233,16 +246,40 @@ export default createPlugin({
       this.createVisualizer(newConfig);
     },
 
-    onPlayerApiReady(_, { getConfig }) {
+    async onPlayerApiReady(_, { getConfig }) {
+      if (this.props.audioCanPlayHandler) {
+        document.removeEventListener(
+          'peard:audio-can-play',
+          this.props.audioCanPlayHandler,
+        );
+      }
+      this.props.audioCanPlayHandler = async (event) => {
+        this.props.audioContext = event.detail.audioContext;
+        this.createVisualizer(await getConfig());
+      };
       document.addEventListener(
         'peard:audio-can-play',
-        async (e) => {
-          this.props.audioContext = e.detail.audioContext;
-          this.props.audioSource = e.detail.audioSource;
-          this.createVisualizer(await getConfig());
-        },
+        this.props.audioCanPlayHandler,
         { passive: true },
       );
+
+      const audioContext = signalChain.getContext();
+      if (audioContext) {
+        this.props.audioContext = audioContext;
+        this.createVisualizer(await getConfig());
+      }
+    },
+
+    stop() {
+      if (this.props.audioCanPlayHandler) {
+        document.removeEventListener(
+          'peard:audio-can-play',
+          this.props.audioCanPlayHandler,
+        );
+        this.props.audioCanPlayHandler = null;
+      }
+      this.destroyVisualizer();
+      this.props.audioContext = null;
     },
   },
 });

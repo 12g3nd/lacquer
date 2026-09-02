@@ -1,5 +1,4 @@
 import ButterchurnVisualizer from './butterchurn';
-import VudioVisualizer from './vudio';
-import WaveVisualizer from './wave';
+import LacquerVisualizer from './lacquer';
 
-export { ButterchurnVisualizer, VudioVisualizer, WaveVisualizer };
+export { ButterchurnVisualizer, LacquerVisualizer };

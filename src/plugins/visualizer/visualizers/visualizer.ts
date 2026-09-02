@@ -1,15 +1,30 @@
 export abstract class Visualizer {
-  protected audioNode: GainNode;
-  protected audioSource: MediaElementAudioSourceNode;
+  protected readonly audioNode: GainNode;
+  private readonly upstreamNode: AudioNode;
+  private isDestroyed = false;
 
-  protected constructor(
-    _audioSource: MediaElementAudioSourceNode,
-    _audioNode: GainNode,
-  ) {
-    this.audioNode = _audioNode;
-    this.audioSource = _audioSource;
+  protected constructor(upstreamNode: AudioNode, audioNode: GainNode) {
+    this.upstreamNode = upstreamNode;
+    this.audioNode = audioNode;
   }
 
   abstract resize(width: number, height: number): void;
-  abstract destroy(): void;
+
+  destroy(): void {
+    if (this.isDestroyed) return;
+    this.isDestroyed = true;
+
+    try {
+      this.destroyVisualizer();
+    } finally {
+      try {
+        this.upstreamNode.disconnect(this.audioNode);
+      } catch {}
+      try {
+        this.audioNode.disconnect();
+      } catch {}
+    }
+  }
+
+  protected abstract destroyVisualizer(): void;
 }

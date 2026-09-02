@@ -1,5 +1,32 @@
 #visualizer {
+  inset: 0;
   position: absolute;
   z-index: 1;
   background-color: black;
+  pointer-events: none;
+}
+
+:root[data-lq-viz] body,
+:root[data-lq-viz] ytmusic-app,
+:root[data-lq-viz] ytmusic-app-layout,
+:root[data-lq-viz] #content,
+:root[data-lq-viz] ytmusic-player-page#player-page,
+:root[data-lq-viz]
+  ytmusic-player-page#player-page
+  > .content.ytmusic-player-page,
+:root[data-lq-viz] ytmusic-player-page#player-page #main-panel,
+:root[data-lq-viz] ytmusic-player-page#player-page #player {
+  background: transparent !important;
+}
+
+:root[data-lq-viz] #visualizer[data-lq-viz-takeover] {
+  left: 0 !important;
+  top: 0 !important;
+  position: fixed;
+  z-index: 0;
+}
+
+:root[data-lq-viz] ytmusic-app {
+  position: relative;
+  z-index: 1;
 }

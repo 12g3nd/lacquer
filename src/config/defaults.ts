@@ -38,6 +38,9 @@ export interface DefaultConfig {
     customWindowTitle?: string;
   };
   'plugins': Record<string, { enabled: boolean } & Record<string, unknown>>;
+  'lacquer': {
+    visualizerMode: boolean;
+  };
 }
 
 /*
@@ -61,7 +64,10 @@ const defaultPlugins: DefaultConfig['plugins'] = {
   'synced-lyrics': { enabled: true }, // the inspector's Lyrics surface depends on it
   'navigation': { enabled: true }, // back / forward, relocated to the rail (D8)
   'performance-improvement': { enabled: true },
-  'shortcuts': { enabled: true }, // media keys, and the FX shortcuts route through it
+  'shortcuts': {
+    enabled: true,
+    local: { visualizerModeToggle: 'CommandOrControl+Shift+V' },
+  }, // media keys, FX, and Visualizer Mode route through it
   'taskbar-mediacontrol': { enabled: true }, // Windows 11 media overlay
   'precise-volume': { enabled: true }, // finer volume; independent of the Signal Chain (see below)
 
@@ -121,4 +127,7 @@ export const defaultConfig: DefaultConfig = {
     themes: [],
   },
   'plugins': defaultPlugins,
+  'lacquer': {
+    visualizerMode: false,
+  },
 };

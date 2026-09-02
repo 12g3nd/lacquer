@@ -26,6 +26,12 @@ import { initTitleBar } from './lacquer/titlebar';
 import lacquerTitlebarCss from './lacquer/titlebar.css?inline';
 import lacquerTransportCss from './lacquer/transport.css?inline';
 import {
+  initVisualizerMode,
+  toggleVisualizerMode,
+  wakeVisualizerChrome,
+} from './lacquer/visualizer-mode';
+import lacquerVisualizerModeCss from './lacquer/visualizer-mode.css?inline';
+import {
   createContext,
   forceLoadRendererPlugin,
   forceUnloadRendererPlugin,
@@ -78,6 +84,7 @@ function adoptLacquerRegionSheets() {
     lacquerFxRackCss,
     lacquerContextMenuCss,
     lacquerSettingsPanelCss,
+    lacquerVisualizerModeCss,
   ].map((css) => {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(css);
@@ -108,22 +115,27 @@ async function onApiLoaded() {
     );
 
   window.ipcRenderer.on('peard:previous-video', () => {
+    wakeVisualizerChrome();
     document
       .querySelector<HTMLElement>('.previous-button.ytmusic-player-bar')
       ?.click();
   });
   window.ipcRenderer.on('peard:next-video', () => {
+    wakeVisualizerChrome();
     document
       .querySelector<HTMLElement>('.next-button.ytmusic-player-bar')
       ?.click();
   });
   window.ipcRenderer.on('peard:play', (_) => {
+    wakeVisualizerChrome();
     api?.playVideo();
   });
   window.ipcRenderer.on('peard:pause', (_) => {
+    wakeVisualizerChrome();
     api?.pauseVideo();
   });
   window.ipcRenderer.on('peard:toggle-play', (_) => {
+    wakeVisualizerChrome();
     if (api?.getPlayerState() === 2) api?.playVideo();
     else api?.pauseVideo();
   });
@@ -172,6 +184,9 @@ async function onApiLoaded() {
 
   window.ipcRenderer.on('peard:fx-rack-toggle', () => {
     setFXRackOpen();
+  });
+  window.ipcRenderer.on('peard:visualizer-mode-toggle', () => {
+    toggleVisualizerMode();
   });
 
   window.ipcRenderer.on('peard:fx-set-preset', (_, preset: string) => {
@@ -377,6 +392,7 @@ async function onApiLoaded() {
   initRail();
   initPlayerStage();
   initSettingsPanel();
+  initVisualizerMode();
   initContextMenu();
   // Reads the album-colour plugin's output and republishes Lacquer's own
   // `--lq-album-*` tokens. DOM-only, and safe before playback: with no artwork

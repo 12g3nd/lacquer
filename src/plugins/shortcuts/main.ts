@@ -53,6 +53,8 @@ export const onMainLoad = async ({
         window.webContents.send('peard:fx-set-preset', 'Sped + Reverb'),
       fxSlowedReverb: () =>
         window.webContents.send('peard:fx-set-preset', 'Slowed + Reverb'),
+      visualizerModeToggle: () =>
+        window.webContents.send('peard:visualizer-mode-toggle'),
     };
 
   if (is.linux()) {
