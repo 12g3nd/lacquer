@@ -46,7 +46,9 @@ The visitor is completing a task: find a thing, queue a thing, navigate. **Scana
 consistency and predictability outrank expression.** Brand lives in precise details — the
 hairline, the tabular figure, the exact hover state — not in atmosphere.
 
-This surface is **always Orbit Noir**. It does not react to the album. It is the stable spine.
+In **Normal Mode**, this surface is Orbit Noir and does not react to the album. It is the stable
+spine. Visualizer Mode is the explicit exception: it may cover the full window while the player
+is open, but auto-suspends on browse routes so library work always returns to this stable state.
 
 ### Experience — the player page
 
@@ -60,7 +62,8 @@ This surface is **album-reactive**. The record possesses the room.
 
 The **transport deck** straddles both. It is Operate in structure — always present, always
 legible, always in the same place — but takes a diluted album tint and carries the two
-album-coloured controls (section 3.4).
+album-coloured controls (section 3.4). Its structural order is song identity left, playback
+controls centre, output controls right.
 
 ---
 
@@ -79,6 +82,12 @@ album-coloured controls (section 3.4).
 | `--lq-flare` | Flare | `#FF647C` | Rare expressive accent, use sparingly |
 | `--lq-milkglass` | Milkglass | `#E8EFF5` | Primary text |
 | `--lq-moondust` | Moon Dust | `#A8B8CA` | Secondary text |
+| `--lq-champagne` | Champagne | `#DAC0A7` | Identity ink — crest and script mark only |
+| `--lq-bronze` | Bronze | `#C38242` | Identity offset stroke only |
+
+Champagne and Bronze make the supplied mark an intentional part of Orbit Noir; they do not
+expand the shell's functional or emotional colour systems. Re-theming controls around them is
+out of scope.
 
 ### 3.2 The functional / emotional rule
 
@@ -135,7 +144,7 @@ near-monochrome falls back to Orbit Noir rather than producing a grey wash.
 | Transport deck tint (diluted) | Active nav item in the rail |
 | **Progress bar fill** | Toggle and checkbox on-states |
 | **Play/pause button** | Titlebar, rail, search |
-| Visualizer, if present | Menu and dialog surfaces |
+| Visualizer Mode field while active | Menu and dialog surfaces |
 | | Any text colour |
 
 The progress fill and play button are the two exceptions. They *are* the now-playing identity
@@ -178,7 +187,7 @@ Four voices. Each has exactly one job. A voice appearing outside its job is a de
 | Voice | Face | Job |
 |---|---|---|
 | **Editorial** | Newsreader | Player-page album/artist title. Playlist detail headers. **Nowhere else.** |
-| **Graphic** | Space Grotesk | The Lacquer wordmark. Section heads. Ties Lacquer to the rest of Orbit Noir. |
+| **Graphic** | Space Grotesk | The `acquer` portion of the titlebar lockup and section heads. The script mark supplies the initial `L`. |
 | **Interface** | Inter | Navigation, search, menus, list rows, buttons, labels, body. The workhorse. |
 | **Instrument** | IBM Plex Mono | Time, duration, speed, semitones, FX readouts, track indices. Always `tabular-nums`. |
 

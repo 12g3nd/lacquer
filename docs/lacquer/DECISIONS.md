@@ -67,13 +67,16 @@ Normalisation and contrast safety are mandatory (`DESIGN.md` 3.4).
 
 ---
 
-## D5 — Album takeover is scoped to the player page and transport
+## D5 — Normal Mode scopes album takeover to the player page and transport
 
-The browse shell stays Orbit Noir permanently. Only the player page and the transport deck
-react to the album.
+In **Normal Mode**, the browse shell stays Orbit Noir. Only the player page and the transport
+deck react to the album. **Visualizer Mode is the explicit, opt-in, owner-authorised
+suspension of this rule:** while active on the player page it may take over the full window;
+while armed on a browse route it auto-suspends and restores the stable shell.
 
 *Reasoning:* a constant environment is what makes the changing one register. A shell that
-restyles every three minutes while browsing is noise, not expression.
+restyles every three minutes while browsing is noise, not expression. The takeover is therefore
+a deliberate mode rather than the default environment.
 
 ---
 
@@ -208,7 +211,16 @@ Lacquer ships these defaults:
 **Off — superseded by Signal Chain.** These must stay off. They create competing audio graphs,
 which is the exact conflict the Signal Chain audit was commissioned to prevent:
 
-`equalizer`, `audio-compressor`, `playback-speed`, `visualizer`, `crossfade`, `skip-silences`
+`equalizer`, `audio-compressor`, `playback-speed`, `crossfade`, `skip-silences`
+
+**`visualizer` is mode-managed, not blanket-banned.** The original D11 reason was partially
+stale: Butterchurn and Vudio created no audible destination path, while Wave did add a dry path
+that bypassed Signal Chain. The safe boundary now exposes the authored Lacquer engines and
+Butterchurn through one disposable post-chain analyser tap. Legacy Wave/Vudio settings resolve
+to Butterchurn; they are neither exposed nor bundled into the live renderer. The plugin remains
+off on a fresh install and Visualizer Mode enables it only while the mode is active on the
+player page. Disable/recreate/unload tears down the owned tap, observer, canvas and animation
+loop without changing the shared analyser's `fftSize`.
 
 **Off — competing visual layers.** These inject their own styling and would fight the authored
 shell: `ambient-mode`, `blur-nav-bar`, `transparent-player`, `unobtrusive-player`, `in-app-menu`
@@ -318,6 +330,49 @@ under `isTesting()`.
   locked, so the theme catalog would actively fight Orbit Noir.
 - **`wayfinder`** is not run as a tracker. Its durable-decision-record principle is adopted
   instead: this file and `DESIGN.md` are the map, and every session reads them first.
+
+---
+
+## D15 — The identity is a script-L crest, re-voiced for Orbit Noir
+
+The supplied laurel/script mark replaces the geometric record/orbit mark on every Windows
+surface. It is traced as generated vector geometry on an Orbit Noir navy plate, with two
+identity-only palette tokens: `--lq-champagne: #dac0a7` and
+`--lq-bronze: #c38242`. The full laurel is used at 32px and above; a weighted, de-wreathed
+script `L` is used below 32px and in the titlebar. In the lockup the script supplies the first
+letter and the text reads `acquer`, so the visible identity reads **Lacquer**, not **LLacquer**.
+
+`scripts/make-logo.mjs` is the geometry source and `scripts/make-icons.mjs` owns raster/ICO/tray
+output. The owner's original raster is retained only as source material at
+`docs/lacquer/assets/mark-source.png`; runtime assets never depend on it.
+
+---
+
+## D16 — The transport is identity left, controls centre, output right
+
+The owner accepted the layout previously flagged for decision. The player bar is a structural
+three-track grid: song artwork/title/artist left, previous/play/next/time centred, and output
+controls right. Lacquer resets YouTube Music's absolute positioning on the identity wrapper and
+assigns the three existing control groups to grid columns; YouTube Music continues to own the
+controls and their responsive visibility. This keeps the order stable across layout ticks
+without a JavaScript mutation loop or fragile `left:` offsets.
+
+---
+
+## D17 — Visualizer Mode is a persistent, player-scoped takeover
+
+Visualizer Mode is off on a fresh install and persists its armed state in `electron-store`.
+When armed it activates only on the player page; browse routes auto-suspend the canvas and
+restore full Normal Mode chrome, then resume on return. It is controlled from the transport,
+by `Ctrl+Shift+V`, and by `Escape` to exit.
+
+The plugin owns the canvas and safe engines; `src/lacquer/visualizer-mode.ts` owns mode state,
+plugin activation and chrome choreography. **Orbital Shockwave** is the album-reactive default
+and keeps the artwork as its centre. **Laser Basilica (Rave)** is a selectable, album-coloured,
+artwork-free treatment. Butterchurn remains the selectable chaos engine. Paused playback drifts
+rather than freezing. Chrome fades after three idle seconds and wakes on input; interactive
+geometry never moves, while the canvas and artwork may react strongly. Reduced-motion and
+Normal Mode remain reliable, and the real-app performance gate must remain green.
 
 ---
 

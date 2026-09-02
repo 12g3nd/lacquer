@@ -1,0 +1,1 @@
+Always read and follow all rules in `.agents\rules\lacquer.md`.

@@ -80,11 +80,23 @@ lives in the rail footer (D8).
 
 ## Wordmark
 
-The titlebar wordmark is a real inline SVG mark (`titlebar.ts`) — a lacquered
-record against a tilted orbit, with a spectral-diffraction arc off the disc
-edge — beside "Lacquer" in Space Grotesk. All colour lives in `titlebar.css`.
-`assets/icon.svg` is the standalone glyph; `pnpm make:icons` rasterises it into
-the PNG and ICO the app and installer use.
+The titlebar wordmark is generated inline SVG (`titlebar.ts`): a weighted
+champagne/bronze script `L` beside `acquer` in Space Grotesk. The full app mark
+places that script inside its laurel on an Orbit Noir plate; the laurel drops
+away below 32px. `pnpm make:icons` generates the PNG, ICO and stateful tray
+assets used by the app and installer from the same source geometry.
+
+## Visualizer Mode
+
+The transport's **VIZ** button or `Ctrl+Shift+V` arms Visualizer Mode; Escape
+exits. It takes over only the player page and auto-suspends on browse routes,
+where full Normal Mode chrome returns. After three idle seconds chrome and the
+cursor fade; pointer, keyboard, focus and media input wake them immediately.
+
+Orbital Shockwave is the default album-reactive treatment and keeps the artwork.
+Laser Basilica (Rave) hides it for a full-window, album-coloured light field.
+Butterchurn is the selectable chaos engine. Paused playback drifts slowly rather
+than freezing.
 
 ## Album-Color Contrast Strategy
 
@@ -94,10 +106,11 @@ the PNG and ICO the app and installer use.
 bands, and publishes its own `--lq-album-*` set (`atmosphere`, `fill`, `veil`,
 `ink`), falling back to Orbit Noir for near-monochrome extraction.
 
-- Only the player-page atmosphere, the transport tint, the progress fill and the
-  play/pause button take album colour (D6). Focus rings, keyboard selection,
-  active nav, toggles, every text colour, the rail, the browse shell and the FX
-  rack stay Ion/Signal on every screen.
+- In Normal Mode, only the player-page atmosphere, the transport tint, the
+  progress fill and the play/pause button take album colour (D6). Focus rings,
+  keyboard selection, active nav, toggles and text remain fixed in both modes.
+  Visualizer Mode is D5's explicit full-window exception and auto-suspends while
+  browsing.
 - Text laid over artwork sits on an Instrument surface or a `--lq-album-veil`
   scrim — never a `text-shadow`.
 

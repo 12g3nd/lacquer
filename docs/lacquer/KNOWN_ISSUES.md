@@ -1,17 +1,9 @@
 # Known Issues
 
-Accurate as of the end of Stage C. See `docs/lacquer/V1_STATUS.md` for what
-each stage changed.
+Accurate after the mark, transport and Visualizer Mode shipment. See
+`docs/lacquer/V1_STATUS.md` for the implementation record.
 
 ## Current
-
-- **Transport layout is YouTube Music's, not B3's.** B3 asks for identity-left /
-  transport-centre; YTM positions the now-playing block absolutely at the bar
-  centre and manages the bar with responsive JS. Reordering it is inert against
-  the absolute positioning, and forcing it means fighting YTM every layout tick —
-  against the constitution's "reliability over visual experimentation". The deck
-  is kept in YTM's arrangement and made Lacquer through material, the album
-  controls, the mono time and the hairline. Flagged for the owner to call.
 
 - **The account footer can sit below the fold** on a tall window with many
   playlists — it is pinned to the bottom of `#guide-renderer` (clear of the
@@ -69,12 +61,22 @@ each stage changed.
   route/focus can leave the overlay toggle inert. This is a test-infra
   workaround, not app behaviour — the toggle works normally in the running app.
 
-## Resolved in Stage C
+## Resolved
+
+- The owner accepted B3's identity-left / transport-centre arrangement. The player
+  bar now uses a structural three-track grid and resets YTM's absolute identity
+  positioning, so responsive layout JS cannot silently restore the old order.
+- D11's blanket visualizer ban was partially stale. Visualizer Mode now consumes one
+  disposable post-Signal-Chain tap; Wave/Vudio are not exposed, legacy settings fall
+  back safely, and 20 lifecycle cycles leave no graph or runtime leaks.
+- The geometric record/orbit mark was retired. The generated champagne/bronze script-L
+  crest now owns the titlebar, app/window icon, installer and tray, with a de-wreathed
+  glyph below 32px.
+- Normal Mode still suppresses browse immersive art on every route (D5); the explicit
+  Visualizer Mode takeover auto-suspends while browsing.
 
 - FX rack rebuilt as an instrument panel using Lacquer tokens and Instrument
   type; parameter surface exposed.
 - Context-menu classifier no longer depends on SVG path geometry (done in its
   own commit); keyboard navigation and a proper `closeMenu()` added this stage.
 - Motion is token-driven and `prefers-reduced-motion` is respected.
-- The wordmark is a real inline SVG mark; Windows icon assets regenerated.
-- The browse immersive-header art gradient is suppressed on every route (D5).

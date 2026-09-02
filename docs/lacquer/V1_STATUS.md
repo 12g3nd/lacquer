@@ -1,7 +1,8 @@
 # Lacquer — Status
 
-**Updated at the end of Stage C.** Originally rewritten at the end of Stage A
-because the prior version recorded the commit as the literal string `HEAD`,
+**Updated after the mark, deck and Visualizer Mode shipment.** Originally
+rewritten at the end of Stage A because the prior version recorded the commit
+as the literal string `HEAD`,
 claimed "6/6 Playwright tests successful" against a single test, said settings
 were "shared" with Pear when they are not, and listed shipped work as deferred.
 This is the accurate record.
@@ -18,7 +19,8 @@ bounded stages (DECISIONS.md D1). The authority for how it should look is
 |---|---|---|
 | **A** | Foundation & spine — tokens, fonts, window shell, config integrity, audio bug fixes, verification harness, housekeeping | **complete** |
 | **B** | Album-colour engine (B1); authored left rail, transport deck, player stage, inspector | **complete** |
-| **C** | FX rack as an instrument panel; context-menu keyboard nav + proper close; motion pass; SVG wordmark + Windows icons; consistency sweep; carried-over housekeeping | **complete** (this commit) |
+| **C** | FX rack as an instrument panel; context-menu keyboard nav + proper close; motion pass; first-generation SVG wordmark + Windows icons; consistency sweep; carried-over housekeeping | **complete** |
+| **Identity / deck / visualizer** | Script-L crest on every Windows surface; structural transport reorder; persistent full-window Visualizer Mode | **complete** |
 
 **Stage B is where Lacquer stops looking like YouTube Music.** The rail is
 relabelled and re-materialised, the transport carries the album-coloured play
@@ -37,20 +39,20 @@ baseline is gone.
 - **`pnpm check`:** passes — `oxlint` (0 errors; the same pre-existing
   `solid(reactivity)` / `no-misused-spread` warnings in `src/plugins/*`, none
   in Lacquer's files), `oxfmt --check` clean, `tsc --noEmit` clean.
-- **`pnpm test`** (smoke, throwaway profile): **23 passed** — the Stage B set
-  (17) plus `context-menu.smoke.spec.ts` ×6, which pins the classifier against
-  the real 14-item queue menu and asserts *Start mix ≠ Go to album*.
+- **`pnpm test`** (smoke, throwaway profile): **32 passed**, including permanent
+  regressions for the generated mark, Visualizer Mode state/chrome, renderer
+  selection and the existing shell/audio behavior. Structural deck and live
+  visualizer ownership checks remain in the authenticated capture suite.
 - **`pnpm test:capture`** (the gate, real authenticated profile over CDP):
   **5 tests pass** — `stage-a` (8 shots), `stage-b` ×2 (12 shots), and
   `stage-c.capture.spec.ts` ×2 (10 gate shots + `03b`). Stage C's logs confirm
   the FX rack surface (`rgba(16,42,76,0.72)` Blueglass, `blur(24px)`, IBM Plex
   Mono readouts), context-menu keyboard nav (ArrowDown/Up, `End` reaching *Pin
-  to Listen again*, type-ahead, Escape-close), the SVG wordmark (22px, Ion
-  spectrum stop), and `#background.immersive-background` resolving to
+  to Listen again*, type-ahead, Escape-close), the then-current Stage C
+  geometric wordmark, and `#background.immersive-background` resolving to
   `display: none` on an album detail route.
-- Resolved plugin dump on the owner's real profile:
-  `album-color-theme / do-not-track / sponsorblock / synced-lyrics: true`,
-  `in-app-menu / equalizer / visualizer / ambient-mode: false`.
+- Visualizer is off on a fresh profile. Visualizer Mode temporarily owns its
+  activation on the player page and unloads it while browsing or when the mode exits.
   - **Harness fix:** `scripts/capture.mjs` set `NODE_ENV=test` purely to
     suppress the dev-mode DevTools auto-open (which deadlocks Playwright's CDP
     attach). That flag also left the preload sandboxed, so
@@ -82,6 +84,36 @@ file reported the checks as passing.
   rule meaningfully enforced without a dozen upstream-file rewrites or a
   per-file `overrides` exception for `in-app-menu/TitleBar.tsx` (which D8
   forbids editing). This was raised with the owner and is the agreed approach.
+
+---
+
+## The mark, deck and Visualizer Mode shipment
+
+- **Identity:** the owner-supplied script `L` and laurel were traced and re-voiced
+  on an Orbit Noir plate. One generator now owns the full crest (32px+), weighted
+  de-wreathed small glyph (16–24px), titlebar lockup, Windows PNG/ICO, installer
+  and stateful tray assets. The titlebar script supplies the initial `L`; the
+  adjacent text is `acquer`, avoiding the earlier **LLacquer** reading.
+- **Deck:** `ytmusic-player-bar` is a structural grid with identity left,
+  transport centred and output right. This replaces the deliberately deferred B3
+  layout and stays stable under YTM's responsive class changes without a DOM loop.
+- **Mode:** `src/lacquer/visualizer-mode.ts` persists an armed state, owns the
+  transport VIZ control and `Ctrl+Shift+V`/Escape lifecycle, activates the plugin
+  only on the player page, and restores Normal Mode while browsing. Chrome fades
+  after three idle seconds and wakes on input while hover, focus and open popovers
+  pin it visible.
+- **Renderers:** Orbital Shockwave is the default album-reactive field and retains
+  the artwork. Laser Basilica (Rave) is an artwork-free, album-coloured light room;
+  Butterchurn remains the selectable chaos engine. Paused playback uses idle drift.
+- **Audio safety:** the old D11 ban was partially stale. The live plugin now owns
+  one disposable post-Signal-Chain analyser tap. Wave/Vudio are no longer exposed
+  or bundled and saved legacy values fall back to Butterchurn. The shared analyser
+  remains at `fftSize === 2048`; disable/recreate/unload releases the tap, canvas,
+  observer, listener and animation loop.
+- **Measured on the target ThinkPad on battery:** Normal playing held 56.3 FPS,
+  Rave playing 55.1 FPS, Rave idle drift 56.2 FPS, and album crossfade 50.9 FPS.
+  Twenty enter/exit cycles returned listeners and observers to baseline, left no
+  disabled render work, and added only 486KB after forced GC.
 
 ---
 
@@ -152,22 +184,25 @@ duration across the app — `:root` excepted, because its only transition is the
 opacity-equivalent album crossfade, which §6 keeps — and the FX rack and
 progress knob pin their transforms in their own sheets.
 
-### The wordmark + icons — C4 (`titlebar.ts`, `titlebar.css`, `assets/`)
+### The current mark + icons (`titlebar.ts`, `titlebar.css`, `assets/`)
 
 `ytmusic-logo::after { content: 'Lacquer' }` is gone. `titlebar.ts` injects a
-real inline SVG lockup: a lacquered record read against a tilted orbit with a
-small Solar body on it, and a spectral-diffraction arc off the disc edge
-(Ion → Signal → Ultraviolet → Solar), beside "Lacquer" set in Space Grotesk.
-All colour and geometry live in `titlebar.css` (the SVG string carries class
-names only; the gradient stops are coloured by CSS).
+real inline SVG lockup: the weighted champagne/bronze script `L` beside `acquer`
+in Space Grotesk, so the visible name reads **Lacquer** once. The full mark places
+that script inside its laurel on an Orbit Noir plate; below 32px the laurel drops
+away so the letter remains legible. `--lq-champagne` and `--lq-bronze` are
+identity-only tokens, not new control colours.
 
-`assets/icon.svg` is the standalone Orbit Noir glyph. `scripts/make-icons.mjs`
-(`pnpm make:icons`) rasterises it through an offscreen Electron window —
-there is no ImageMagick/sharp in the toolchain — and writes
+`scripts/make-logo.mjs` is the single geometry source for the full, small and
+titlebar marks. `scripts/make-icons.mjs` (`pnpm make:icons`) rasterises those
+sources through an offscreen Electron window — there is no ImageMagick/sharp in
+the toolchain — and writes
 `assets/icon.png` (used by the dev window, `electron-builder`'s `win.icon`, and
 the notifications / touchbar plugins), the `assets/generated/icons/png/*` set,
-and a hand-assembled PNG-in-ICO at `assets/generated/icons/win/icon.ico` (the
-packaged Windows window icon). macOS `.icns` is untouched (out of scope, D12).
+stateful tray assets and a hand-assembled PNG-in-ICO at
+`assets/generated/icons/win/icon.ico` (the packaged Windows window icon). The
+owner's original raster is source material at `docs/lacquer/assets/mark-source.png`.
+macOS `.icns` is untouched (out of scope, D12).
 
 ### Consistency sweep — C5
 
@@ -194,7 +229,8 @@ chrome.
   `album-color-theme`'s un-hidden `#background.immersive-background` (a blurred
   full-bleed `<img>`, not a CSS background — which is why Stage A's
   `background-image: none` missed it). `suppress.css` now removes the layer, so
-  the browse shell is Orbit Noir on every route (D5).
+  Normal Mode's browse shell is Orbit Noir on every route (D5). Visualizer Mode
+  is the explicit player-only exception and auto-suspends on browse routes.
 
 ---
 
@@ -249,15 +285,12 @@ Lacquer's sheets last wins that cascade without a per-rule specificity fight
   their `fx-rack.ts` inline placeholder styling to bordered ghost buttons; the
   FX active indicator is Solar (expressive "on", not Ion — not a selected state).
   The rack itself is Stage C.
-- **Layout deviation:** B3 asks for identity-left / transport-centre. YouTube
-  Music positions the now-playing block *absolutely* at the bar centre and
-  arranges the bar with responsive JS; reordering it (`order` + flex was tried
-  and is inert against the absolute positioning) means fighting that every
-  layout tick, and the workspace constitution ranks transport reliability above
-  a layout tweak. Kept in YTM's arrangement — transport left, identity centre,
-  output right, a legitimate transport layout — and made unmistakably Lacquer
-  through the material, the album controls, the mono time and the hairline.
-  Flagged here for the owner rather than forced.
+- **Structure:** identity left, transport centre, output right. The player bar is
+  a three-track grid; the identity wrapper's stock absolute positioning is reset
+  and the existing YTM control groups are assigned to columns. YTM still owns
+  every button and its responsive visibility, but its layout JS cannot silently
+  put the old order back. Verified at 1920, 1280 and 760px with long metadata and
+  playing/paused states.
 
 ### The player stage — B4 (`player-stage.css`, `player-stage.ts`)
 
@@ -352,8 +385,9 @@ timing).
 ### Window shell (A5)
 
 - The window is **frameless** on Windows with its titlebar collapsed to one
-  row: the de-branded stock `ytmusic-nav-bar` with the "Lacquer" wordmark
-  (Space Grotesk) where the stock logo was. Window controls are the native
+  row: the de-branded stock `ytmusic-nav-bar` with the Lacquer wordmark where
+  the stock logo was. Stage A's plain Space Grotesk treatment was later replaced
+  by the D15 script-L lockup. Window controls are the native
   Windows Controls Overlay — Pear's existing mechanism, not hand-drawn.
 - `src/lacquer/titlebar.ts` (new) draws the wordmark and puts back/forward at
   the top of the rail. Each injection re-asserts itself through a narrow
