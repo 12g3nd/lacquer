@@ -61,6 +61,15 @@ test('D11: defaults.ts carries the full table', () => {
   for (const id of EXPECTED_OFF) {
     expect(defaultConfig.plugins[id]?.enabled, `${id} off`).toBe(false);
   }
+
+  expect(defaultConfig.plugins['synced-lyrics']).toMatchObject({
+    enabled: true,
+    preciseTiming: true,
+    showLyricsEvenIfInexact: true,
+    showTimeCodes: true,
+    lineEffect: 'fancy',
+    romanization: true,
+  });
 });
 
 test('D11: applies on a clean profile', () => {

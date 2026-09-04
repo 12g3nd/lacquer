@@ -201,7 +201,7 @@ Lacquer ships these defaults:
 | `album-color-theme` | The design anchor. Non-optional. |
 | `do-not-track` | Ad blocking. An ad rendering on the Experience surface breaks the design premise. |
 | `sponsorblock` | Skips non-music segments. |
-| `synced-lyrics` | The inspector's Lyrics surface depends on it. |
+| `synced-lyrics` | The inspector's Lyrics surface depends on it. Lacquer defaults to precise timing, visible timecodes, the Fancy line treatment and YT Music as the preferred provider, matching the owner's useful Pear setup. |
 | `navigation` | Back/forward, relocated to the rail in D8. |
 | `performance-improvement` | Already default-on upstream. |
 | `shortcuts` | Media keys, and the FX shortcuts route through it. |
@@ -362,9 +362,11 @@ without a JavaScript mutation loop or fragile `left:` offsets.
 ## D17 — Visualizer Mode is a persistent, player-scoped takeover
 
 Visualizer Mode is off on a fresh install and persists its armed state in `electron-store`.
-When armed it activates only on the player page; browse routes auto-suspend the canvas and
-restore full Normal Mode chrome, then resume on return. It is controlled from the transport,
-by `Ctrl+Shift+V`, and by `Escape` to exit.
+When armed it activates only on the player page. Enabling it from Browse first reveals the
+player so the action has immediate visible feedback. Later Browse navigation auto-suspends the
+canvas and restores full Normal Mode chrome; clicking the still-armed VIZ control returns to the
+player and resumes. It is controlled from the transport, by `Ctrl+Shift+V`, and by `Escape` to
+exit.
 
 The plugin owns the canvas and safe engines; `src/lacquer/visualizer-mode.ts` owns mode state,
 plugin activation and chrome choreography. **Orbital Shockwave** is the album-reactive default

@@ -19,7 +19,7 @@
   -webkit-app-region: no-drag;
 }
 .lq-wordmark-svg {
-  height: 22px;
+  height: 28px;
   width: auto;
   display: block;
   overflow: visible;
@@ -48,6 +48,38 @@
   letter-spacing: 0.26em;
   text-transform: uppercase;
   fill: var(--lq-milkglass);
+}
+
+/* ── Search ─────────────────────────────────────────────────────────
+   The stock focused/open state repaints only the inner box near-black and
+   squares its lower corners. That leaves a black tab hanging below Lacquer's
+   pill focus ring. Keep the retained control on one authored surface in both
+   idle and focused states; suggestions remain their own floating panel. */
+ytmusic-search-box {
+  --ytmusic-search-background: var(--lq-instrument-raised) !important;
+}
+/* The host supplies the focus ring for the complete control, including its
+   search icon. A second ring on the input cuts that surface in two. */
+ytmusic-search-box input:focus,
+ytmusic-search-box input:focus-visible {
+  outline: none !important;
+}
+ytmusic-search-box .search-box,
+ytmusic-search-box[opened] .search-box,
+ytmusic-search-box:focus-within .search-box {
+  overflow: hidden !important;
+  border-radius: var(--lq-radius-pill) !important;
+  background: var(--lq-instrument-raised) !important;
+}
+ytmusic-search-box
+  #suggestion-list:not(:has(ytmusic-search-suggestions-section)) {
+  display: none !important;
+}
+
+@media (max-width: 800px) {
+  ytmusic-nav-bar:has(ytmusic-search-box:focus-within) #lacquer-wordmark {
+    visibility: hidden;
+  }
 }
 
 /* ── Rail back / forward buttons ──────────────────────────────────── */

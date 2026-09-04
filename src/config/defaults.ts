@@ -61,7 +61,16 @@ const defaultPlugins: DefaultConfig['plugins'] = {
   'album-color-theme': { enabled: true, enableSeekbar: false },
   'do-not-track': { enabled: true }, // ad blocking — an ad on the Experience surface breaks the premise
   'sponsorblock': { enabled: true },
-  'synced-lyrics': { enabled: true }, // the inspector's Lyrics surface depends on it
+  'synced-lyrics': {
+    enabled: true,
+    preciseTiming: true,
+    showLyricsEvenIfInexact: true,
+    showTimeCodes: true,
+    defaultTextString: '♪',
+    lineEffect: 'fancy',
+    romanization: true,
+    preferredProvider: 'YTMusic',
+  }, // match the owner's useful Pear lyrics setup, including the Fancy line treatment
   'navigation': { enabled: true }, // back / forward, relocated to the rail (D8)
   'performance-improvement': { enabled: true },
   'shortcuts': {

@@ -35,7 +35,7 @@ test('production titlebar carries the approved script-L lockup', async () => {
       };
     });
     expect(result).toEqual({
-      height: '22px',
+      height: '28px',
       champagne: 'rgb(218, 192, 167)',
       bronze: 'rgb(195, 130, 66)',
     });

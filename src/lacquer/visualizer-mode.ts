@@ -186,9 +186,32 @@ export const setVisualizerModeEnabled = (enabled: boolean) => {
   renderState();
 };
 
+const revealPlayerPage = () => {
+  const layout = document.querySelector('ytmusic-app-layout');
+  if (layout?.hasAttribute('player-page-open')) return;
+
+  // Use YouTube Music's own control so its route, focus and responsive state
+  // stay authoritative. Merely arming from Browse used to look like a dead
+  // button because the player-scoped mode immediately suspended itself.
+  document
+    .querySelector<HTMLElement>('ytmusic-player-bar .toggle-player-page-button')
+    ?.click();
+};
+
 export const toggleVisualizerMode = () => {
   if (!initialised) return;
-  setVisualizerModeEnabled(!armed);
+
+  // A pressed button on Browse means the mode is armed but suspended. In that
+  // state the useful action is to reveal the player and resume, not silently
+  // disarm the mode while leaving the screen unchanged.
+  if (armed && !playerPageOpen) {
+    revealPlayerPage();
+    return;
+  }
+
+  const enabled = !armed;
+  if (enabled && !playerPageOpen) revealPlayerPage();
+  setVisualizerModeEnabled(enabled);
 };
 
 const mountButton = (rightControls: Element) => {
