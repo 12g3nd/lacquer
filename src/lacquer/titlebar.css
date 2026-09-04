@@ -11,6 +11,19 @@
  */
 
 /* ── Wordmark ─────────────────────────────────────────────────────── */
+/* The stock left slot tracks the collapsed 72px rail, not its contents.
+   Size it around both the authored mark and the retained guide control so
+   neither can overflow into the search field. */
+ytmusic-nav-bar .left-content {
+  width: max-content !important;
+  flex: 0 0 auto;
+}
+ytmusic-nav-bar .center-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-inline: var(--lq-space-5) !important;
+}
+
 #lacquer-wordmark {
   display: inline-flex;
   align-items: center;
@@ -77,7 +90,7 @@ ytmusic-search-box
 }
 
 @media (max-width: 800px) {
-  ytmusic-nav-bar:has(ytmusic-search-box:focus-within) #lacquer-wordmark {
+  ytmusic-nav-bar:has(ytmusic-search-box:focus-within) .left-content {
     visibility: hidden;
   }
 }

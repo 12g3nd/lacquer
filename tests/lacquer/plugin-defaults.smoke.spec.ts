@@ -66,7 +66,7 @@ test('D11: defaults.ts carries the full table', () => {
     enabled: true,
     preciseTiming: true,
     showLyricsEvenIfInexact: true,
-    showTimeCodes: true,
+    showTimeCodes: false,
     lineEffect: 'fancy',
     romanization: true,
   });

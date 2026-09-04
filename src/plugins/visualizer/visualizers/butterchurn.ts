@@ -6,6 +6,7 @@ import { Visualizer } from './visualizer';
 import type { VisualizerPluginConfig } from '../index';
 
 class ButterchurnVisualizer extends Visualizer {
+  private readonly canvas: HTMLCanvasElement;
   private readonly visualizer: ReturnType<typeof Butterchurn.createVisualizer>;
   private destroyed: boolean = false;
   private animFrameHandle: number | null;
@@ -18,6 +19,7 @@ class ButterchurnVisualizer extends Visualizer {
     config: VisualizerPluginConfig,
   ) {
     super(upstreamNode, audioNode);
+    this.canvas = canvas;
 
     const preset = ButterchurnPresets[config.butterchurn.preset];
     const renderVisualizer = () => {
@@ -38,6 +40,13 @@ class ButterchurnVisualizer extends Visualizer {
   }
 
   resize(width: number, height: number) {
+    // Butterchurn 3 resizes its internal OffscreenCanvas only. The supplied
+    // output canvas otherwise stays at the browser's default 300×150 and
+    // clips the rendered field to a black rectangle in the corner.
+    this.canvas.width = Math.max(1, Math.round(width));
+    this.canvas.height = Math.max(1, Math.round(height));
+    this.canvas.style.width = `${width}px`;
+    this.canvas.style.height = `${height}px`;
     this.visualizer.setRendererSize(width, height);
   }
 

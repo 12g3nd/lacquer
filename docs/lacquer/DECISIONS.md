@@ -201,7 +201,7 @@ Lacquer ships these defaults:
 | `album-color-theme` | The design anchor. Non-optional. |
 | `do-not-track` | Ad blocking. An ad rendering on the Experience surface breaks the design premise. |
 | `sponsorblock` | Skips non-music segments. |
-| `synced-lyrics` | The inspector's Lyrics surface depends on it. Lacquer defaults to precise timing, visible timecodes, the Fancy line treatment and YT Music as the preferred provider, matching the owner's useful Pear setup. |
+| `synced-lyrics` | The inspector's Lyrics surface depends on it. Lacquer keeps precise timing, the Fancy line treatment and YT Music as the preferred provider from Pear, but hides per-line timecodes so the lyrics remain uncluttered. |
 | `navigation` | Back/forward, relocated to the rail in D8. |
 | `performance-improvement` | Already default-on upstream. |
 | `shortcuts` | Media keys, and the FX shortcuts route through it. |

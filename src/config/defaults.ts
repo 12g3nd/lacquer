@@ -65,7 +65,7 @@ const defaultPlugins: DefaultConfig['plugins'] = {
     enabled: true,
     preciseTiming: true,
     showLyricsEvenIfInexact: true,
-    showTimeCodes: true,
+    showTimeCodes: false,
     defaultTextString: '♪',
     lineEffect: 'fancy',
     romanization: true,
