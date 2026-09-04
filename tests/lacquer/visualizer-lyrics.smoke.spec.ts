@@ -34,7 +34,12 @@ test('overlay follows timed lyrics, seeks, gaps, and missing lyrics without time
     next: '',
   });
   expect(selectVisualizerLyrics(lines, 1500).current).toBe('First line');
-  expect(selectVisualizerLyrics(lines, 3500).current).toBe('');
+  // Providers frequently end a line a few hundred milliseconds before the
+  // next timestamp. Keep the outgoing line visible through that handoff.
+  expect(selectVisualizerLyrics(lines, 3000).current).toBe('First line');
+  expect(selectVisualizerLyrics(lines, 3500).current).toBe('First line');
+  expect(selectVisualizerLyrics(lines, 3999).current).toBe('First line');
+  expect(selectVisualizerLyrics(lines, 4000).current).toBe('Next line');
   expect(selectVisualizerLyrics(undefined, 1500)).toEqual({
     previous: '',
     current: '',

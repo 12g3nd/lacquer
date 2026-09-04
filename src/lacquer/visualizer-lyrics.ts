@@ -14,11 +14,22 @@ export function selectVisualizerLyrics(
   lines: readonly TimedLine[] | undefined,
   time: number,
 ): OverlayLyrics {
-  const index =
-    lines?.findIndex(
-      (line) => time >= line.timeInMs && time < line.timeInMs + line.duration,
-    ) ?? -1;
-  if (!lines || index < 0) return { previous: '', current: '', next: '' };
+  if (!lines?.length) return { previous: '', current: '', next: '' };
+  let index = -1;
+  for (let candidate = 0; candidate < lines.length; candidate += 1) {
+    if (time < lines[candidate].timeInMs) break;
+    index = candidate;
+  }
+  if (index < 0) return { previous: '', current: '', next: '' };
+  // Timed providers often leave a short gap between one line's declared
+  // duration and the next line's timestamp. The normal synced renderer keeps
+  // the most recent line through that handoff; doing the same here prevents a
+  // visible blank flash. The final line still expires at its own duration.
+  if (
+    index === lines.length - 1 &&
+    time >= lines[index].timeInMs + lines[index].duration
+  )
+    return { previous: '', current: '', next: '' };
   return {
     previous: lines[index - 1]?.text ?? '',
     current: lines[index].text,

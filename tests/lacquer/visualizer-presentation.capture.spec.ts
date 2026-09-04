@@ -58,6 +58,13 @@ test('presentation: independent panel, lyrics overlay, album colour and persiste
     );
     const current = page.locator('.lq-viz-lyric-current');
     await expect(current).not.toHaveText('', { timeout: 30_000 });
+    await expect
+      .poll(() =>
+        current.evaluate(
+          (line) => getComputedStyle(line).animationIterationCount,
+        ),
+      )
+      .toContain('infinite');
     await expect(page.locator('#lq-viz-lyrics')).toBeVisible();
     await expect(page.locator('#lq-viz-lyrics')).not.toContainText(
       /\[\d\d:\d\d/,
