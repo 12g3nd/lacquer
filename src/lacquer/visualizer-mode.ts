@@ -1,4 +1,6 @@
 import { whenElement } from './dom';
+import { initVisualizerLyrics } from './visualizer-lyrics';
+import { applyVisualizerPresentation } from './visualizer-presentation';
 
 export interface VisualizerModeInput {
   armed: boolean;
@@ -246,6 +248,8 @@ const mountButton = (rightControls: Element) => {
 export const initVisualizerMode = () => {
   if (initialised) return;
   initialised = true;
+  applyVisualizerPresentation();
+  initVisualizerLyrics();
   armed = window.mainConfig.get('lacquer.visualizerMode') === true;
   modeOwnsPlugin = armed;
   playerPageOpen =

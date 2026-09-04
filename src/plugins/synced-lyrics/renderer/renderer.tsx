@@ -10,6 +10,11 @@ import {
 import { type VirtualizerHandle, VList } from 'virtua/solid';
 
 import {
+  publishVisualizerLyrics,
+  selectVisualizerLyrics,
+} from '@/lacquer/visualizer-lyrics';
+
+import {
   ErrorDisplay,
   LoadingKaomoji,
   NotFoundKaomoji,
@@ -18,7 +23,7 @@ import {
 } from './components';
 import { LyricsPicker } from './components/LyricsPicker';
 import { reactiveOwner } from './reactive-root';
-import { currentLyrics } from './store';
+import { currentLyrics, lyricsStore } from './store';
 import { selectors } from './utils';
 
 import type { LineLyrics, SyncedLyricsPluginConfig } from '../types';
@@ -144,6 +149,27 @@ type LyricsRendererChild =
 const lyricsPicker: LyricsRendererChild = { kind: 'LyricsPicker' };
 
 export const [currentTime, setCurrentTime] = createSignal<number>(-1);
+// Lives with the plugin root, not the tab component: the overlay must keep
+// advancing while the queue is selected or the entire inspector is hidden.
+runWithOwner(reactiveOwner, () => {
+  createEffect(() => {
+    const lyrics = currentLyrics();
+    const timed =
+      lyrics.state === 'done' && lyrics.data?.lines?.length
+        ? lyrics.data.lines
+        : Object.values(lyricsStore.lyrics).find(
+            (provider) =>
+              provider.state === 'done' && provider.data?.lines?.length,
+          )?.data?.lines;
+    publishVisualizerLyrics(
+      selectVisualizerLyrics(
+        config()?.enabled ? timed : undefined,
+        currentTime(),
+      ),
+    );
+  });
+  onCleanup(() => publishVisualizerLyrics({ current: '', next: '' }));
+});
 export const LyricsRenderer = () => {
   const [scroller, setScroller] = createSignal<VirtualizerHandle>();
   const [stickyRef, setStickRef] = createSignal<HTMLElement | null>(null);

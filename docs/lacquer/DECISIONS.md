@@ -222,6 +222,13 @@ is an explicit Chaos choice, not a legacy-profile fallback. The transport gear e
 (show artwork), Laser Basilica (hide artwork), and Butterchurn (hide artwork) without requiring
 config-file editing. Butterchurn is the owner's selected artwork-free engine; like Laser Basilica,
 it hides stage artwork and metadata only during takeover, restoring both on exit or engine change.
+The VIZ presentation controls independently persist side-panel visibility, a current/next-line
+Fancy lyric overlay (without timecodes), and album-colour matching. The overlay reads the
+existing synced-lyrics provider/timing state, clears for gaps or missing timed lyrics, and
+survives chrome auto-hide. Butterchurn retains its preset geometry and shared audio tap;
+album matching recolours its output with native canvas passes and a 900ms colour transition.
+Switching matching off restores the preset's original colours. These presentation overrides
+apply only to active VIZ, never normal browsing or standalone plugin use.
 The plugin remains
 off on a fresh install and Visualizer Mode enables it only while the mode is active on the
 player page. Disable/recreate/unload tears down the owned tap, observer, canvas and animation

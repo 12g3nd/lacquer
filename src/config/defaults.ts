@@ -40,6 +40,9 @@ export interface DefaultConfig {
   'plugins': Record<string, { enabled: boolean } & Record<string, unknown>>;
   'lacquer': {
     visualizerMode: boolean;
+    visualizerShowPanel: boolean;
+    visualizerLyricsOverlay: boolean;
+    visualizerAlbumColors: boolean;
   };
 }
 
@@ -138,5 +141,8 @@ export const defaultConfig: DefaultConfig = {
   'plugins': defaultPlugins,
   'lacquer': {
     visualizerMode: false,
+    visualizerShowPanel: true,
+    visualizerLyricsOverlay: false,
+    visualizerAlbumColors: true,
   },
 };

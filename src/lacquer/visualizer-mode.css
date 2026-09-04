@@ -37,6 +37,76 @@
   visibility: hidden !important;
 }
 
+:root[data-lq-viz][data-lq-viz-panel-hidden] #player-page #side-panel {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#lq-viz-lyrics {
+  display: none;
+  position: fixed;
+  z-index: 2;
+  inset-inline: max(24px, 12vw);
+  bottom: max(112px, 16vh);
+  pointer-events: none;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  font-family: var(--lq-font-interface);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--lq-milkglass);
+  /* A tight outline preserves contrast even over a white Butterchurn flash. */
+  -webkit-text-stroke: 1px var(--lq-orbit);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 4px var(--lq-orbit),
+    0 4px 16px var(--lq-orbit);
+}
+
+:root[data-lq-viz][data-lq-viz-lyrics-overlay] #lq-viz-lyrics:not([hidden]) {
+  display: block;
+}
+
+/* Keep the overlay out of the inspector when the user elects to show both. */
+:root[data-lq-viz]:not([data-lq-viz-panel-hidden]) #lq-viz-lyrics {
+  inset-inline: 96px max(400px, 32vw);
+}
+
+.lq-viz-lyric-current {
+  font-size: clamp(24px, 3vw, 48px);
+  animation: lq-viz-lyric-arrive 180ms ease-out;
+}
+
+.lq-viz-lyric-next {
+  margin-top: var(--lq-space-3);
+  font-size: clamp(16px, 1.6vw, 24px);
+  color: color-mix(in srgb, var(--lq-milkglass) 74%, var(--lq-album-fill));
+}
+
+@keyframes lq-viz-lyric-arrive {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 900px) {
+  :root[data-lq-viz]:not([data-lq-viz-panel-hidden]) #lq-viz-lyrics {
+    inset-inline: 88px 24px;
+    top: 110px;
+    bottom: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lq-viz-lyric-current {
+    animation: none;
+  }
+}
+
 :root[data-lq-viz]
   :is(
     ytmusic-nav-bar,

@@ -14,6 +14,11 @@
  */
 
 import { whenElement } from './dom';
+import {
+  getVisualizerPreference,
+  setVisualizerPreference,
+  type VisualizerPreference,
+} from './visualizer-presentation';
 
 import { resolveVisualizerType } from '../plugins/visualizer/visualizers/lacquer-state';
 
@@ -45,6 +50,10 @@ export function initSettingsPanel() {
 
       let open = false;
       const engineItems = new Map<string, HTMLButtonElement>();
+      const preferenceItems = new Map<
+        VisualizerPreference,
+        HTMLButtonElement
+      >();
       const setOpen = (next: boolean) => {
         const selected = resolveVisualizerType(
           window.mainConfig.plugins.getOptions<{ type?: unknown }>('visualizer')
@@ -52,6 +61,12 @@ export function initSettingsPanel() {
         );
         for (const [type, item] of engineItems) {
           item.setAttribute('aria-checked', String(type === selected));
+        }
+        for (const [key, item] of preferenceItems) {
+          item.setAttribute(
+            'aria-checked',
+            String(getVisualizerPreference(key)),
+          );
         }
         open = next;
         menu.hidden = !next;
@@ -92,6 +107,18 @@ export function initSettingsPanel() {
         });
         item.setAttribute('role', 'menuitemradio');
         engineItems.set(type, item);
+      }
+
+      for (const [key, label] of [
+        ['visualizerShowPanel', 'VIZ: show side panel'],
+        ['visualizerLyricsOverlay', 'VIZ: overlay lyrics'],
+        ['visualizerAlbumColors', 'VIZ: match album colours'],
+      ] as const) {
+        const item = addItem(label, () => {
+          setVisualizerPreference(key, !getVisualizerPreference(key));
+        });
+        item.setAttribute('role', 'menuitemcheckbox');
+        preferenceItems.set(key, item);
       }
 
       addItem('Plugins & Options', () => {

@@ -31,6 +31,8 @@
   gap: var(--lq-space-1);
   width: 290px;
   max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
   background: var(--lq-orbit) !important;
   padding: var(--lq-space-2);
 }
@@ -57,6 +59,20 @@
 .lacquer-settings-item[aria-checked='true'] {
   color: var(--lq-ion);
   background: color-mix(in srgb, var(--lq-ion) 12%, transparent);
+}
+
+.lacquer-settings-item[role='menuitemcheckbox']::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-inline-end: var(--lq-space-2);
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+
+.lacquer-settings-item[role='menuitemcheckbox'][aria-checked='true']::before {
+  background: currentColor;
 }
 
 .lacquer-settings-item:disabled {
