@@ -131,6 +131,9 @@ test('shell-regressions: every engine paints a full-window field after reload', 
           .catch(() => undefined),
       );
       await expect(page.locator('html')).toHaveAttribute('data-lq-viz', '');
+      await expect(
+        page.locator('#player-page #player.ytmusic-player-page'),
+      ).toHaveCSS('opacity', type === 'lacquer-orbital' ? '1' : '0');
       await expect(page.locator('#visualizer')).toHaveCSS('width', '1280px');
       await expect(page.locator('#visualizer')).toHaveCSS('height', '800px');
       await expect(page.locator('#player-page')).toHaveCSS(

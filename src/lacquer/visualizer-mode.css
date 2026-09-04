@@ -137,7 +137,10 @@
   will-change: transform, filter;
 }
 
-:root[data-lq-viz][data-lq-viz-treatment='rave']
+:root[data-lq-viz]:is(
+    [data-lq-viz-treatment='rave'],
+    [data-lq-viz-treatment='butterchurn']
+  )
   ytmusic-player-page#player-page
   :is(#player.ytmusic-player-page, #lacquer-now) {
   opacity: 0 !important;

@@ -34,6 +34,7 @@ class ButterchurnVisualizer extends Visualizer {
     });
     this.visualizer.loadPreset(preset, config.butterchurn.blendTimeInSeconds);
     this.visualizer.connectAudio(audioNode);
+    document.documentElement.dataset.lqVizTreatment = 'butterchurn';
 
     // Start animation request loop. Do not use setInterval!
     this.animFrameHandle = requestAnimationFrame(renderVisualizer);
@@ -51,6 +52,7 @@ class ButterchurnVisualizer extends Visualizer {
   }
 
   protected destroyVisualizer() {
+    document.documentElement.removeAttribute('data-lq-viz-treatment');
     if (this.animFrameHandle !== null) {
       cancelAnimationFrame(this.animFrameHandle);
       this.animFrameHandle = null;

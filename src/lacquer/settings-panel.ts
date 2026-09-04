@@ -83,7 +83,7 @@ export function initSettingsPanel() {
       for (const [type, label] of [
         ['lacquer-orbital', 'Orbital Shockwave — show artwork'],
         ['lacquer-rave', 'Laser Basilica — hide artwork'],
-        ['butterchurn', 'Butterchurn — Chaos'],
+        ['butterchurn', 'Butterchurn — hide artwork'],
       ]) {
         const item = addItem(label, async () => {
           await window.ipcRenderer.invoke('peard:set-config', 'visualizer', {

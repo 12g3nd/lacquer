@@ -219,7 +219,9 @@ that bypassed Signal Chain. The safe boundary now exposes the authored Lacquer e
 Butterchurn through one disposable post-chain analyser tap. Legacy Wave/Vudio settings resolve
 to Orbital Shockwave; they are neither exposed nor bundled into the live renderer. Butterchurn
 is an explicit Chaos choice, not a legacy-profile fallback. The transport gear exposes Orbital
-(show artwork), Laser Basilica (hide artwork), and Chaos without requiring config-file editing.
+(show artwork), Laser Basilica (hide artwork), and Butterchurn (hide artwork) without requiring
+config-file editing. Butterchurn is the owner's selected artwork-free engine; like Laser Basilica,
+it hides stage artwork and metadata only during takeover, restoring both on exit or engine change.
 The plugin remains
 off on a fresh install and Visualizer Mode enables it only while the mode is active on the
 player page. Disable/recreate/unload tears down the owned tap, observer, canvas and animation

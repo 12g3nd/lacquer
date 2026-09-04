@@ -143,7 +143,7 @@ export default createPlugin({
     const visualizerTypes = [
       ['lacquer-orbital', 'Orbital Shockwave'],
       ['lacquer-rave', 'Laser Basilica (Rave)'],
-      ['butterchurn', 'Butterchurn (Chaos)'],
+      ['butterchurn', 'Butterchurn (hide artwork)'],
     ] as const;
 
     return [
