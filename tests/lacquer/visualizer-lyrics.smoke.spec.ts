@@ -24,20 +24,24 @@ test('overlay follows timed lyrics, seeks, gaps, and missing lyrics without time
     { timeInMs: 4000, duration: 2000, text: 'Next line' },
   ];
   expect(selectVisualizerLyrics(lines, 1500)).toEqual({
+    previous: '',
     current: 'First line',
     next: 'Next line',
   });
   expect(selectVisualizerLyrics(lines, 4500)).toEqual({
+    previous: 'First line',
     current: 'Next line',
     next: '',
   });
   expect(selectVisualizerLyrics(lines, 1500).current).toBe('First line');
   expect(selectVisualizerLyrics(lines, 3500).current).toBe('');
   expect(selectVisualizerLyrics(undefined, 1500)).toEqual({
+    previous: '',
     current: '',
     next: '',
   });
   expect(selectVisualizerLyrics(lines, 7000)).toEqual({
+    previous: '',
     current: '',
     next: '',
   });

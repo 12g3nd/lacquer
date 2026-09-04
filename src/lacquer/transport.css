@@ -56,10 +56,11 @@ ytmusic-player-bar > .middle-controls.ytmusic-player-bar {
 ytmusic-player-bar > .middle-controls > .content-info-wrapper {
   position: static !important;
   inset: auto !important;
+  flex: 1 1 auto;
   min-width: 0;
-  width: 100% !important;
+  width: auto !important;
   max-width: 100% !important;
-  margin: 0 !important;
+  margin: 0 0 0 var(--lq-space-2) !important;
   transform: none !important;
 }
 
@@ -68,7 +69,29 @@ ytmusic-player-bar > .left-controls.ytmusic-player-bar {
   grid-row: 1;
   justify-self: center;
   min-width: 0;
-  width: auto !important;
+  /* Reserve the primary cluster's footprint in the grid even though its
+     children are viewport-anchored. This keeps the identity from growing
+     underneath the buttons at the narrow supported width. */
+  width: 156px !important;
+  position: static !important;
+}
+
+/* Time belongs beside transport, but it must not pull the three primary
+   buttons away from the window's geometric centre. Both are positioned from
+   the bar, whose layout already establishes the containing block. */
+ytmusic-player-bar
+  > .left-controls.ytmusic-player-bar
+  > .left-controls-buttons.ytmusic-player-bar {
+  position: absolute !important;
+  left: 50vw !important;
+  transform: translateX(-50%) !important;
+}
+
+ytmusic-player-bar > .left-controls.ytmusic-player-bar > .time-info {
+  position: absolute !important;
+  left: calc(50vw + 94px) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }
 
 ytmusic-player-bar > .right-controls.ytmusic-player-bar {

@@ -133,6 +133,21 @@ test('saturated artwork does not fall back', () => {
   }
 });
 
+test('muted but chromatic artwork keeps its album hue', () => {
+  // Captured from the real "We Can't Stop" artwork. This used to be rejected
+  // as monochrome and made both the play control and Butterchurn Ion blue.
+  const source = { r: 106, g: 90, b: 101 };
+  const tokens = normaliseAlbumColor(source);
+  expect(tokens.isFallback).toBe(false);
+  const sourceHue = rgbToOklch(source).h;
+  const outputHue = rgbToOklch(parseRgb(tokens.fill)).h;
+  const drift = Math.min(
+    Math.abs(outputHue - sourceHue),
+    360 - Math.abs(outputHue - sourceHue),
+  );
+  expect(drift).toBeLessThan(12);
+});
+
 test('hue survives normalisation', () => {
   // Clamping in OKLCH must move lightness and chroma without swinging hue —
   // that is the entire reason for not doing this in HSL.

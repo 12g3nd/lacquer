@@ -168,7 +168,9 @@ runWithOwner(reactiveOwner, () => {
       ),
     );
   });
-  onCleanup(() => publishVisualizerLyrics({ current: '', next: '' }));
+  onCleanup(() =>
+    publishVisualizerLyrics({ previous: '', current: '', next: '' }),
+  );
 });
 export const LyricsRenderer = () => {
   const [scroller, setScroller] = createSignal<VirtualizerHandle>();

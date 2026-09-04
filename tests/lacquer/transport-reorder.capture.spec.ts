@@ -14,6 +14,8 @@ type Rect = {
 type DeckLayout = {
   viewportWidth: number;
   identity: Rect;
+  artwork: Rect;
+  identityText: Rect;
   transport: Rect;
   output: Rect;
   titleOverflow: string;
@@ -53,7 +55,10 @@ const deckLayout = (page: Page): Promise<DeckLayout> =>
     const bar = document.querySelector<HTMLElement>('ytmusic-player-bar');
     const play = bar?.querySelector<HTMLElement>('#play-pause-button');
     const identity = bar?.querySelector<HTMLElement>('.content-info-wrapper');
+    const artwork = bar?.querySelector<HTMLElement>('.thumbnail-image-wrapper');
+    const identityText = identity;
     const transport =
+      play?.closest<HTMLElement>('.left-controls-buttons') ??
       play?.closest<HTMLElement>('.left-controls') ??
       play?.closest<HTMLElement>('.middle-controls') ??
       play?.parentElement;
@@ -62,11 +67,21 @@ const deckLayout = (page: Page): Promise<DeckLayout> =>
       bar?.querySelector<HTMLElement>('.right-controls-buttons');
     const title = bar?.querySelector<HTMLElement>('.title');
 
-    if (!bar || !identity || !transport || !output || !title) {
+    if (
+      !bar ||
+      !identity ||
+      !artwork ||
+      !identityText ||
+      !transport ||
+      !output ||
+      !title
+    ) {
       throw new Error(
         JSON.stringify({
           bar: !!bar,
           identity: identity?.className ?? null,
+          artwork: artwork?.className ?? null,
+          identityText: identityText?.className ?? null,
           playParent: play?.parentElement?.className ?? null,
           playGrandparent:
             play?.parentElement?.parentElement?.className ?? null,
@@ -92,6 +107,8 @@ const deckLayout = (page: Page): Promise<DeckLayout> =>
     return {
       viewportWidth: innerWidth,
       identity: rect(identity),
+      artwork: rect(artwork),
+      identityText: rect(identityText),
       transport: rect(transport),
       output: rect(output),
       titleOverflow: titleStyle.overflow,
@@ -126,7 +143,11 @@ const expectReordered = (layout: DeckLayout) => {
   expect(
     Math.abs(centre - layout.viewportWidth / 2),
     `transport must remain centred at ${layout.viewportWidth}px`,
-  ).toBeLessThanOrEqual(Math.max(48, layout.viewportWidth * 0.055));
+  ).toBeLessThanOrEqual(2);
+  expect(
+    layout.identityText.left - layout.artwork.right,
+    `identity text must clear artwork at ${layout.viewportWidth}px`,
+  ).toBeGreaterThanOrEqual(8);
   expect(layout.titleOverflow).toBe('hidden');
   expect(layout.titleWhiteSpace).toBe('nowrap');
 };

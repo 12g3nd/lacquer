@@ -178,7 +178,11 @@ export const contrastRatio = (a: Rgb, b: Rgb) => {
  * produces a muddy wash rather than a mood, so Orbit Noir takes over —
  * DESIGN.md §3.4 requires the fallback rather than the wash.
  */
-const MONOCHROME_CHROMA = 0.035;
+// Keep genuinely muted album colours. The previous 0.035 cutoff rejected
+// mauves and warm greys that are visually coloured (for example 106,90,101),
+// forcing a large part of a real library back to Ion blue. Only effectively
+// neutral extraction noise should use Orbit Noir.
+const MONOCHROME_CHROMA = 0.01;
 
 /** Ion, the functional cobalt, as the fallback hue. Keeps one code path. */
 const ION: Rgb = { r: 0x4f, g: 0x7d, b: 0xff };
