@@ -10,8 +10,15 @@ export interface BandEnergies {
 }
 
 export const resolveVisualizerType = (type: unknown): LacquerVisualizerType => {
-  if (type === 'lacquer-orbital' || type === 'lacquer-rave') return type;
-  return 'butterchurn';
+  if (
+    type === 'lacquer-orbital' ||
+    type === 'lacquer-rave' ||
+    type === 'butterchurn'
+  )
+    return type;
+  // Imported Pear engines must inherit Lacquer's approved album-led default.
+  // Chaos is opt-in, never the compatibility fallback.
+  return 'lacquer-orbital';
 };
 
 const averageRange = (

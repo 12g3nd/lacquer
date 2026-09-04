@@ -217,7 +217,10 @@ which is the exact conflict the Signal Chain audit was commissioned to prevent:
 stale: Butterchurn and Vudio created no audible destination path, while Wave did add a dry path
 that bypassed Signal Chain. The safe boundary now exposes the authored Lacquer engines and
 Butterchurn through one disposable post-chain analyser tap. Legacy Wave/Vudio settings resolve
-to Butterchurn; they are neither exposed nor bundled into the live renderer. The plugin remains
+to Orbital Shockwave; they are neither exposed nor bundled into the live renderer. Butterchurn
+is an explicit Chaos choice, not a legacy-profile fallback. The transport gear exposes Orbital
+(show artwork), Laser Basilica (hide artwork), and Chaos without requiring config-file editing.
+The plugin remains
 off on a fresh install and Visualizer Mode enables it only while the mode is active on the
 player page. Disable/recreate/unload tears down the owned tap, observer, canvas and animation
 loop without changing the shared analyser's `fftSize`.

@@ -29,7 +29,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--lq-space-1);
-  min-width: 172px;
+  width: 290px;
+  max-width: calc(100vw - 32px);
+  background: var(--lq-orbit) !important;
   padding: var(--lq-space-2);
 }
 #lacquer-settings-menu-container[hidden] {
@@ -50,4 +52,14 @@
 }
 .lacquer-settings-item:hover {
   background: color-mix(in srgb, var(--lq-milkglass) 10%, transparent);
+}
+
+.lacquer-settings-item[aria-checked='true'] {
+  color: var(--lq-ion);
+  background: color-mix(in srgb, var(--lq-ion) 12%, transparent);
+}
+
+.lacquer-settings-item:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }

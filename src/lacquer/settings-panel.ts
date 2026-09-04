@@ -15,6 +15,8 @@
 
 import { whenElement } from './dom';
 
+import { resolveVisualizerType } from '../plugins/visualizer/visualizers/lacquer-state';
+
 const GEAR_SVG = `
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -42,25 +44,55 @@ export function initSettingsPanel() {
       menu.hidden = true;
 
       let open = false;
+      const engineItems = new Map<string, HTMLButtonElement>();
       const setOpen = (next: boolean) => {
+        const selected = resolveVisualizerType(
+          window.mainConfig.plugins.getOptions<{ type?: unknown }>('visualizer')
+            .type,
+        );
+        for (const [type, item] of engineItems) {
+          item.setAttribute('aria-checked', String(type === selected));
+        }
         open = next;
         menu.hidden = !next;
         gearButton.setAttribute('aria-expanded', String(next));
       };
 
-      const addItem = (text: string, onClick: () => void) => {
+      const addItem = (text: string, onClick: () => void | Promise<void>) => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'lacquer-settings-item';
         button.setAttribute('role', 'menuitem');
         button.textContent = text;
-        button.addEventListener('click', (event) => {
+        button.addEventListener('click', async (event) => {
           event.stopPropagation();
-          onClick();
-          setOpen(false);
+          button.disabled = true;
+          try {
+            await onClick();
+            setOpen(false);
+          } catch {
+            button.textContent = `${text} — retry`;
+          } finally {
+            button.disabled = false;
+          }
         });
         menu.appendChild(button);
+        return button;
       };
+
+      for (const [type, label] of [
+        ['lacquer-orbital', 'Orbital Shockwave — show artwork'],
+        ['lacquer-rave', 'Laser Basilica — hide artwork'],
+        ['butterchurn', 'Butterchurn — Chaos'],
+      ]) {
+        const item = addItem(label, async () => {
+          await window.ipcRenderer.invoke('peard:set-config', 'visualizer', {
+            type,
+          });
+        });
+        item.setAttribute('role', 'menuitemradio');
+        engineItems.set(type, item);
+      }
 
       addItem('Plugins & Options', () => {
         window.ipcRenderer.send('lacquer:edit-config');

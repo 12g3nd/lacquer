@@ -10,8 +10,9 @@ test('authored visualizer types survive while unsafe legacy types fall back', ()
   expect(resolveVisualizerType('lacquer-orbital')).toBe('lacquer-orbital');
   expect(resolveVisualizerType('lacquer-rave')).toBe('lacquer-rave');
   expect(resolveVisualizerType('butterchurn')).toBe('butterchurn');
-  expect(resolveVisualizerType('wave')).toBe('butterchurn');
-  expect(resolveVisualizerType('vudio')).toBe('butterchurn');
+  expect(resolveVisualizerType('wave')).toBe('lacquer-orbital');
+  expect(resolveVisualizerType('vudio')).toBe('lacquer-orbital');
+  expect(resolveVisualizerType(undefined)).toBe('lacquer-orbital');
 });
 
 test('audio energy is read from frequency ranges, not fixed bin numbers', () => {

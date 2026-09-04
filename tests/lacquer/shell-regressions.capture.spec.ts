@@ -2,6 +2,49 @@ import { expect, test } from '@playwright/test';
 
 import { attachToLacquer, capture } from './harness';
 
+test('shell-regressions: settings exposes album-led artwork and rave modes', async () => {
+  const { page, dispose } = await attachToLacquer();
+  page.setDefaultTimeout(5000);
+  const original = await page.evaluate(() =>
+    window.mainConfig.plugins.getOptions('visualizer'),
+  );
+  try {
+    await page.locator('#lacquer-gear-button').click();
+    const rave = page.getByRole('menuitemradio', {
+      name: 'Laser Basilica — hide artwork',
+    });
+    await expect(rave).toBeVisible();
+    await rave.click();
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => window.mainConfig.plugins.getOptions('visualizer').type,
+        ),
+      )
+      .toBe('lacquer-rave');
+    await page.locator('#lacquer-gear-button').click();
+    await expect(rave).toHaveAttribute('aria-checked', 'true');
+    await capture(page, 'visualizer-choices-menu');
+    await page
+      .getByRole('menuitemradio', { name: 'Orbital Shockwave — show artwork' })
+      .click();
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => window.mainConfig.plugins.getOptions('visualizer').type,
+        ),
+      )
+      .toBe('lacquer-orbital');
+  } finally {
+    await page.evaluate(
+      (config) =>
+        window.ipcRenderer.invoke('peard:set-config', 'visualizer', config),
+      original,
+    );
+    await dispose();
+  }
+});
+
 test('shell-regressions: header controls have clearance at every width', async () => {
   test.setTimeout(60_000);
   const { page, dispose } = await attachToLacquer();
