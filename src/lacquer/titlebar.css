@@ -116,12 +116,12 @@ ytmusic-search-box
   display: flex;
   align-items: center;
   gap: 14px;
-  flex: 0 1 236px;
+  flex: 0 1 190px;
   min-width: 0;
-  max-width: 236px;
+  max-width: 190px;
   height: 40px;
   box-sizing: border-box;
-  padding-inline-start: 24px;
+  padding-inline: 18px 12px;
   border-inline-start: 1px solid var(--lq-hairline);
   color: var(--lq-milkglass);
   font: 13px var(--lq-font-interface);
@@ -149,10 +149,6 @@ ytmusic-search-box
   color: var(--lq-moondust);
   font-size: 11px;
 }
-#lq-listening-status .lq-shell-navbtn {
-  flex: 0 0 32px;
-  border: 1px solid var(--lq-hairline);
-}
 .lq-listening-indicator {
   width: 7px;
   height: 7px;
@@ -166,9 +162,9 @@ ytmusic-search-box
 @media (max-width: 1150px) {
   #lq-listening-status {
     gap: 10px;
-    padding-inline-start: 12px;
-    flex-basis: 196px;
-    max-width: 196px;
+    padding-inline: 12px;
+    flex-basis: 170px;
+    max-width: 170px;
   }
 }
 @media (max-width: 1000px) {

@@ -20,7 +20,6 @@
 import { whenElement } from './dom';
 import { WORDMARK_SVG } from './logo.generated';
 import { signalChain } from './signal-chain';
-import { enterVisualizerFullscreen } from './visualizer-fullscreen';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const WORDMARK_ID = 'lacquer-wordmark';
@@ -107,14 +106,7 @@ const initListeningStatus = () => {
       const detail = document.createElement('small');
       detail.className = 'lq-listening-detail';
       copy.append(title, detail);
-      const full = navButton(
-        'Full-screen visualizer',
-        'M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5',
-        () => {
-          enterVisualizerFullscreen();
-        },
-      );
-      status.append(indicator, copy, full);
+      status.append(indicator, copy);
       host.prepend(status);
     });
     const update = () => {

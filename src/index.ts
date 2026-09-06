@@ -3,6 +3,7 @@ import path from 'node:path';
 import url from 'node:url';
 
 import ErrorHtmlAsset from '@assets/error.html?asset';
+import WindowsAppIcon from '@assets/generated/icons/win/icon.ico?asset&asarUnpack';
 import {
   enhanceWebRequest,
   type BetterSession,
@@ -185,11 +186,12 @@ electronDebug({
   showDevTools: false, // Disable automatic devTools on new window
 });
 
-let icon = 'assets/icon.png';
+const assetRoot = path.resolve(__dirname, '..', '..', 'assets');
+let icon = path.join(assetRoot, 'icon.png');
 if (process.platform === 'win32') {
-  icon = 'assets/generated/icons/win/icon.ico';
+  icon = WindowsAppIcon;
 } else if (process.platform === 'darwin') {
-  icon = 'assets/generated/icons/mac/icon.icns';
+  icon = path.join(assetRoot, 'generated', 'icons', 'mac', 'icon.icns');
 }
 
 function onClosed() {
