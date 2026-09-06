@@ -93,6 +93,9 @@ importers:
       '@skyra/jaro-winkler':
         specifier: 1.1.1
         version: 1.1.1
+      '@soundtouchjs/audio-worklet':
+        specifier: 2.1.1
+        version: 2.1.1
       '@xhayper/discord-rpc':
         specifier: 1.3.4
         version: 1.3.4(bufferutil@4.1.0)(utf-8-validate@6.0.6)
@@ -1389,6 +1392,18 @@ packages:
     resolution: {integrity: sha512-hZ/M/qr25QOCcwDPOHtGjxTD8w2mNyVAYvcfgwzBHq2RwNqHNdDNsMZYap20+ruRwW4A3Cdkczyoz0TSxLCAPQ==}
     peerDependencies:
       solid-js: ^1.6.12
+
+  '@soundtouchjs/audio-worklet@2.1.1':
+    resolution: {integrity: sha512-itxSW62gbtDKoFo6eEr4PXzVz3oF+wCVREupFi5JiUR31tWWwCizr+2XezYD1SnkrSDfdmZvvviTtoyejYeD0Q==}
+
+  '@soundtouchjs/core@2.1.1':
+    resolution: {integrity: sha512-ccBiG9/zHdM1Sx1RUkXWBgRYFI1HCiUHHwRK8gAvVNgmcafBgUzRP6Czn7pUPcHgSQus+i3Eu3DlfBR24wqspA==}
+
+  '@soundtouchjs/interpolation-strategy-lanczos@2.1.1':
+    resolution: {integrity: sha512-EX4qVLnOJ9pKfL7iSPJSJDKDAoZ4d7JO7KTKMPVo2XIhlmT/2hTZC5dWL/R9Jv3XC7kyQeteeGcogWP6DPi47A==}
+
+  '@soundtouchjs/worklet-base@2.1.1':
+    resolution: {integrity: sha512-H/QMyW8yB91WX1CVSVCeOXNPdv1m71Zi0KQlvcX3f+159GNUo8kckmXV0cHpni9SCqVhCHMS/lapbBKl4tc6nQ==}
 
   '@stylistic/eslint-plugin@5.10.0':
     resolution: {integrity: sha512-nPK52ZHvot8Ju/0A4ucSX1dcPV2/1clx0kLcH5wDmrE4naKso7TUC/voUyU1O9OTKTrR6MYip6LP0ogEMQ9jPQ==}
@@ -5043,6 +5058,22 @@ snapshots:
   '@solid-primitives/utils@6.3.2(solid-js@1.9.13)':
     dependencies:
       solid-js: 1.9.13
+
+  '@soundtouchjs/audio-worklet@2.1.1':
+    dependencies:
+      '@soundtouchjs/core': 2.1.1
+      '@soundtouchjs/interpolation-strategy-lanczos': 2.1.1
+      '@soundtouchjs/worklet-base': 2.1.1
+
+  '@soundtouchjs/core@2.1.1':
+    dependencies:
+      '@soundtouchjs/interpolation-strategy-lanczos': 2.1.1
+
+  '@soundtouchjs/interpolation-strategy-lanczos@2.1.1': {}
+
+  '@soundtouchjs/worklet-base@2.1.1':
+    dependencies:
+      '@soundtouchjs/core': 2.1.1
 
   '@stylistic/eslint-plugin@5.10.0(eslint@9.39.4(jiti@2.7.0)(supports-color@7.2.0))':
     dependencies:

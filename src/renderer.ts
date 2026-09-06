@@ -32,6 +32,7 @@ import {
   wakeVisualizerChrome,
 } from './lacquer/visualizer-mode';
 import lacquerVisualizerModeCss from './lacquer/visualizer-mode.css?inline';
+import { initVolumeControl } from './lacquer/volume-control';
 import {
   createContext,
   forceLoadRendererPlugin,
@@ -410,6 +411,7 @@ async function onApiLoaded() {
 
   signalChain.init(audioSource, audioContext, video);
   initFXRack();
+  initVolumeControl(api!);
 
   for (const [id, plugin] of Object.entries(getAllLoadedRendererPlugins())) {
     if (typeof plugin.renderer !== 'function') {

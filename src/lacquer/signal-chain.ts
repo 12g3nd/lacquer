@@ -1,6 +1,7 @@
 import largeCathedralIrPath from './assets/ir/large-cathedral.wav?url';
 import mediumHallIrPath from './assets/ir/medium-hall.wav?url';
 import smallRoomIrPath from './assets/ir/small-room.wav?url';
+import { PitchStage } from './pitch-stage';
 
 import type { FilterConfig } from '../plugins/equalizer/presets';
 import type {
@@ -55,7 +56,9 @@ class SignalChain {
 
   private currentPreset: SignalChainPreset = 'Original';
   private playbackRate = 1;
-  private preservesPitch = true;
+  private pitchCorrection = 1;
+  private pitchStage!: PitchStage;
+  pitchReady: Promise<void> = Promise.resolve();
 
   // Store active config so we can wait for buffers to load
   private activeReverbConfig: ReverbConfig = { wet: 0, ir: null };
@@ -135,7 +138,16 @@ class SignalChain {
     this.analyserNode.fftSize = 2048;
 
     // --- WIRING ---
-    source.connect(this.inputGain);
+    this.pitchStage = new PitchStage(ctx);
+    source.connect(this.pitchStage.input);
+    this.pitchStage.output.connect(this.inputGain);
+    this.pitchReady = this.pitchStage.ready;
+    this.pitchReady
+      .then(() => this.restorePlaybackRate())
+      .catch((error: unknown) => {
+        console.error('[Lacquer] Pitch processing unavailable', error);
+        document.dispatchEvent(new Event('lacquer:pitch-unavailable'));
+      });
 
     // EQ
     this.inputGain.connect(this.eqBypassGain);
@@ -330,12 +342,14 @@ class SignalChain {
     if (video.playbackRate !== this.playbackRate) {
       video.playbackRate = this.playbackRate;
     }
-    video.preservesPitch = this.preservesPitch;
+    this.pitchStage?.set(this.playbackRate, this.pitchCorrection);
+    video.preservesPitch =
+      !this.pitchStage?.usesProcessor && this.pitchCorrection >= 0.5;
   };
 
-  setSpeed(rate: number, preservesPitch: boolean) {
+  setSpeed(rate: number, preservesPitch: boolean | number) {
     this.playbackRate = rate;
-    this.preservesPitch = preservesPitch;
+    this.pitchCorrection = Math.max(0, Math.min(1, Number(preservesPitch)));
     this.restorePlaybackRate();
   }
 

@@ -123,6 +123,11 @@ export const onPlayerApiReady = async (
     });
   }
 
+  document.addEventListener('lacquer:volume-set', (event) => {
+    const value = (event as CustomEvent<number>).detail;
+    if (Number.isFinite(value)) saveVolume(Math.max(0, Math.min(100, value)));
+  });
+
   function saveVolume(volume: number) {
     options.savedVolume = volume;
     writeOptions();

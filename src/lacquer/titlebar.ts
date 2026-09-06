@@ -19,6 +19,8 @@
 
 import { whenElement } from './dom';
 import { WORDMARK_SVG } from './logo.generated';
+import { signalChain } from './signal-chain';
+import { enterVisualizerFullscreen } from './visualizer-fullscreen';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const WORDMARK_ID = 'lacquer-wordmark';
@@ -90,7 +92,52 @@ const injectRailNav = (rail: Element) => {
   });
 };
 
+const initListeningStatus = () => {
+  whenElement('ytmusic-nav-bar #right-content').then((host) => {
+    keepInjected(host, 'lq-listening-status', () => {
+      const status = document.createElement('div');
+      status.id = 'lq-listening-status';
+      const indicator = document.createElement('span');
+      indicator.className = 'lq-listening-indicator';
+      indicator.setAttribute('aria-hidden', 'true');
+      const copy = document.createElement('div');
+      const title = document.createElement('span');
+      const detail = document.createElement('small');
+      copy.append(title, detail);
+      const full = navButton(
+        'Full-screen visualizer',
+        'M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5',
+        () => {
+          enterVisualizerFullscreen();
+        },
+      );
+      status.append(indicator, copy, full);
+      host.prepend(status);
+    });
+    const update = () => {
+      const status = document.getElementById('lq-listening-status');
+      const video = document.querySelector('video');
+      if (!status) return;
+      const playing = video && !video.paused;
+      status.toggleAttribute('data-playing', Boolean(playing));
+      status.querySelector('div > span')!.textContent = playing
+        ? 'Listening'
+        : 'Ready when you are';
+      status.querySelector('small')!.textContent =
+        `${signalChain.getCurrentPreset()} \u00b7 ${(video?.playbackRate ?? 1).toFixed(2)}\u00d7`;
+    };
+    whenElement('video').then((video) => {
+      for (const event of ['playing', 'pause', 'ratechange'])
+        video.addEventListener(event, update);
+      update();
+    });
+    document.addEventListener('lacquer:preset-changed', update);
+    update();
+  });
+};
+
 export const initTitleBar = () => {
+  initListeningStatus();
   whenElement('ytmusic-nav-bar').then(injectWordmark);
   whenElement('#guide-renderer, ytmusic-guide-renderer').then(injectRailNav);
 };

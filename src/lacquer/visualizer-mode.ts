@@ -79,6 +79,7 @@ const CHROME_SELECTOR = [
 ].join(',');
 const OPEN_POPOVER_SELECTOR = [
   '#lacquer-fx-rack:not([hidden])',
+  '#lq-volume-panel:popover-open',
   '#lacquer-settings-menu-container:not([hidden])',
   'tp-yt-iron-dropdown[opened]',
 ].join(',');

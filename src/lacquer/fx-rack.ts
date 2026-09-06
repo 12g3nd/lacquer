@@ -31,6 +31,7 @@ type RoomKey = 'off' | 'small-room' | 'medium-hall' | 'large-cathedral';
 interface Overrides {
   speed?: number;
   pitchLock?: boolean;
+  pitchCorrection?: number;
   reverbWet?: number;
   room?: RoomKey;
   width?: number;
@@ -39,6 +40,7 @@ interface Overrides {
 interface PresetParams {
   speed: number;
   pitchLock: boolean;
+  pitchCorrection?: number;
   reverbWet: number;
   room: RoomKey;
   width: number;
@@ -185,6 +187,9 @@ export const initFXRack = () => {
     return {
       speed: overrides.speed ?? base.speed,
       pitchLock: overrides.pitchLock ?? base.pitchLock,
+      pitchCorrection:
+        overrides.pitchCorrection ??
+        Number(overrides.pitchLock ?? base.pitchLock),
       reverbWet: overrides.reverbWet ?? base.reverbWet,
       room: overrides.room ?? base.room,
       width: overrides.width ?? base.width,
@@ -212,7 +217,7 @@ export const initFXRack = () => {
    * safety even when the preset (Original) would leave it bypassed. */
   const applyOverrides = () => {
     const p = effective();
-    signalChain.setSpeed(p.speed, p.pitchLock);
+    signalChain.setSpeed(p.speed, p.pitchCorrection ?? Number(p.pitchLock));
     signalChain.setReverb({
       wet: p.reverbWet,
       ir: p.room === 'off' ? null : p.room,
@@ -353,16 +358,30 @@ export const initFXRack = () => {
   // Pitch mode
   const pitchRow = makeRow('Pitch', true);
   const pitchControl = el('div', 'lq-fx-pitch');
-  const pitchSlider = makeSlider(0, 1, 1, 'Pitch mode', (value) => {
-    overrides.pitchLock = value === 1;
+  const pitchSlider = makeSlider(0, 1, 0.01, 'Pitch mode', (value) => {
+    overrides.pitchCorrection = value;
+    delete overrides.pitchLock;
   });
+  const pitchReadout = el('output', 'lq-fx-pitch-value');
   pitchControl.append(
     el('span', 'lq-fx-pitch-end', 'Variable'),
     pitchSlider,
+    pitchReadout,
     el('span', 'lq-fx-pitch-end', 'Lock'),
   );
   pitchRow.appendChild(pitchControl);
   params.appendChild(pitchRow);
+  pitchSlider.disabled = true;
+  const pitchUnavailable = () => {
+    pitchSlider.disabled = true;
+    pitchSlider.title = 'Pitch processing unavailable. Reload to retry.';
+  };
+  signalChain.pitchReady
+    .then(() => {
+      pitchSlider.disabled = false;
+    })
+    .catch(pitchUnavailable);
+  document.addEventListener('lacquer:pitch-unavailable', pitchUnavailable);
 
   // Reverb wet
   const reverbRow = makeRow('Reverb');
@@ -431,11 +450,22 @@ export const initFXRack = () => {
     setSliderFill(speedSlider);
     speedReadout.textContent = formatSpeed(p.speed);
 
-    pitchSlider.value = p.pitchLock ? '1' : '0';
+    const correction = p.pitchCorrection ?? Number(p.pitchLock);
+    pitchSlider.value = String(correction);
     pitchSlider.setAttribute(
       'aria-valuetext',
-      p.pitchLock ? 'Lock' : 'Variable',
+      correction === 1
+        ? 'Lock'
+        : correction === 0
+          ? 'Variable'
+          : `${Math.round(correction * 100)}% pitch correction`,
     );
+    pitchReadout.textContent =
+      correction === 1
+        ? '100%'
+        : correction === 0
+          ? '0%'
+          : `${Math.round(correction * 100)}%`;
     setSliderFill(pitchSlider);
 
     if (document.activeElement !== reverbSlider) {
