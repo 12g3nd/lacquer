@@ -250,6 +250,7 @@ export const initFXRack = () => {
   rack.id = 'lacquer-fx-rack';
   rack.setAttribute('role', 'dialog');
   rack.setAttribute('aria-label', 'Signal chain');
+  rack.popover = 'manual';
   rack.hidden = true;
   rack.toggleAttribute('inert', true);
 
@@ -351,17 +352,16 @@ export const initFXRack = () => {
 
   // Pitch mode
   const pitchRow = makeRow('Pitch', true);
-  const pitch = makeSegmented<boolean>(
-    'Pitch mode',
-    [
-      { value: false, label: 'Vari' },
-      { value: true, label: 'Lock' },
-    ],
-    (value) => {
-      overrides.pitchLock = value;
-    },
+  const pitchControl = el('div', 'lq-fx-pitch');
+  const pitchSlider = makeSlider(0, 1, 1, 'Pitch mode', (value) => {
+    overrides.pitchLock = value === 1;
+  });
+  pitchControl.append(
+    el('span', 'lq-fx-pitch-end', 'Variable'),
+    pitchSlider,
+    el('span', 'lq-fx-pitch-end', 'Lock'),
   );
-  pitchRow.appendChild(pitch.group);
+  pitchRow.appendChild(pitchControl);
   params.appendChild(pitchRow);
 
   // Reverb wet
@@ -430,9 +430,12 @@ export const initFXRack = () => {
     setSliderFill(speedSlider);
     speedReadout.textContent = formatSpeed(p.speed);
 
-    for (const { value, button } of pitch.buttons) {
-      button.setAttribute('aria-pressed', String(value === p.pitchLock));
-    }
+    pitchSlider.value = p.pitchLock ? '1' : '0';
+    pitchSlider.setAttribute(
+      'aria-valuetext',
+      p.pitchLock ? 'Lock' : 'Variable',
+    );
+    setSliderFill(pitchSlider);
 
     if (document.activeElement !== reverbSlider) {
       reverbSlider.value = String(p.reverbWet);
@@ -521,10 +524,12 @@ export const initFXRack = () => {
     rack.toggleAttribute('inert', !open);
     fxButton.setAttribute('aria-expanded', String(open));
     if (open) {
+      rack.showPopover();
       render();
       runMeter();
       focusables()[0]?.focus();
     } else {
+      rack.hidePopover();
       stopMeter();
       fxButton.focus();
     }

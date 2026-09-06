@@ -469,10 +469,6 @@ async function createMainWindow() {
     }
   }
 
-  if (windowMaximized) {
-    win.maximize();
-  }
-
   if (config.get('options.alwaysOnTop')) {
     win.setAlwaysOnTop(true);
   }
@@ -533,9 +529,43 @@ async function createMainWindow() {
     showUnresponsiveDialog(win, details);
   });
 
-  win.once('ready-to-show', () => {
+  // Chromium's first paint precedes the authored renderer shell. Wait for
+  // that shell before revealing the window; still expose offline/auth pages.
+  let firstPaintReady = false;
+  let shellReady = false;
+  let startupFinished = false;
+  const reveal = () => {
+    if (startupFinished || !firstPaintReady || !shellReady) return;
+    startupFinished = true;
+    clearTimeout(startupFallback);
+    ipcMain.removeListener('lacquer:shell-ready', onShellReady);
     if (config.get('options.appVisible')) {
+      if (windowMaximized) win.maximize();
       win.show();
+    }
+  };
+  const onShellReady = (event: Electron.IpcMainEvent) => {
+    if (event.sender !== win.webContents) return;
+    shellReady = true;
+    reveal();
+  };
+  const startupFallback = setTimeout(() => {
+    shellReady = true;
+    reveal();
+  }, 12_000);
+  ipcMain.on('lacquer:shell-ready', onShellReady);
+  win.once('closed', () => {
+    clearTimeout(startupFallback);
+    ipcMain.removeListener('lacquer:shell-ready', onShellReady);
+  });
+  win.once('ready-to-show', () => {
+    firstPaintReady = true;
+    reveal();
+  });
+  win.webContents.on('did-finish-load', () => {
+    if (new URL(win.webContents.getURL()).hostname !== 'music.youtube.com') {
+      shellReady = true;
+      reveal();
     }
   });
 

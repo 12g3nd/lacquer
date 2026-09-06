@@ -398,6 +398,9 @@ async function onApiLoaded() {
   // `--lq-album-*` tokens. DOM-only, and safe before playback: with no artwork
   // yet it simply publishes the Orbit Noir fallback.
   initAlbumColor();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => window.ipcRenderer.send('lacquer:shell-ready'));
+  });
 
   const video = document.querySelector('video')!;
   const audioContext = new AudioContext();
