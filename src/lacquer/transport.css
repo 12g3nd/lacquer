@@ -49,7 +49,7 @@ ytmusic-player-bar > .middle-controls.ytmusic-player-bar {
   grid-row: 1;
   justify-self: start;
   min-width: 0;
-  width: min(420px, 100%) !important;
+  width: min(500px, 100%) !important;
   max-width: 100% !important;
 }
 
@@ -323,4 +323,57 @@ ytmusic-player-bar #play-pause-button.ytmusic-player-bar yt-icon {
   ytmusic-player-bar .right-controls-buttons {
     gap: 3px;
   }
+}
+
+/* Preserve each metadata field, rather than truncating the whole byline. */
+ytmusic-player-bar .menu.ytmusic-player-bar {
+  display: none !important;
+}
+ytmusic-player-bar #like-button-renderer {
+  flex: 0 0 auto;
+  margin-inline-start: 14px !important;
+}
+ytmusic-player-bar yt-formatted-string.byline {
+  display: flex !important;
+  align-items: baseline;
+  gap: 4px;
+  width: 100%;
+}
+ytmusic-player-bar yt-formatted-string.byline > a {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0 !important;
+}
+ytmusic-player-bar yt-formatted-string.byline > span {
+  flex: 0 0 auto;
+}
+ytmusic-player-bar .content-info-wrapper > .subtitle,
+ytmusic-player-bar .content-info-wrapper .subtitle > .subtitle {
+  display: block !important;
+  width: 100%;
+}
+#lacquer-viz-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+#lacquer-viz-fullscreen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--lq-hairline);
+  border-radius: var(--lq-radius-md);
+  background: transparent;
+  color: var(--lq-moondust);
+  cursor: pointer;
+}
+#lacquer-viz-fullscreen:hover,
+#lacquer-viz-fullscreen:focus-visible {
+  color: var(--lq-milkglass);
+  border-color: var(--lq-ion);
 }

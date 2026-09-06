@@ -411,6 +411,7 @@ export const initFXRack = () => {
     selectPreset(preset === 'Original' ? lastNonOriginal : 'Original');
   });
   foot.appendChild(bypassButton);
+  foot.appendChild(el('p', 'lq-fx-scope', 'Applies to every song'));
   rack.appendChild(foot);
 
   // ── Render ─────────────────────────────────────────────────────────

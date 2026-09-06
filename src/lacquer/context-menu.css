@@ -10,7 +10,7 @@
 
 ytmusic-menu-popup-renderer,
 ytmusic-menu-popup-renderer tp-yt-paper-listbox {
-  background: var(--lq-blueglass) !important;
+  background: var(--lq-instrument) !important;
   backdrop-filter: var(--lq-blueglass-blur);
   border-radius: var(--lq-radius-md);
   font-family: var(--lq-font-interface);

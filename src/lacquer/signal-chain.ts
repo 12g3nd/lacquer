@@ -54,6 +54,8 @@ class SignalChain {
   };
 
   private currentPreset: SignalChainPreset = 'Original';
+  private playbackRate = 1;
+  private preservesPitch = true;
 
   // Store active config so we can wait for buffers to load
   private activeReverbConfig: ReverbConfig = { wet: 0, ir: null };
@@ -86,6 +88,11 @@ class SignalChain {
     if (this.audioContext) return;
     this.audioContext = ctx;
     this.videoElement = video;
+    // YTM resets the media element's rate on track changes. The rack owns
+    // the listening session, so retain its effective speed and pitch mode.
+    video.addEventListener('ratechange', this.restorePlaybackRate);
+    video.addEventListener('loadedmetadata', this.restorePlaybackRate);
+    video.addEventListener('playing', this.restorePlaybackRate);
 
     // Load IRs
     this.loadIR('small-room', smallRoomIrPath);
@@ -314,13 +321,22 @@ class SignalChain {
     this.route('limiter', active);
   }
 
-  setSpeed(rate: number, preservesPitch: boolean) {
-    if (this.videoElement) {
-      this.videoElement.playbackRate = rate;
-      (
-        this.videoElement as HTMLVideoElement & { preservesPitch: boolean }
-      ).preservesPitch = preservesPitch;
+  private restorePlaybackRate = () => {
+    const video = this.videoElement;
+    if (!video) return;
+    if (video.defaultPlaybackRate !== this.playbackRate) {
+      video.defaultPlaybackRate = this.playbackRate;
     }
+    if (video.playbackRate !== this.playbackRate) {
+      video.playbackRate = this.playbackRate;
+    }
+    video.preservesPitch = this.preservesPitch;
+  };
+
+  setSpeed(rate: number, preservesPitch: boolean) {
+    this.playbackRate = rate;
+    this.preservesPitch = preservesPitch;
+    this.restorePlaybackRate();
   }
 
   getCurrentPreset(): SignalChainPreset {

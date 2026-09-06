@@ -1,0 +1,86 @@
+/* An edge-to-edge listening view. The album and lyrics supply the colour;
+   a quiet editorial header remains legible over every visualizer engine. */
+#lq-viz-song-header {
+  display: none;
+  outline: none;
+}
+:root[data-lq-viz-fullscreen] ytmusic-app {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+:root[data-lq-viz-fullscreen] #lq-viz-song-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: fixed;
+  z-index: 4;
+  inset: 0 0 auto;
+  padding: clamp(24px, 4vw, 64px);
+  padding-bottom: 64px;
+  color: var(--lq-milkglass);
+  background: linear-gradient(var(--lq-orbit), transparent);
+  pointer-events: none;
+}
+#lq-viz-song-header img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px #0006;
+}
+.lq-viz-song-identity {
+  flex: 1;
+  min-width: 0;
+}
+#lq-viz-song-header h1 {
+  margin: 0;
+  max-width: 32ch;
+  font-family: var(--lq-font-editorial);
+  font-weight: 500;
+  font-size: clamp(24px, 3vw, 42px);
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#lq-viz-song-header p {
+  margin: 8px 0 0;
+  color: var(--lq-moondust);
+  font: 14px var(--lq-font-interface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#lq-viz-song-header button {
+  pointer-events: auto;
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--lq-hairline-strong);
+  border-radius: var(--lq-radius-pill);
+  color: var(--lq-milkglass);
+  background: var(--lq-orbit);
+  font: 12px var(--lq-font-interface);
+  cursor: pointer;
+}
+:root[data-lq-viz-fullscreen][data-lq-viz-chrome-hidden]
+  #lq-viz-song-header
+  button:not(:focus-visible) {
+  opacity: 0;
+  pointer-events: none;
+}
+:root[data-lq-viz-fullscreen] #lq-viz-lyrics:not([hidden]) {
+  display: block;
+  inset: auto max(32px, 12vw) max(48px, 12vh) !important;
+}
+:root[data-lq-viz-fullscreen] .lq-viz-lyric-current {
+  font-size: clamp(28px, 3.5vw, 58px);
+}
+@media (max-width: 650px) {
+  #lq-viz-song-header img {
+    width: 44px;
+    height: 44px;
+  }
+  :root[data-lq-viz-fullscreen] #lq-viz-song-header {
+    gap: 12px;
+  }
+}

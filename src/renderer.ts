@@ -25,6 +25,7 @@ import { signalChain } from './lacquer/signal-chain';
 import { initTitleBar } from './lacquer/titlebar';
 import lacquerTitlebarCss from './lacquer/titlebar.css?inline';
 import lacquerTransportCss from './lacquer/transport.css?inline';
+import lacquerVisualizerFullscreenCss from './lacquer/visualizer-fullscreen.css?inline';
 import {
   initVisualizerMode,
   toggleVisualizerMode,
@@ -85,6 +86,7 @@ function adoptLacquerRegionSheets() {
     lacquerContextMenuCss,
     lacquerSettingsPanelCss,
     lacquerVisualizerModeCss,
+    lacquerVisualizerFullscreenCss,
   ].map((css) => {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(css);

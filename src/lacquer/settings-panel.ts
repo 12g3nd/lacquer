@@ -46,6 +46,7 @@ export function initSettingsPanel() {
       const menu = document.createElement('div');
       menu.id = 'lacquer-settings-menu-container';
       menu.setAttribute('role', 'menu');
+      menu.popover = 'manual';
       menu.hidden = true;
 
       let open = false;
@@ -55,6 +56,7 @@ export function initSettingsPanel() {
         HTMLButtonElement
       >();
       const setOpen = (next: boolean) => {
+        if (open === next) return;
         const selected = resolveVisualizerType(
           window.mainConfig.plugins.getOptions<{ type?: unknown }>('visualizer')
             .type,
@@ -70,6 +72,8 @@ export function initSettingsPanel() {
         }
         open = next;
         menu.hidden = !next;
+        if (next) menu.showPopover();
+        else menu.hidePopover();
         gearButton.setAttribute('aria-expanded', String(next));
       };
 
@@ -137,13 +141,15 @@ export function initSettingsPanel() {
       });
       menu.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
+          event.stopPropagation();
           setOpen(false);
           gearButton.focus();
         }
       });
       document.addEventListener('pointerdown', (event) => {
         const target = event.target as Node;
-        if (!menu.contains(target) && target !== gearButton) setOpen(false);
+        if (!menu.contains(target) && !gearButton.contains(target))
+          setOpen(false);
       });
 
       const wrapper = document.createElement('div');

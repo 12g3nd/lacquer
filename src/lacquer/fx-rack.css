@@ -324,3 +324,10 @@
   font-size: 11px;
   color: var(--lq-moondust);
 }
+
+.lq-fx-scope {
+  margin: 10px 0 0;
+  text-align: center;
+  color: var(--lq-moondust);
+  font-size: 11px;
+}

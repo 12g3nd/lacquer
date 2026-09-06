@@ -1,4 +1,8 @@
 import { whenElement } from './dom';
+import {
+  enterVisualizerFullscreen,
+  initVisualizerFullscreen,
+} from './visualizer-fullscreen';
 import { initVisualizerLyrics } from './visualizer-lyrics';
 import { applyVisualizerPresentation } from './visualizer-presentation';
 
@@ -183,6 +187,13 @@ const renderState = () => {
 };
 
 export const setVisualizerModeEnabled = (enabled: boolean) => {
+  if (
+    !enabled &&
+    document.fullscreenElement &&
+    document.documentElement.hasAttribute('data-lq-viz-fullscreen')
+  ) {
+    document.exitFullscreen();
+  }
   armed = enabled;
   window.mainConfig.set('lacquer.visualizerMode', enabled);
   renderState();
@@ -235,7 +246,15 @@ const mountButton = (rightControls: Element) => {
 
   const wrapper = document.createElement('div');
   wrapper.id = 'lacquer-viz-wrapper';
-  wrapper.appendChild(button);
+  const fullscreen = document.createElement('button');
+  fullscreen.id = 'lacquer-viz-fullscreen';
+  fullscreen.type = 'button';
+  fullscreen.title = 'Full-screen visualizer';
+  fullscreen.setAttribute('aria-label', 'Full-screen visualizer');
+  fullscreen.innerHTML =
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>';
+  fullscreen.addEventListener('click', () => enterVisualizerFullscreen());
+  wrapper.append(button, fullscreen);
   rightControls.prepend(wrapper);
   renderState();
 };
@@ -252,6 +271,10 @@ export const initVisualizerMode = () => {
   initVisualizerLyrics();
   armed = window.mainConfig.get('lacquer.visualizerMode') === true;
   modeOwnsPlugin = armed;
+  initVisualizerFullscreen(() => {
+    revealPlayerPage();
+    setVisualizerModeEnabled(true);
+  });
   playerPageOpen =
     document
       .querySelector('ytmusic-app-layout')
