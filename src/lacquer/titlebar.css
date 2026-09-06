@@ -116,20 +116,42 @@ ytmusic-search-box
   display: flex;
   align-items: center;
   gap: 14px;
+  flex: 0 1 236px;
+  min-width: 0;
+  max-width: 236px;
+  height: 40px;
+  box-sizing: border-box;
   padding-inline-start: 24px;
   border-inline-start: 1px solid var(--lq-hairline);
   color: var(--lq-milkglass);
   font: 13px var(--lq-font-interface);
   -webkit-app-region: no-drag;
 }
-#lq-listening-status > div {
-  min-width: 148px;
-}
-#lq-listening-status small {
+#lq-listening-status .lq-listening-copy {
   display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  line-height: 1.1;
+}
+#lq-listening-status .lq-listening-title,
+#lq-listening-status .lq-listening-detail {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#lq-listening-status .lq-listening-title {
+  color: var(--lq-milkglass);
+}
+#lq-listening-status .lq-listening-detail {
   margin-top: 5px;
   color: var(--lq-moondust);
   font-size: 11px;
+}
+#lq-listening-status .lq-shell-navbtn {
+  flex: 0 0 32px;
+  border: 1px solid var(--lq-hairline);
 }
 .lq-listening-indicator {
   width: 7px;
@@ -145,9 +167,8 @@ ytmusic-search-box
   #lq-listening-status {
     gap: 10px;
     padding-inline-start: 12px;
-  }
-  #lq-listening-status > div {
-    min-width: 120px;
+    flex-basis: 196px;
+    max-width: 196px;
   }
 }
 @media (max-width: 1000px) {

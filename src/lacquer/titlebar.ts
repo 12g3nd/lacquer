@@ -101,8 +101,11 @@ const initListeningStatus = () => {
       indicator.className = 'lq-listening-indicator';
       indicator.setAttribute('aria-hidden', 'true');
       const copy = document.createElement('div');
+      copy.className = 'lq-listening-copy';
       const title = document.createElement('span');
+      title.className = 'lq-listening-title';
       const detail = document.createElement('small');
+      detail.className = 'lq-listening-detail';
       copy.append(title, detail);
       const full = navButton(
         'Full-screen visualizer',
@@ -120,10 +123,9 @@ const initListeningStatus = () => {
       if (!status) return;
       const playing = video && !video.paused;
       status.toggleAttribute('data-playing', Boolean(playing));
-      status.querySelector('div > span')!.textContent = playing
-        ? 'Listening'
-        : 'Ready when you are';
-      status.querySelector('small')!.textContent =
+      status.querySelector<HTMLElement>('.lq-listening-title')!.textContent =
+        playing ? 'Listening' : 'Ready when you are';
+      status.querySelector<HTMLElement>('.lq-listening-detail')!.textContent =
         `${signalChain.getCurrentPreset()} \u00b7 ${(video?.playbackRate ?? 1).toFixed(2)}\u00d7`;
     };
     whenElement('video').then((video) => {

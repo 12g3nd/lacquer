@@ -60,6 +60,15 @@ class SignalChain {
   private pitchStage!: PitchStage;
   pitchReady: Promise<void> = Promise.resolve();
 
+  private resumeAudioContext = () => {
+    const context = this.audioContext;
+    if (context?.state === 'suspended') {
+      context.resume().catch((error: unknown) => {
+        console.warn('[Lacquer] Audio context resume failed', error);
+      });
+    }
+  };
+
   // Store active config so we can wait for buffers to load
   private activeReverbConfig: ReverbConfig = { wet: 0, ir: null };
 
@@ -96,6 +105,12 @@ class SignalChain {
     video.addEventListener('ratechange', this.restorePlaybackRate);
     video.addEventListener('loadedmetadata', this.restorePlaybackRate);
     video.addEventListener('playing', this.restorePlaybackRate);
+    video.addEventListener('play', this.resumeAudioContext);
+    video.addEventListener('playing', this.resumeAudioContext);
+    document.addEventListener('pointerdown', this.resumeAudioContext, {
+      passive: true,
+    });
+    this.resumeAudioContext();
 
     // Load IRs
     this.loadIR('small-room', smallRoomIrPath);
