@@ -119,7 +119,7 @@ test('the titlebar injects the de-wreathed script lockup', async () => {
 
   try {
     const { initTitleBar } = await import('../../src/lacquer/titlebar');
-    initTitleBar();
+    initTitleBar(() => 'Original');
     await Promise.resolve();
 
     const lockup = dom.document.querySelector('#lacquer-wordmark');

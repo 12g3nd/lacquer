@@ -105,6 +105,10 @@ class SignalChain {
     video.addEventListener('ratechange', this.restorePlaybackRate);
     video.addEventListener('loadedmetadata', this.restorePlaybackRate);
     video.addEventListener('playing', this.restorePlaybackRate);
+    document.addEventListener(
+      'lacquer:pitch-unavailable',
+      this.restorePlaybackRate,
+    );
     video.addEventListener('play', this.resumeAudioContext);
     video.addEventListener('playing', this.resumeAudioContext);
     document.addEventListener('pointerdown', this.resumeAudioContext, {
@@ -161,7 +165,6 @@ class SignalChain {
       .then(() => this.restorePlaybackRate())
       .catch((error: unknown) => {
         console.error('[Lacquer] Pitch processing unavailable', error);
-        document.dispatchEvent(new Event('lacquer:pitch-unavailable'));
       });
 
     // EQ

@@ -45,6 +45,7 @@ export function initVolumeControl(api: MusicPlayer) {
     speaker.addEventListener('pointerenter', open);
     speaker.addEventListener('pointerleave', scheduleClose);
     speaker.addEventListener('focusin', open);
+    speaker.addEventListener('focusout', scheduleClose);
     panel.addEventListener('pointerenter', () => clearTimeout(timer));
     panel.addEventListener('pointerleave', scheduleClose);
     panel.addEventListener('focusout', scheduleClose);

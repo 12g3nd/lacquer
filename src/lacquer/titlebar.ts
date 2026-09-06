@@ -19,7 +19,6 @@
 
 import { whenElement } from './dom';
 import { WORDMARK_SVG } from './logo.generated';
-import { signalChain } from './signal-chain';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const WORDMARK_ID = 'lacquer-wordmark';
@@ -91,7 +90,7 @@ const injectRailNav = (rail: Element) => {
   });
 };
 
-const initListeningStatus = () => {
+const initListeningStatus = (getPreset: () => string) => {
   whenElement('ytmusic-nav-bar #right-content').then((host) => {
     keepInjected(host, 'lq-listening-status', () => {
       const status = document.createElement('div');
@@ -118,7 +117,7 @@ const initListeningStatus = () => {
       status.querySelector<HTMLElement>('.lq-listening-title')!.textContent =
         playing ? 'Listening' : 'Ready when you are';
       status.querySelector<HTMLElement>('.lq-listening-detail')!.textContent =
-        `${signalChain.getCurrentPreset()} \u00b7 ${(video?.playbackRate ?? 1).toFixed(2)}\u00d7`;
+        `${getPreset()} \u00b7 ${(video?.playbackRate ?? 1).toFixed(2)}\u00d7`;
     };
     whenElement('video').then((video) => {
       for (const event of ['playing', 'pause', 'ratechange'])
@@ -130,8 +129,8 @@ const initListeningStatus = () => {
   });
 };
 
-export const initTitleBar = () => {
-  initListeningStatus();
+export const initTitleBar = (getPreset: () => string) => {
+  initListeningStatus(getPreset);
   whenElement('ytmusic-nav-bar').then(injectWordmark);
   whenElement('#guide-renderer, ytmusic-guide-renderer').then(injectRailNav);
 };

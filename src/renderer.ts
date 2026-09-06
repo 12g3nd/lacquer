@@ -391,7 +391,7 @@ async function onApiLoaded() {
   // has played yet there is no <video> element, and the audio setup below
   // throws — which previously took the titlebar, settings menu and context
   // menu down with it. These use `whenElement`, so they are safe to run early.
-  initTitleBar();
+  initTitleBar(() => signalChain.getCurrentPreset());
   initRail();
   initPlayerStage();
   initSettingsPanel();

@@ -4,6 +4,7 @@ import url from 'node:url';
 
 import ErrorHtmlAsset from '@assets/error.html?asset';
 import WindowsAppIcon from '@assets/generated/icons/win/icon.ico?asset&asarUnpack';
+import AppIcon from '@assets/icon.png?asset&asarUnpack';
 import {
   enhanceWebRequest,
   type BetterSession,
@@ -186,13 +187,7 @@ electronDebug({
   showDevTools: false, // Disable automatic devTools on new window
 });
 
-const assetRoot = path.resolve(__dirname, '..', '..', 'assets');
-let icon = path.join(assetRoot, 'icon.png');
-if (process.platform === 'win32') {
-  icon = WindowsAppIcon;
-} else if (process.platform === 'darwin') {
-  icon = path.join(assetRoot, 'generated', 'icons', 'mac', 'icon.icns');
-}
+const icon = process.platform === 'win32' ? WindowsAppIcon : AppIcon;
 
 function onClosed() {
   // Dereference the window
@@ -759,7 +754,7 @@ app.whenReady().then(async () => {
     const appData = app.getPath('appData');
     // Check shortcut validity if not in dev mode / running portable app
     if (
-      !is.dev() &&
+      app.isPackaged &&
       !appLocation.startsWith(path.join(appData, '..', 'Local', 'Temp'))
     ) {
       const shortcutPath = path.join(
@@ -775,7 +770,9 @@ app.whenReady().then(async () => {
         const shortcutDetails = shell.readShortcutLink(shortcutPath); // Throw error if it doesn't exist yet
         if (
           shortcutDetails.target !== appLocation ||
-          shortcutDetails.appUserModelId !== appID
+          shortcutDetails.appUserModelId !== appID ||
+          shortcutDetails.icon !== icon ||
+          shortcutDetails.iconIndex !== 0
         ) {
           // oxlint-disable-next-line typescript/only-throw-error
           throw 'needUpdate';
@@ -790,6 +787,8 @@ app.whenReady().then(async () => {
             cwd: path.dirname(appLocation),
             description: 'Lacquer - Windows-first YouTube Music client',
             appUserModelId: appID,
+            icon,
+            iconIndex: 0,
           },
         );
       }
