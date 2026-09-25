@@ -12,6 +12,7 @@ import {
 import { initAlbumColor } from './lacquer/album-color';
 import { initContextMenu } from './lacquer/context-menu';
 import lacquerContextMenuCss from './lacquer/context-menu.css?inline';
+import { initFocusModality } from './lacquer/focus-modality';
 import { initFXRack, setFXRackOpen } from './lacquer/fx-rack';
 import lacquerFxRackCss from './lacquer/fx-rack.css?inline';
 import lacquerInspectorCss from './lacquer/inspector.css?inline';
@@ -24,6 +25,7 @@ import lacquerSettingsPanelCss from './lacquer/settings-panel.css?inline';
 import { signalChain } from './lacquer/signal-chain';
 import { initTitleBar } from './lacquer/titlebar';
 import lacquerTitlebarCss from './lacquer/titlebar.css?inline';
+import { initTransportFit } from './lacquer/transport-fit';
 import lacquerTransportCss from './lacquer/transport.css?inline';
 import lacquerVisualizerFullscreenCss from './lacquer/visualizer-fullscreen.css?inline';
 import {
@@ -391,7 +393,9 @@ async function onApiLoaded() {
   // has played yet there is no <video> element, and the audio setup below
   // throws — which previously took the titlebar, settings menu and context
   // menu down with it. These use `whenElement`, so they are safe to run early.
-  initTitleBar(() => signalChain.getCurrentPreset());
+  initFocusModality();
+  initTitleBar();
+  initTransportFit();
   initRail();
   initPlayerStage();
   initSettingsPanel();
@@ -463,8 +467,10 @@ async function onApiLoaded() {
       ?.navigate(startingPages[startingPage]);
   }
 
-  // Remove upgrade button
-  if (window.mainConfig.get('options.removeUpgradeButton')) {
+  // Remove upgrade button — unconditionally in Lacquer (D11): an ad-free
+  // surface is a design premise, and profiles carried over from Pear can hold
+  // `removeUpgradeButton: false`.
+  {
     const itemsSelector = 'ytmusic-guide-section-renderer #items';
     let selector = 'ytmusic-guide-entry-renderer:last-child';
 
@@ -535,8 +541,9 @@ const definePearTransElements = () => {
 };
 
 const preload = async () => {
-  await loadI18n();
-  await setLanguage(window.mainConfig.get('options.language') ?? 'en');
+  const language = window.mainConfig.get('options.language') ?? 'en';
+  await loadI18n(language);
+  await setLanguage(language);
   window.i18n = {
     t: i18t.bind(i18next),
   };

@@ -1,5 +1,6 @@
 import {
   createEffect,
+  createMemo,
   createSignal,
   onCleanup,
   onMount,
@@ -11,7 +12,7 @@ import { type VirtualizerHandle, VList } from 'virtua/solid';
 
 import {
   publishVisualizerLyrics,
-  selectVisualizerLyrics,
+  selectVisualizerLyricIndex,
 } from '@/lacquer/visualizer-lyrics';
 
 import {
@@ -152,25 +153,25 @@ export const [currentTime, setCurrentTime] = createSignal<number>(-1);
 // Lives with the plugin root, not the tab component: the overlay must keep
 // advancing while the queue is selected or the entire inspector is hidden.
 runWithOwner(reactiveOwner, () => {
-  createEffect(() => {
+  const timedLines = createMemo(() => {
+    if (!config()?.enabled) return undefined;
     const lyrics = currentLyrics();
-    const timed =
-      lyrics.state === 'done' && lyrics.data?.lines?.length
-        ? lyrics.data.lines
-        : Object.values(lyricsStore.lyrics).find(
-            (provider) =>
-              provider.state === 'done' && provider.data?.lines?.length,
-          )?.data?.lines;
+    return lyrics.state === 'done' && lyrics.data?.lines?.length
+      ? lyrics.data.lines
+      : Object.values(lyricsStore.lyrics).find(
+          (provider) =>
+            provider.state === 'done' && provider.data?.lines?.length,
+        )?.data?.lines;
+  });
+  // Recomputed per song, not per playback-clock tick.
+  const lineTexts = createMemo(() => timedLines()?.map((line) => line.text));
+  createEffect(() => {
     publishVisualizerLyrics(
-      selectVisualizerLyrics(
-        config()?.enabled ? timed : undefined,
-        currentTime(),
-      ),
+      lineTexts(),
+      selectVisualizerLyricIndex(timedLines(), currentTime()),
     );
   });
-  onCleanup(() =>
-    publishVisualizerLyrics({ previous: '', current: '', next: '' }),
-  );
+  onCleanup(() => publishVisualizerLyrics(undefined, -1));
 });
 export const LyricsRenderer = () => {
   const [scroller, setScroller] = createSignal<VirtualizerHandle>();

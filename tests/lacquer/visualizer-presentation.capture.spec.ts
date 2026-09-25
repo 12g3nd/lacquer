@@ -56,15 +56,16 @@ test('presentation: independent panel, lyrics overlay, album colour and persiste
         ?.play()
         .catch(() => undefined),
     );
-    const current = page.locator('.lq-viz-lyric-current');
+    const current = page.locator('.lq-viz-lyric[data-state="active"]');
     await expect(current).not.toHaveText('', { timeout: 30_000 });
+    // The column scrolls by moving its track, never by swapping slot text.
     await expect
       .poll(() =>
-        current.evaluate(
-          (line) => getComputedStyle(line).animationIterationCount,
-        ),
+        page
+          .locator('.lq-viz-lyrics-track')
+          .evaluate((track) => getComputedStyle(track).transform),
       )
-      .toContain('infinite');
+      .not.toBe('none');
     await expect(page.locator('#lq-viz-lyrics')).toBeVisible();
     await expect(page.locator('#lq-viz-lyrics')).not.toContainText(
       /\[\d\d:\d\d/,

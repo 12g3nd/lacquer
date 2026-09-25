@@ -72,8 +72,8 @@
   display: block;
   inset: auto max(32px, 12vw) max(48px, 12vh) !important;
 }
-:root[data-lq-viz-fullscreen] .lq-viz-lyric-current {
-  font-size: clamp(28px, 3.5vw, 58px);
+:root[data-lq-viz-fullscreen] #lq-viz-lyrics {
+  --lq-viz-lyric-size: clamp(28px, 3.5vw, 58px);
 }
 @media (max-width: 650px) {
   #lq-viz-song-header img {

@@ -3,6 +3,30 @@
  * accessibility tree; focus and input are what wake it, never DOM removal.
  */
 
+/* Per-frame audio reactivity, written by the authored renderer onto only the
+   elements below that read it. Non-inherited, so a frame's update restyles
+   those elements alone rather than every descendant of the shell. */
+@property --lq-viz-kick {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --lq-viz-mid {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --lq-viz-high {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --lq-viz-art-scale {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
 /* The authored renderer interpolates its album palette on the canvas. Stop
    registered root colors repainting the hidden app on every transition frame;
    Normal Mode keeps the 900ms token transition from tokens.css. */
@@ -42,26 +66,29 @@
   pointer-events: none !important;
 }
 
+/* Lyrics overlay — one continuous column that glides upward (Spotify-style).
+   `visualizer-lyrics.ts` lays out every line once and moves the track with a
+   composited transform so the active line settles on the box's centre line;
+   the mask fades the neighbours in and out at the edges. */
 #lq-viz-lyrics {
+  --lq-viz-lyric-size: clamp(24px, 3vw, 48px);
   display: none;
   position: fixed;
   z-index: 2;
   inset-inline: max(24px, 12vw);
   bottom: max(112px, 16vh);
+  /* Room for the active line plus roughly one neighbour either side. */
+  height: calc(var(--lq-viz-lyric-size) * 5.2);
+  overflow: hidden;
   pointer-events: none;
   text-align: center;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
-  font-family: var(--lq-font-interface);
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--lq-milkglass);
-  /* A tight outline preserves contrast even over a white Butterchurn flash. */
-  -webkit-text-stroke: 1px var(--lq-orbit);
-  paint-order: stroke fill;
-  text-shadow:
-    0 2px 4px var(--lq-orbit),
-    0 4px 16px var(--lq-orbit);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 26%,
+    #000 74%,
+    transparent 100%
+  );
 }
 
 :root[data-lq-viz][data-lq-viz-lyrics-overlay] #lq-viz-lyrics:not([hidden]) {
@@ -73,95 +100,47 @@
   inset-inline: 96px max(400px, 32vw);
 }
 
-.lq-viz-lyric-current {
-  font-size: clamp(24px, 3vw, 48px);
+.lq-viz-lyrics-track {
+  transition: transform 640ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.lq-viz-lyrics-track[data-instant] {
+  transition: none;
 }
 
-.lq-viz-lyric-previous,
-.lq-viz-lyric-next {
-  min-height: 1.3em;
-  font-size: clamp(16px, 1.6vw, 24px);
+.lq-viz-lyric {
+  padding-block: calc(var(--lq-viz-lyric-size) * 0.18);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  font-family: var(--lq-font-interface);
+  font-size: var(--lq-viz-lyric-size);
+  font-weight: 700;
+  line-height: 1.22;
   color: color-mix(in srgb, var(--lq-milkglass) 74%, var(--lq-album-fill));
+  opacity: 0.3;
+  transform: scale(0.92);
+  transform-origin: center;
+  transition:
+    opacity 480ms ease-out,
+    transform 640ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 480ms ease-out;
+  /* A tight outline preserves contrast even over a white Butterchurn flash. */
+  -webkit-text-stroke: 1px var(--lq-orbit);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 4px var(--lq-orbit),
+    0 4px 16px var(--lq-orbit);
 }
-
-.lq-viz-lyric-previous {
-  margin-bottom: var(--lq-space-3);
-  opacity: 0.48;
+.lq-viz-lyric[data-state='active'] {
+  color: var(--lq-milkglass);
+  opacity: 1;
+  transform: scale(1);
 }
-
-.lq-viz-lyric-next {
-  margin-top: var(--lq-space-3);
-  opacity: 0.72;
+.lq-viz-lyric[data-state='next'] {
+  opacity: 0.58;
 }
-
-.lq-viz-lyric-previous:empty,
-.lq-viz-lyric-next:empty {
-  visibility: hidden;
-}
-
-#lq-viz-lyrics.is-advancing .lq-viz-lyric-previous {
-  animation: lq-viz-lyric-previous-rise 340ms cubic-bezier(0.22, 1, 0.36, 1)
-    both;
-}
-
-#lq-viz-lyrics.is-advancing .lq-viz-lyric-current {
-  animation:
-    lq-viz-lyric-current-rise 340ms cubic-bezier(0.22, 1, 0.36, 1) both,
-    lq-viz-lyric-bobble 1.6s ease-in-out 340ms infinite both;
-}
-
-#lq-viz-lyrics.is-advancing .lq-viz-lyric-next {
-  animation: lq-viz-lyric-next-rise 380ms 30ms cubic-bezier(0.22, 1, 0.36, 1)
-    both;
-}
-
-@keyframes lq-viz-lyric-previous-rise {
-  from {
-    opacity: 1;
-    transform: translateY(18px) scale(1.03);
-  }
-  to {
-    opacity: 0.48;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes lq-viz-lyric-current-rise {
-  from {
-    opacity: 0.86;
-    transform: translateY(12px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes lq-viz-lyric-next-rise {
-  from {
-    opacity: 0.32;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 0.72;
-    transform: translateY(0);
-  }
-}
-
-@keyframes lq-viz-lyric-bobble {
-  0%,
-  100% {
-    translate: 0 0;
-  }
-  25% {
-    translate: 0 3px;
-  }
-  50% {
-    translate: 0 0;
-  }
-  75% {
-    translate: 0 -3px;
-  }
+.lq-viz-lyric[data-state='previous'] {
+  opacity: 0.4;
 }
 
 @media (max-width: 900px) {
@@ -173,9 +152,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #lq-viz-lyrics.is-advancing
-    :is(.lq-viz-lyric-previous, .lq-viz-lyric-current, .lq-viz-lyric-next) {
-    animation: none;
+  .lq-viz-lyrics-track,
+  .lq-viz-lyric {
+    transition: opacity 200ms ease-out;
   }
 }
 

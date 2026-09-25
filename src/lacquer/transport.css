@@ -316,6 +316,17 @@ ytmusic-player-bar #play-pause-button.ytmusic-player-bar yt-icon {
   width: 26px;
   height: 26px;
 }
+/* The output controls vary in width (captions for videos, plugin buttons);
+   `transport-fit.ts` flags the bar when they would run into the time: first
+   tighten the controls, and hide the time only if that is not enough. */
+ytmusic-player-bar[data-lq-deck-compact] .right-controls-buttons {
+  gap: 0;
+}
+ytmusic-player-bar[data-lq-time-cramped]
+  > .left-controls.ytmusic-player-bar
+  > .time-info {
+  display: none !important;
+}
 @media (max-width: 1100px) {
   ytmusic-player-bar > .left-controls.ytmusic-player-bar > .time-info {
     display: none !important;
@@ -373,7 +384,7 @@ ytmusic-player-bar .content-info-wrapper .subtitle > .subtitle {
   cursor: pointer;
 }
 #lacquer-viz-fullscreen:hover,
-#lacquer-viz-fullscreen:focus-visible {
+:root[data-lq-keyboard-nav] #lacquer-viz-fullscreen:focus-visible {
   color: var(--lq-milkglass);
   border-color: var(--lq-ion);
 }
