@@ -148,8 +148,16 @@ export const injectCpuTamerByAnimationFrame = ((__CONTEXT__) => {
     let afInterupter = null;
 
     const getRAFHelper = () => {
+      // Lacquer: always take the requestAnimationFrame path. The CSS-animation
+      // helper below keeps an infinite 1ms animation running on a hidden
+      // element, which makes Chromium produce a full frame on every vsync even
+      // when nothing on screen changes. With YouTube Music's layer tree that
+      // cost ~35% of the renderer main thread while idle (measured: 1.6 s of
+      // frame work per 4 s idle, 0.27 s without it). rAF only schedules a
+      // frame while a tamed timer is actually waiting on one.
+      const LACQUER_USE_RAF = true;
       const asc = document.createElement('a-f');
-      if (!('onanimationiteration' in asc)) {
+      if (LACQUER_USE_RAF || !('onanimationiteration' in asc)) {
         return (resolve) => requestAnimationFrame(afInterupter = resolve);
       }
       asc.id = 'a-f';

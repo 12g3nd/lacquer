@@ -34,6 +34,7 @@ import { allPlugins, mainPlugins } from 'virtual:plugins';
 import * as config from '@/config';
 import { APPLICATION_NAME, loadI18n, setLanguage, t } from '@/i18n';
 import lacquerFontsCss from '@/lacquer/fonts.css?inline';
+import { registerImpulseResponses } from '@/lacquer/impulse-responses';
 import { migratePearSession } from '@/lacquer/session-migration';
 import lacquerSuppressCss from '@/lacquer/suppress.css?inline';
 import lacquerTokensCss from '@/lacquer/tokens.css?inline';
@@ -194,6 +195,8 @@ function onClosed() {
   // For multiple Windows store them in an array
   mainWindow = null;
 }
+
+registerImpulseResponses(ipcMain);
 
 ipcMain.handle('peard:get-main-plugin-names', async () =>
   Object.keys(await mainPlugins()),
@@ -726,7 +729,7 @@ app.whenReady().then(async () => {
     }
   }
 
-  await loadI18n().then(async () => {
+  await loadI18n(config.get('options.language') ?? 'en').then(async () => {
     await setLanguage(config.get('options.language') ?? 'en');
     console.log(LoggerPrefix, t('main.console.i18n.loaded'));
   });

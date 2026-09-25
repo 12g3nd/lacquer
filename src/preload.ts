@@ -5,6 +5,7 @@ import {
   webFrame,
 } from 'electron';
 import is from 'electron-is';
+import { loadLanguageResources } from 'virtual:i18n';
 
 import { loadI18n, setLanguage } from '@/i18n';
 
@@ -38,8 +39,9 @@ new MutationObserver((mutations, observer) => {
   }
 }).observe(document, { subtree: true, childList: true });
 
-loadI18n().then(async () => {
-  await setLanguage(config.get('options.language') ?? 'en');
+const language: string = config.get('options.language') ?? 'en';
+loadI18n(language).then(async () => {
+  await setLanguage(language);
   await loadAllPreloadPlugins();
 });
 
@@ -52,6 +54,9 @@ ipcRenderer.on('plugin:enable', async (_, id: string) => {
 
 contextBridge.exposeInMainWorld('mainConfig', config);
 contextBridge.exposeInMainWorld('electronIs', is);
+contextBridge.exposeInMainWorld('lacquerI18n', {
+  getLanguageResources: () => loadLanguageResources(['en', language]),
+});
 contextBridge.exposeInMainWorld('ipcRenderer', {
   on: (
     channel: string,

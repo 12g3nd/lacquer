@@ -30,6 +30,16 @@ const parseRgb = (value: string, fallback: Rgb): Rgb => {
 const rgba = ({ r, g, b }: Rgb, alpha: number) =>
   `rgba(${r}, ${g}, ${b}, ${Math.max(0, Math.min(1, alpha))})`;
 
+/** Everything in `visualizer-mode.css` that reads `--lq-viz-*`. */
+const REACTIVE_TARGETS = [
+  'ytmusic-nav-bar',
+  '#guide-wrapper',
+  '#mini-guide',
+  'ytmusic-player-bar',
+  'ytmusic-player-page#player-page #side-panel',
+  'ytmusic-player-page#player-page #player.ytmusic-player-page',
+].join(', ');
+
 const sameRgb = (a: Rgb, b: Rgb) => a.r === b.r && a.g === b.g && a.b === b.b;
 const samePalette = (a: Palette, b: Palette) =>
   sameRgb(a.atmosphere, b.atmosphere) &&
@@ -93,14 +103,15 @@ export default class LacquerVisualizer extends Visualizer {
     this.video = document.querySelector('video');
     this.artwork = takeover ? document.querySelector('#song-image') : null;
 
-    // Reactive values must reach the whole shell, but writing them onto
-    // `documentElement.style` wakes album-color's style observer every frame.
-    // A dedicated CSSOM rule has the same cascade/inheritance semantics without
-    // producing root-attribute mutation records.
+    // Writing the reactive values onto `documentElement.style` wakes
+    // album-color's style observer every frame, so they live in a dedicated
+    // CSSOM rule. That rule targets only the elements that read them, and the
+    // properties are registered non-inherited (`visualizer-mode.css`): set on
+    // `:root`, every frame invalidated style for the entire document.
     document.getElementById('lq-viz-reactivity')?.remove();
     this.reactivityStyle = document.createElement('style');
     this.reactivityStyle.id = 'lq-viz-reactivity';
-    this.reactivityStyle.textContent = ':root {}';
+    this.reactivityStyle.textContent = `${REACTIVE_TARGETS} {}`;
     document.head.appendChild(this.reactivityStyle);
     this.reactivityRule = this.reactivityStyle.sheet!
       .cssRules[0] as CSSStyleRule;

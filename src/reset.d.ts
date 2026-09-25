@@ -2,6 +2,7 @@ import '@total-typescript/ts-reset';
 
 import type * as config from './config';
 import type { t } from '@/i18n';
+import type { LanguageResources } from '@/i18n/resources/@types';
 import type { VideoDataChanged } from '@/types/video-data-changed';
 import type { ipcRenderer as electronIpcRenderer } from 'electron';
 import type is from 'electron-is';
@@ -34,6 +35,10 @@ declare global {
     reload: () => void;
     i18n: {
       t: typeof t;
+    };
+    /** Exposed by the preload so the renderer bundle carries no translations. */
+    lacquerI18n: {
+      getLanguageResources: () => Promise<LanguageResources>;
     };
   }
 }

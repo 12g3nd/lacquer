@@ -1,6 +1,3 @@
-import largeCathedralIrPath from './assets/ir/large-cathedral.wav?url';
-import mediumHallIrPath from './assets/ir/medium-hall.wav?url';
-import smallRoomIrPath from './assets/ir/small-room.wav?url';
 import { PitchStage } from './pitch-stage';
 
 import type { FilterConfig } from '../plugins/equalizer/presets';
@@ -72,11 +69,26 @@ class SignalChain {
   // Store active config so we can wait for buffers to load
   private activeReverbConfig: ReverbConfig = { wet: 0, ir: null };
 
-  private async loadIR(name: string, url: string) {
-    if (!this.audioContext) return;
+  private irRequests = new Set<string>();
+
+  /**
+   * Fetches one impulse response from the main process (see
+   * `impulse-responses.ts`) the first time a preset asks for it. Loading all
+   * three eagerly cost ~1 MB of base64 in every bundle plus three decodes at
+   * startup, for a reverb most sessions never switch on.
+   */
+  private async loadIR(name: string) {
+    if (!this.audioContext || this.irRequests.has(name)) return;
+    this.irRequests.add(name);
     try {
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
+      const bytes = (await window.ipcRenderer.invoke(
+        'lacquer:get-ir',
+        name,
+      )) as Uint8Array;
+      const arrayBuffer = bytes.buffer.slice(
+        bytes.byteOffset,
+        bytes.byteOffset + bytes.byteLength,
+      ) as ArrayBuffer;
       const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
       this.irBuffers[name] = audioBuffer;
 
@@ -88,6 +100,7 @@ class SignalChain {
         this.setReverb(this.activeReverbConfig);
       }
     } catch (e) {
+      this.irRequests.delete(name);
       console.error('Failed to load IR', name, e);
     }
   }
@@ -115,11 +128,6 @@ class SignalChain {
       passive: true,
     });
     this.resumeAudioContext();
-
-    // Load IRs
-    this.loadIR('small-room', smallRoomIrPath);
-    this.loadIR('medium-hall', mediumHallIrPath);
-    this.loadIR('large-cathedral', largeCathedralIrPath);
 
     this.inputGain = ctx.createGain();
 
@@ -329,7 +337,9 @@ class SignalChain {
       this.reverbConvolver.buffer = buffer;
       this.reverbWetGain.gain.setTargetAtTime(config.wet, t, 0.01);
     } else {
+      // Silent until the IR arrives; `loadIR` re-applies this config.
       this.reverbWetGain.gain.setTargetAtTime(0, t, 0.01);
+      this.loadIR(config.ir);
     }
   }
 
