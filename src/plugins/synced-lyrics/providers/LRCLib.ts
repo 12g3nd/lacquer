@@ -1,5 +1,7 @@
 import { jaroWinkler } from '@skyra/jaro-winkler';
 
+import { pickClosestResult } from './match';
+
 import { LRC } from '../parsers/lrc';
 import { config } from '../renderer/renderer';
 
@@ -135,19 +137,8 @@ export class LRCLib implements LyricProvider {
       filteredResults.push(item);
     }
 
-    filteredResults.sort(({ duration: durationA }, { duration: durationB }) => {
-      const left = Math.abs(durationA - songDuration);
-      const right = Math.abs(durationB - songDuration);
-
-      return left - right;
-    });
-
-    const closestResult = filteredResults[0];
+    const closestResult = pickClosestResult(filteredResults, songDuration);
     if (!closestResult) {
-      return null;
-    }
-
-    if (Math.abs(closestResult.duration - songDuration) > 15) {
       return null;
     }
 

@@ -228,7 +228,7 @@
 .lq-fx-slider:focus-visible {
   outline: none;
 }
-.lq-fx-slider:focus-visible::-webkit-slider-thumb {
+:root[data-lq-keyboard-nav] .lq-fx-slider:focus-visible::-webkit-slider-thumb {
   outline: 2px solid var(--lq-focus);
   outline-offset: 2px;
 }

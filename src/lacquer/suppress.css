@@ -213,9 +213,12 @@ ytmusic-browse-response #background-gradient {
 
 /* ── Premium / upgrade nag ──────────────────────────────────────────
    Off-brand, and an ad-free surface is a design premise (D11). The guide
-   entry carries no `href` to match, so Pear's own `removeUpgradeButton`
-   option (defaulted on in `config/defaults.ts`) hides it by icon path; these
-   selectors catch the other placements. */
+   entry carries no `href` to match. `renderer.ts` hides it by icon path
+   once the player API loads — always in Lacquer, whatever a carried-over
+   `removeUpgradeButton` says — but this sheet is live from first paint, so
+   the entry past Listen / Discover / Collection is hidden here too, in both
+   the full and the icon rail. These selectors catch the other placements. */
+ytmusic-guide-entry-renderer[is-primary]:nth-child(n + 4 of [is-primary]),
 ytmusic-guide-entry-renderer:has(a[href*='music_premium']),
 ytmusic-guide-entry-renderer:has(a[href*='premium']),
 ytmusic-pivot-bar-item-renderer:has(a[href*='premium']),
@@ -226,8 +229,14 @@ ytmusic-pivot-bar-item-renderer:has(a[href*='premium']),
 /* ── Trustworthy focus ring ─────────────────────────────────────────
    The shipped build tinted the focus ring with album colour, which breaks
    the one rule that must never break (DESIGN.md §3.2: focus is always Ion).
-   Restore a single, high-contrast, album-independent ring. */
+   Restore a single, high-contrast, album-independent ring.
+   Shown only while navigating with Tab (`focus-modality.ts`): Chromium also
+   treats shortcut keys — arrow-key volume, media keys — as keyboard
+   modality, which left a ring around whatever was last clicked. */
 :focus-visible {
+  outline: none !important;
+}
+:root[data-lq-keyboard-nav] :focus-visible {
   outline: 2px solid var(--lq-focus) !important;
   outline-offset: 2px !important;
 }

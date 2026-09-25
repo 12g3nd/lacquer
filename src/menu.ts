@@ -202,19 +202,6 @@ export const mainMenuTemplate = async (
           submenu: [
             {
               label: t(
-                'main.menu.options.submenu.visual-tweaks.submenu.remove-upgrade-button',
-              ),
-              type: 'checkbox',
-              checked: config.get('options.removeUpgradeButton'),
-              click(item: MenuItem) {
-                config.setMenuOption(
-                  'options.removeUpgradeButton',
-                  item.checked,
-                );
-              },
-            },
-            {
-              label: t(
                 'main.menu.options.submenu.visual-tweaks.submenu.custom-window-title.label',
               ),
               async click() {

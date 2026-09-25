@@ -90,47 +90,7 @@ const injectRailNav = (rail: Element) => {
   });
 };
 
-const initListeningStatus = (getPreset: () => string) => {
-  whenElement('ytmusic-nav-bar #right-content').then((host) => {
-    keepInjected(host, 'lq-listening-status', () => {
-      const status = document.createElement('div');
-      status.id = 'lq-listening-status';
-      const indicator = document.createElement('span');
-      indicator.className = 'lq-listening-indicator';
-      indicator.setAttribute('aria-hidden', 'true');
-      const copy = document.createElement('div');
-      copy.className = 'lq-listening-copy';
-      const title = document.createElement('span');
-      title.className = 'lq-listening-title';
-      const detail = document.createElement('small');
-      detail.className = 'lq-listening-detail';
-      copy.append(title, detail);
-      status.append(indicator, copy);
-      host.prepend(status);
-    });
-    const update = () => {
-      const status = document.getElementById('lq-listening-status');
-      const video = document.querySelector('video');
-      if (!status) return;
-      const playing = video && !video.paused;
-      status.toggleAttribute('data-playing', Boolean(playing));
-      status.querySelector<HTMLElement>('.lq-listening-title')!.textContent =
-        playing ? 'Listening' : 'Ready when you are';
-      status.querySelector<HTMLElement>('.lq-listening-detail')!.textContent =
-        `${getPreset()} \u00b7 ${(video?.playbackRate ?? 1).toFixed(2)}\u00d7`;
-    };
-    whenElement('video').then((video) => {
-      for (const event of ['playing', 'pause', 'ratechange'])
-        video.addEventListener(event, update);
-      update();
-    });
-    document.addEventListener('lacquer:preset-changed', update);
-    update();
-  });
-};
-
-export const initTitleBar = (getPreset: () => string) => {
-  initListeningStatus(getPreset);
+export const initTitleBar = () => {
   whenElement('ytmusic-nav-bar').then(injectWordmark);
   whenElement('#guide-renderer, ytmusic-guide-renderer').then(injectRailNav);
 };

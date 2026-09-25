@@ -3,7 +3,11 @@ import { signalChain } from '@/lacquer/signal-chain';
 import { createPlugin } from '@/utils';
 
 import emptyStyle from './empty-player.css?inline';
-import { ButterchurnVisualizer, LacquerVisualizer } from './visualizers';
+import {
+  getButterchurnVisualizer,
+  LacquerVisualizer,
+  loadButterchurnVisualizer,
+} from './visualizers';
 import { resolveVisualizerType } from './visualizers/lacquer-state';
 import { type Visualizer } from './visualizers/visualizer';
 
@@ -60,6 +64,8 @@ type RenderProps = {
   audioContext: AudioContext | null;
   observer: ResizeObserver | null;
   audioCanPlayHandler: ((event: CustomEvent<Compressor>) => void) | null;
+  /** Identifies the create call waiting on the lazily loaded Butterchurn. */
+  pendingLoad: object | null;
 };
 
 type VisualizerRenderer = {
@@ -167,9 +173,11 @@ export default createPlugin({
       audioContext: null,
       observer: null,
       audioCanPlayHandler: null,
+      pendingLoad: null,
     } as RenderProps,
 
     destroyVisualizer(this: VisualizerRenderer) {
+      this.props.pendingLoad = null;
       this.props.observer?.disconnect();
       this.props.observer = null;
       this.props.visualizerInstance?.destroy();
@@ -182,6 +190,24 @@ export default createPlugin({
 
       if (!this.props.audioContext) return;
       if (!config.enabled) return;
+
+      const visualizerType = resolveVisualizerType(config.type);
+      const ButterchurnVisualizer = getButterchurnVisualizer();
+      if (visualizerType === 'butterchurn' && !ButterchurnVisualizer) {
+        // Retry once the module is in, unless a later create/destroy has
+        // superseded this request in the meantime.
+        const request = {};
+        this.props.pendingLoad = request;
+        loadButterchurnVisualizer()
+          .then(() => {
+            if (this.props.pendingLoad === request)
+              this.createVisualizer(config);
+          })
+          .catch((error: unknown) => {
+            console.error('[Lacquer] Butterchurn failed to load', error);
+          });
+        return;
+      }
 
       const takeover = document.documentElement.hasAttribute('data-lq-viz');
       const visualizerContainer = takeover
@@ -201,10 +227,9 @@ export default createPlugin({
       gainNode.gain.value = 1.0;
       analyserNode.connect(gainNode);
 
-      const visualizerType = resolveVisualizerType(config.type);
       try {
         this.props.visualizerInstance =
-          visualizerType === 'butterchurn'
+          visualizerType === 'butterchurn' && ButterchurnVisualizer
             ? new ButterchurnVisualizer(
                 this.props.audioContext,
                 analyserNode,
@@ -247,6 +272,17 @@ export default createPlugin({
     },
 
     async onPlayerApiReady(_, { getConfig }) {
+      // Warm the lazily loaded Butterchurn module once startup has settled, so
+      // opening the player does not wait on it when it is the chosen type.
+      if (resolveVisualizerType((await getConfig()).type) === 'butterchurn') {
+        requestIdleCallback(
+          () => {
+            loadButterchurnVisualizer().catch(() => undefined);
+          },
+          { timeout: 5000 },
+        );
+      }
+
       if (this.props.audioCanPlayHandler) {
         document.removeEventListener(
           'peard:audio-can-play',
